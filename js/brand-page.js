@@ -55,25 +55,115 @@ class BrandPage {
     }
 
     async loadProducts() {
+        // Show loading indicator
+        this.showLoading();
+        
         try {
             console.log('Loading products for brand:', this.brand);
             
-            if (window.apiClient) {
-                const response = await window.apiClient.getProducts({ brand: this.brand });
-                this.products = response.products || [];
-                console.log('Products loaded from API:', this.products.length);
-            } else {
-                // Fallback to localStorage
-                const adminData = JSON.parse(localStorage.getItem('adminPanelData') || '{}');
-                const allProducts = adminData.products || [];
-                this.products = allProducts.filter(product => product.brand === this.brand);
-                console.log('Products loaded from localStorage:', this.products.length);
+            // Try localStorage first for instant loading
+            const adminData = JSON.parse(localStorage.getItem('adminPanelData') || '{}');
+            const allProducts = adminData.products || [];
+            const localProducts = allProducts.filter(product => product.brand === this.brand);
+            
+            if (localProducts.length > 0) {
+                console.log('Products loaded from localStorage (instant):', localProducts.length);
+                this.products = localProducts;
+                this.displayProducts();
             }
             
-            this.displayProducts();
+            // Then try API in background to sync (with shorter timeout for faster loading)
+            if (window.apiClient && localProducts.length === 0) {
+                // Only wait for API if we don't have localStorage data
+                try {
+                    console.log('Fetching from API (no localStorage data)...');
+                    // Use shorter timeout for brand page (3 seconds instead of 10)
+                    const apiPromise = window.apiClient.getProducts({ brand: this.brand });
+                    const timeoutPromise = new Promise((_, reject) => 
+                        setTimeout(() => reject(new Error('API timeout')), 3000)
+                    );
+                    
+                    const response = await Promise.race([apiPromise, timeoutPromise]);
+                    this.products = response.products || [];
+                    console.log('Products loaded from API:', this.products.length);
+                    this.displayProducts();
+                } catch (apiError) {
+                    console.warn('API request failed or timed out:', apiError.message);
+                    // Show error if no products at all
+                    if (this.products.length === 0) {
+                        this.displayProducts(); // Will show "no products" message
+                    }
+                }
+            } else if (window.apiClient && localProducts.length > 0) {
+                // We have localStorage data, sync with API in background (non-blocking)
+                window.apiClient.getProducts({ brand: this.brand })
+                    .then(response => {
+                        const apiProducts = response.products || [];
+                        if (apiProducts.length !== localProducts.length) {
+                            console.log('API returned different product count, updating...');
+                            this.products = apiProducts;
+                            this.displayProducts();
+                        }
+                    })
+                    .catch(err => {
+                        console.log('Background API sync failed (non-critical):', err.message);
+                        // Keep using localStorage data
+                    });
+            } else {
+                // No API client, use localStorage
+                if (this.products.length === 0) {
+                    this.products = localProducts;
+                    this.displayProducts();
+                }
+            }
+            
+            // If still no products, show message
+            if (this.products.length === 0) {
+                this.displayProducts();
+            }
         } catch (error) {
             console.error('Error loading products:', error);
-            this.showError('Failed to load products');
+            // Try localStorage as final fallback
+            const adminData = JSON.parse(localStorage.getItem('adminPanelData') || '{}');
+            const allProducts = adminData.products || [];
+            this.products = allProducts.filter(product => product.brand === this.brand);
+            
+            if (this.products.length > 0) {
+                this.displayProducts();
+            } else {
+                this.showError('Failed to load products');
+            }
+        }
+    }
+    
+    showLoading() {
+        const container = document.getElementById('productsContainer');
+        const noProductsMessage = document.getElementById('noProductsMessage');
+        
+        if (container) {
+            container.style.display = 'grid';
+            container.innerHTML = `
+                <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
+                    <div style="display: inline-block; width: 40px; height: 40px; border: 4px solid #f3f4f6; border-top-color: #DEA193; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+                    <p style="margin-top: 20px; color: #64748b; font-size: 1rem;">Loading products...</p>
+                </div>
+            `;
+        }
+        
+        if (noProductsMessage) {
+            noProductsMessage.style.display = 'none';
+        }
+        
+        // Add spin animation if not exists
+        if (!document.getElementById('loading-spin-style')) {
+            const style = document.createElement('style');
+            style.id = 'loading-spin-style';
+            style.textContent = `
+                @keyframes spin {
+                    to { transform: rotate(360deg); }
+                }
+            `;
+            document.head.appendChild(style);
         }
     }
 
@@ -94,7 +184,16 @@ class BrandPage {
     }
 
     renderProductCard(product) {
-        const imageUrl = product.image_url || this.getPlaceholderImage();
+        // Get the primary image or first available image
+        let imageUrl = this.getPlaceholderImage();
+        
+        if (product.images && product.images.length > 0) {
+            // Use the primary image or first image
+            const primaryImage = product.images.find(img => img.is_primary) || product.images[0];
+            imageUrl = primaryImage.image_url;
+        } else if (product.image_url) {
+            imageUrl = product.image_url;
+        }
         
         return `
             <article class="product-card">
@@ -103,6 +202,7 @@ class BrandPage {
                          alt="${product.name}" 
                          style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px;"
                          onerror="this.src='${this.getPlaceholderImage()}'">
+                    ${product.images && product.images.length > 1 ? `<div class="image-count-badge">+${product.images.length - 1}</div>` : ''}
                 </div>
                 <h3 class="product-card__title">${product.name}</h3>
                 <p class="product-card__price">₹ ${product.price.toLocaleString()}</p>
@@ -111,9 +211,13 @@ class BrandPage {
                     <span class="product-gender">${product.gender}</span>
                 </div>
                 <button class="btn btn--ghost view-details-btn" data-product-id="${product.id}">View Details</button>
-                <button class="btn btn--primary whatsapp-btn" 
+                <button class="btn btn--primary add-to-cart-btn" 
                         data-product-name="${product.name}" 
-                        data-product-brand="${product.brand}">📱 WhatsApp</button>
+                        data-product-brand="${product.brand}"
+                        data-product-price="${product.price}"
+                        data-product-category="${product.category}"
+                        data-product-model="${product.model || ''}"
+                        data-product-id="${product.id}">🛒 Add to Cart</button>
             </article>
         `;
     }
@@ -132,13 +236,17 @@ class BrandPage {
             }
         });
 
-        // Handle WhatsApp buttons
+        // Handle Add to Cart buttons
         document.addEventListener('click', (e) => {
-            if (e.target.classList.contains('whatsapp-btn')) {
+            if (e.target.classList.contains('add-to-cart-btn')) {
                 e.preventDefault();
                 const productName = e.target.getAttribute('data-product-name');
                 const productBrand = e.target.getAttribute('data-product-brand');
-                this.openWhatsApp(productName, productBrand);
+                const productPrice = parseFloat(e.target.getAttribute('data-product-price'));
+                const productCategory = e.target.getAttribute('data-product-category');
+                const productModel = e.target.getAttribute('data-product-model');
+                const productId = e.target.getAttribute('data-product-id');
+                this.openAddToCartModal(productName, productBrand, productPrice, productCategory, productModel, productId);
             }
         });
     }
@@ -166,7 +274,10 @@ class BrandPage {
             animation: fadeIn 0.3s ease-in-out;
         `;
 
-        const imageUrl = product.image_url || this.getPlaceholderImage();
+        const images = (product.images && product.images.length > 0)
+            ? product.images.map(img => img.image_url)
+            : (product.image_url ? [product.image_url] : [this.getPlaceholderImage()]);
+        let currentIndex = 0;
         
         modal.innerHTML = `
             <div style="background: white; padding: 30px; border-radius: 12px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
@@ -177,7 +288,16 @@ class BrandPage {
                 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
                     <div>
-                        <img src="${imageUrl}" alt="${product.name}" style="width: 100%; height: 250px; object-fit: cover; border-radius: 8px; border: 2px solid #f1f5f9;">
+                        <div style="position: relative;">
+                            <button class="gallery-prev" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);background:#0008;color:#fff;border:none;border-radius:6px;padding:6px 10px;cursor:pointer">‹</button>
+                            <img class="gallery-main" src="${images[0]}" alt="${product.name}" style="width: 100%; height: 250px; object-fit: cover; border-radius: 8px; border: 2px solid #f1f5f9;">
+                            <button class="gallery-next" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:#0008;color:#fff;border:none;border-radius:6px;padding:6px 10px;cursor:pointer">›</button>
+                        </div>
+                        <div class="gallery-thumbs" style="display:flex;gap:8px;margin-top:10px;overflow-x:auto;">
+                            ${images.map((src, idx) => `
+                                <img data-index="${idx}" src="${src}" style="width:60px;height:60px;object-fit:cover;border-radius:6px;border:2px solid ${idx===0?'#DEA193':'#e5e7eb'};cursor:pointer;" />
+                            `).join('')}
+                        </div>
                     </div>
                     <div>
                         <div style="margin-bottom: 15px;">
@@ -200,7 +320,7 @@ class BrandPage {
                             <span style="color: #0f172a; font-weight: 500;">${product.model || 'N/A'}</span>
                         </div>
                         
-                        <div style="margin-bottom: 20px; padding: 15px; background: linear-gradient(135deg, #8b5cf6, #a855f7); border-radius: 8px; text-align: center;">
+                        <div style="margin-bottom: 20px; padding: 15px; background: linear-gradient(135deg, #DEA193, #BA867B); border-radius: 12px; text-align: center; box-shadow: 0 4px 15px rgba(222, 161, 147, 0.3);">
                             <strong style="color: white; font-size: 1.1rem;">Price</strong><br>
                             <span style="color: white; font-size: 1.5em; font-weight: bold;">₹ ${product.price.toLocaleString()}</span>
                         </div>
@@ -208,17 +328,17 @@ class BrandPage {
                 </div>
                 
                 ${product.description ? `
-                    <div style="margin-bottom: 20px; padding: 15px; background: #f8fafc; border-radius: 8px; border-left: 4px solid #8b5cf6;">
-                        <strong style="color: #475569;">Description:</strong><br>
-                        <span style="color: #0f172a; line-height: 1.6;">${product.description}</span>
+                    <div style="margin-bottom: 20px; padding: 15px; background: linear-gradient(135deg, #F3DDD8, #F0D4CE); border-radius: 12px; border-left: 4px solid #DEA193;">
+                        <strong style="color: #7a534a;">Description:</strong><br>
+                        <span style="color: #1f2937; line-height: 1.6;">${product.description}</span>
                     </div>
                 ` : ''}
                 
                 <div style="display: flex; gap: 15px; margin-top: 25px;">
-                    <button class="add-to-cart-modal-btn" style="background: linear-gradient(135deg, #8b5cf6, #a855f7); color: white; border: none; padding: 15px 25px; border-radius: 8px; cursor: pointer; flex: 1; font-weight: bold; font-size: 1rem; box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);">
+                    <button class="add-to-cart-modal-btn" style="background: linear-gradient(135deg, #DEA193, #BA867B); color: white; border: none; padding: 15px 25px; border-radius: 12px; cursor: pointer; flex: 1; font-weight: bold; font-size: 1rem; box-shadow: 0 4px 15px rgba(222, 161, 147, 0.3); transition: all 0.3s ease;">
                         🛒 Add to Cart
                     </button>
-                    <button class="close-modal-btn" style="background: #64748b; color: white; border: none; padding: 15px 25px; border-radius: 8px; cursor: pointer; font-weight: bold;">
+                    <button class="close-modal-btn" style="background: linear-gradient(135deg, #DEA193, #BA867B); color: white; border: none; padding: 15px 25px; border-radius: 12px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 15px rgba(222, 161, 147, 0.3); transition: all 0.3s ease;">
                         Close
                     </button>
                 </div>
@@ -230,6 +350,10 @@ class BrandPage {
         // Add event listeners
         const closeButtons = modal.querySelectorAll('.close-modal-btn');
         const addToCartButton = modal.querySelector('.add-to-cart-modal-btn');
+        const mainImg = modal.querySelector('.gallery-main');
+        const prevBtn = modal.querySelector('.gallery-prev');
+        const nextBtn = modal.querySelector('.gallery-next');
+        const thumbs = Array.from(modal.querySelectorAll('.gallery-thumbs img'));
         
         closeButtons.forEach(btn => {
             btn.addEventListener('click', () => {
@@ -243,6 +367,17 @@ class BrandPage {
                 modal.remove();
             });
         }
+
+        function showImage(index) {
+            if (index < 0) index = images.length - 1;
+            if (index >= images.length) index = images.length - 1;
+            currentIndex = index;
+            mainImg.src = images[currentIndex];
+            thumbs.forEach((t, i) => t.style.borderColor = i === currentIndex ? '#DEA193' : '#e5e7eb');
+        }
+        if (prevBtn) prevBtn.addEventListener('click', () => showImage(currentIndex - 1));
+        if (nextBtn) nextBtn.addEventListener('click', () => showImage(currentIndex + 1));
+        thumbs.forEach(t => t.addEventListener('click', (e) => showImage(parseInt(e.currentTarget.getAttribute('data-index')))));
         
         // Close modal when clicking outside
         modal.addEventListener('click', (e) => {

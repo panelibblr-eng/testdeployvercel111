@@ -34,7 +34,7 @@ app.use(helmet({
 // CORS configuration
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://monica-opto-hub.vercel.app', 'https://monica-opto-hub-git-main-anushajeewnanis-projects.vercel.app']
+    ? (process.env.CORS_ORIGIN ? [process.env.CORS_ORIGIN] : ['https://monica-opto-hub.vercel.app'])
     : ['http://localhost:3001', 'http://localhost:3000'],
   credentials: true
 }));

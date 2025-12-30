@@ -1,228 +1,246 @@
 const express = require('express');
 const router = express.Router();
-const { getDatabase } = require('../database/init');
+const { ensureDatabaseConnection } = require('../database/init');
+const Analytics = require('../database/models/Analytics');
 
 // POST /api/analytics/track - Track visitor analytics
-router.post('/track', (req, res) => {
-  const db = getDatabase();
-  const {
-    visitorId,
-    page,
-    userAgent,
-    referrer,
-    ipAddress
-  } = req.body;
-  
-  if (!visitorId || !page) {
-    return res.status(400).json({ error: 'visitorId and page are required' });
-  }
-  
-  const query = `
-    INSERT INTO analytics (visitor_id, page, user_agent, referrer, ip_address)
-    VALUES (?, ?, ?, ?, ?)
-  `;
-  
-  const params = [
-    visitorId,
-    page,
-    userAgent || '',
-    referrer || '',
-    ipAddress || ''
-  ];
-  
-  db.run(query, params, function(err) {
-    if (err) {
-      console.error('Error tracking analytics:', err);
-      return res.status(500).json({ error: 'Failed to track analytics' });
+router.post('/track', async (req, res) => {
+  try {
+    await ensureDatabaseConnection();
+    const {
+      visitorId,
+      page,
+      userAgent,
+      referrer,
+      ipAddress
+    } = req.body;
+    
+    if (!visitorId || !page) {
+      return res.status(400).json({ error: 'visitorId and page are required' });
     }
     
-    res.json({ message: 'Analytics tracked successfully', id: this.lastID });
-  });
+    const analytics = new Analytics({
+      visitor_id: visitorId,
+      page,
+      user_agent: userAgent || '',
+      referrer: referrer || '',
+      ip_address: ipAddress || '',
+      timestamp: new Date()
+    });
+    
+    await analytics.save();
+    
+    res.json({ message: 'Analytics tracked successfully', id: analytics._id.toString() });
+  } catch (error) {
+    console.error('Error tracking analytics:', error);
+    res.status(500).json({ error: 'Failed to track analytics' });
+  }
 });
 
 // GET /api/analytics/visitors - Get visitor analytics
-router.get('/visitors', (req, res) => {
-  const db = getDatabase();
-  const { period = '30', page } = req.query;
-  
-  let query = `
-    SELECT 
-      visitor_id,
-      page,
-      user_agent,
-      referrer,
-      ip_address,
-      timestamp
-    FROM analytics 
-    WHERE timestamp >= datetime('now', '-${parseInt(period)} days')
-  `;
-  
-  const params = [];
-  
-  if (page) {
-    query += ' AND page = ?';
-    params.push(page);
-  }
-  
-  query += ' ORDER BY timestamp DESC';
-  
-  db.all(query, params, (err, rows) => {
-    if (err) {
-      console.error('Error fetching visitor analytics:', err);
-      return res.status(500).json({ error: 'Failed to fetch visitor analytics' });
+router.get('/visitors', async (req, res) => {
+  try {
+    await ensureDatabaseConnection();
+    const { period = '30', page } = req.query;
+    
+    const daysAgo = new Date();
+    daysAgo.setDate(daysAgo.getDate() - parseInt(period));
+    
+    const query = { timestamp: { $gte: daysAgo } };
+    
+    if (page) {
+      query.page = page;
     }
     
-    res.json({ visitors: rows, count: rows.length });
-  });
+    const visitors = await Analytics.find(query)
+      .sort({ timestamp: -1 })
+      .select('visitor_id page user_agent referrer ip_address timestamp');
+    
+    res.json({ 
+      visitors: visitors.map(v => v.toObject()), 
+      count: visitors.length 
+    });
+  } catch (error) {
+    console.error('Error fetching visitor analytics:', error);
+    res.status(500).json({ error: 'Failed to fetch visitor analytics' });
+  }
 });
 
 // GET /api/analytics/stats - Get analytics statistics
-router.get('/stats', (req, res) => {
-  const db = getDatabase();
-  const { period = '30' } = req.query;
-  
-  const queries = {
-    totalVisitors: `
-      SELECT COUNT(DISTINCT visitor_id) as count 
-      FROM analytics 
-      WHERE timestamp >= datetime('now', '-${parseInt(period)} days')
-    `,
-    totalPageViews: `
-      SELECT COUNT(*) as count 
-      FROM analytics 
-      WHERE timestamp >= datetime('now', '-${parseInt(period)} days')
-    `,
-    uniqueVisitors: `
-      SELECT COUNT(DISTINCT visitor_id) as count 
-      FROM analytics 
-      WHERE timestamp >= datetime('now', '-${parseInt(period)} days')
-    `,
-    popularPages: `
-      SELECT page, COUNT(*) as views 
-      FROM analytics 
-      WHERE timestamp >= datetime('now', '-${parseInt(period)} days')
-      GROUP BY page 
-      ORDER BY views DESC 
-      LIMIT 10
-    `,
-    dailyVisitors: `
-      SELECT DATE(timestamp) as date, COUNT(DISTINCT visitor_id) as visitors
-      FROM analytics 
-      WHERE timestamp >= datetime('now', '-${parseInt(period)} days')
-      GROUP BY DATE(timestamp)
-      ORDER BY date DESC
-    `,
-    deviceStats: `
-      SELECT 
-        CASE 
-          WHEN user_agent LIKE '%Mobile%' OR user_agent LIKE '%Android%' OR user_agent LIKE '%iPhone%' THEN 'Mobile'
-          WHEN user_agent LIKE '%Tablet%' OR user_agent LIKE '%iPad%' THEN 'Tablet'
-          ELSE 'Desktop'
-        END as device_type,
-        COUNT(DISTINCT visitor_id) as count
-      FROM analytics 
-      WHERE timestamp >= datetime('now', '-${parseInt(period)} days')
-      GROUP BY device_type
-    `
-  };
-  
-  const results = {};
-  let completed = 0;
-  const totalQueries = Object.keys(queries).length;
-  
-  Object.entries(queries).forEach(([key, query]) => {
-    if (key === 'totalVisitors' || key === 'totalPageViews' || key === 'uniqueVisitors') {
-      db.get(query, (err, row) => {
-        if (err) {
-          console.error(`Error fetching ${key}:`, err);
-          results[key] = 0;
-        } else {
-          results[key] = row.count;
+router.get('/stats', async (req, res) => {
+  try {
+    await ensureDatabaseConnection();
+    const { period = '30' } = req.query;
+    
+    const daysAgo = new Date();
+    daysAgo.setDate(daysAgo.getDate() - parseInt(period));
+    
+    const analyticsData = await Analytics.find({ timestamp: { $gte: daysAgo } });
+    
+    const uniqueVisitorIds = [...new Set(analyticsData.map(a => a.visitor_id.toString()))];
+    
+    const totalVisitors = uniqueVisitorIds.length;
+    const totalPageViews = analyticsData.length;
+    const uniqueVisitors = uniqueVisitorIds.length;
+    
+    // Popular pages
+    const popularPages = await Analytics.aggregate([
+      { $match: { timestamp: { $gte: daysAgo } } },
+      { $group: { _id: '$page', views: { $sum: 1 } } },
+      { $sort: { views: -1 } },
+      { $limit: 10 },
+      { $project: { page: '$_id', views: 1, _id: 0 } }
+    ]);
+    
+    // Daily visitors
+    const dailyVisitors = await Analytics.aggregate([
+      { $match: { timestamp: { $gte: daysAgo } } },
+      {
+        $group: {
+          _id: { $dateToString: { format: '%Y-%m-%d', date: '$timestamp' } },
+          visitors: { $addToSet: '$visitor_id' }
         }
-        
-        completed++;
-        if (completed === totalQueries) {
-          res.json(results);
+      },
+      {
+        $project: {
+          date: '$_id',
+          visitors: { $size: '$visitors' },
+          _id: 0
         }
-      });
-    } else {
-      db.all(query, (err, rows) => {
-        if (err) {
-          console.error(`Error fetching ${key}:`, err);
-          results[key] = [];
-        } else {
-          results[key] = rows;
+      },
+      { $sort: { date: -1 } }
+    ]);
+    
+    // Device stats
+    const deviceStats = await Analytics.aggregate([
+      { $match: { timestamp: { $gte: daysAgo } } },
+      {
+        $project: {
+          visitor_id: 1,
+          device_type: {
+            $cond: {
+              if: {
+                $or: [
+                  { $regexMatch: { input: '$user_agent', regex: /Mobile|Android|iPhone/i } },
+                ]
+              },
+              then: 'Mobile',
+              else: {
+                $cond: {
+                  if: {
+                    $or: [
+                      { $regexMatch: { input: '$user_agent', regex: /Tablet|iPad/i } },
+                    ]
+                  },
+                  then: 'Tablet',
+                  else: 'Desktop'
+                }
+              }
+            }
+          }
         }
-        
-        completed++;
-        if (completed === totalQueries) {
-          res.json(results);
+      },
+      {
+        $group: {
+          _id: '$device_type',
+          count: { $addToSet: '$visitor_id' }
         }
-      });
-    }
-  });
+      },
+      {
+        $project: {
+          device_type: '$_id',
+          count: { $size: '$count' },
+          _id: 0
+        }
+      }
+    ]);
+    
+    res.json({
+      success: true,
+      totalVisitors,
+      totalPageViews,
+      uniqueVisitors,
+      popularPages,
+      dailyVisitors,
+      deviceStats
+    });
+  } catch (error) {
+    console.error('Error fetching analytics stats:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 // GET /api/analytics/timeline - Get visitor timeline
-router.get('/timeline', (req, res) => {
-  const db = getDatabase();
-  const { period = '7' } = req.query;
-  
-  const query = `
-    SELECT 
-      DATE(timestamp) as date,
-      COUNT(DISTINCT visitor_id) as unique_visitors,
-      COUNT(*) as page_views
-    FROM analytics 
-    WHERE timestamp >= datetime('now', '-${parseInt(period)} days')
-    GROUP BY DATE(timestamp)
-    ORDER BY date DESC
-  `;
-  
-  db.all(query, (err, rows) => {
-    if (err) {
-      console.error('Error fetching timeline:', err);
-      return res.status(500).json({ error: 'Failed to fetch timeline' });
-    }
+router.get('/timeline', async (req, res) => {
+  try {
+    await ensureDatabaseConnection();
+    const { period = '7' } = req.query;
     
-    res.json({ timeline: rows });
-  });
+    const daysAgo = new Date();
+    daysAgo.setDate(daysAgo.getDate() - parseInt(period));
+    
+    const timeline = await Analytics.aggregate([
+      { $match: { timestamp: { $gte: daysAgo } } },
+      {
+        $group: {
+          _id: { $dateToString: { format: '%Y-%m-%d', date: '$timestamp' } },
+          unique_visitors: { $addToSet: '$visitor_id' },
+          page_views: { $sum: 1 }
+        }
+      },
+      {
+        $project: {
+          date: '$_id',
+          unique_visitors: { $size: '$unique_visitors' },
+          page_views: 1,
+          _id: 0
+        }
+      },
+      { $sort: { date: -1 } }
+    ]);
+    
+    res.json({ success: true, timeline });
+  } catch (error) {
+    console.error('Error fetching timeline:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch timeline' });
+  }
 });
 
 // GET /api/analytics/pages - Get page analytics
-router.get('/pages', (req, res) => {
-  const db = getDatabase();
-  const { period = '30' } = req.query;
-  
-  const query = `
-    SELECT 
-      page,
-      COUNT(*) as views,
-      COUNT(DISTINCT visitor_id) as unique_visitors,
-      AVG(CASE 
-        WHEN visitor_id IN (
-          SELECT visitor_id 
-          FROM analytics 
-          WHERE timestamp >= datetime('now', '-${parseInt(period)} days')
-          GROUP BY visitor_id 
-          HAVING COUNT(*) > 1
-        ) THEN 1 
-        ELSE 0 
-      END) as bounce_rate
-    FROM analytics 
-    WHERE timestamp >= datetime('now', '-${parseInt(period)} days')
-    GROUP BY page
-    ORDER BY views DESC
-  `;
-  
-  db.all(query, (err, rows) => {
-    if (err) {
-      console.error('Error fetching page analytics:', err);
-      return res.status(500).json({ error: 'Failed to fetch page analytics' });
-    }
+router.get('/pages', async (req, res) => {
+  try {
+    await ensureDatabaseConnection();
+    const { period = '30' } = req.query;
     
-    res.json({ pages: rows });
-  });
+    const daysAgo = new Date();
+    daysAgo.setDate(daysAgo.getDate() - parseInt(period));
+    
+    const pages = await Analytics.aggregate([
+      { $match: { timestamp: { $gte: daysAgo } } },
+      {
+        $group: {
+          _id: '$page',
+          views: { $sum: 1 },
+          unique_visitors: { $addToSet: '$visitor_id' }
+        }
+      },
+      {
+        $project: {
+          page: '$_id',
+          views: 1,
+          unique_visitors: { $size: '$unique_visitors' },
+          bounce_rate: 0, // Calculate bounce rate if needed
+          _id: 0
+        }
+      },
+      { $sort: { views: -1 } }
+    ]);
+    
+    res.json({ success: true, pages });
+  } catch (error) {
+    console.error('Error fetching page analytics:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch page analytics' });
+  }
 });
 
 module.exports = router;

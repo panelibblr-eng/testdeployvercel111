@@ -10,11 +10,18 @@ class WebsiteContentManager {
         this.setupEventListeners();
         this.updateWebsiteContent();
         
-        // Auto-refresh content every 5 seconds
+        // Auto-refresh content every 30 seconds (reduced frequency to avoid disruption)
         setInterval(() => {
-            this.loadAdminData();
-            this.updateWebsiteContent();
-        }, 5000);
+            // Only refresh if admin panel is not currently active (to avoid disruption)
+            const isAdminPanelActive = window.location.pathname.includes('admin.html');
+            if (!isAdminPanelActive) {
+                console.log('Auto-refreshing website content (admin panel not active)...');
+                this.loadAdminData();
+                this.updateWebsiteContent();
+            } else {
+                console.log('Skipping auto-refresh (admin panel active)');
+            }
+        }, 30000); // Increased from 5 seconds to 30 seconds
     }
 
     loadAdminData() {
@@ -23,6 +30,8 @@ class WebsiteContentManager {
             if (savedData) {
                 this.adminData = JSON.parse(savedData);
                 console.log('Website content data loaded:', this.adminData);
+            } else {
+                console.log('No admin data found in localStorage');
             }
         } catch (error) {
             console.error('Error loading admin data:', error);
@@ -39,11 +48,28 @@ class WebsiteContentManager {
             }
         });
 
-        // Listen for custom events from admin panel
+        // Listen for custom events from admin panel - only update if content actually changed
         window.addEventListener('adminDataUpdated', (event) => {
             console.log('Admin data updated event received in website content manager:', event.detail);
-            this.loadAdminData();
-            this.updateWebsiteContent();
+            
+            // Check if content actually changed before updating
+            const newData = event.detail;
+            if (newData && this.adminData) {
+                const contentChanged = JSON.stringify(newData.settings?.content) !== JSON.stringify(this.adminData.settings?.content);
+                const websiteChanged = JSON.stringify(newData.settings?.website) !== JSON.stringify(this.adminData.settings?.website);
+                
+                if (contentChanged || websiteChanged) {
+                    console.log('Content changed, updating website...');
+                    this.loadAdminData();
+                    this.updateWebsiteContent();
+                } else {
+                    console.log('Content unchanged, skipping website update');
+                }
+            } else {
+                // Fallback to full update
+                this.loadAdminData();
+                this.updateWebsiteContent();
+            }
         });
     }
 
@@ -51,7 +77,6 @@ class WebsiteContentManager {
         if (!this.adminData) return;
 
         this.updateHeroSection();
-        this.updateAnnouncement();
         this.updateBrands();
         this.updateSocialMedia();
         this.updateSiteSettings();
@@ -59,17 +84,18 @@ class WebsiteContentManager {
     }
 
     updateProducts() {
-        // Notify ProductDisplay about product updates
-        if (window.productDisplay) {
-            console.log('Notifying ProductDisplay about product updates');
-            window.productDisplay.loadProducts();
-            window.productDisplay.displayProductsOnPageLoad();
-        }
+        // DISABLED: This was causing conflicts with admin panel product management
+        // The admin panel handles its own product management
+        console.log('Product updates handled by admin panel - skipping website content manager interference');
     }
 
     updateHeroSection() {
         const content = this.adminData.settings?.content?.hero;
-        if (!content) return;
+        console.log('updateHeroSection called with content:', content);
+        if (!content) {
+            console.log('No hero content found in admin data');
+            return;
+        }
 
         // Update hero eyebrow text
         const eyebrowElement = document.querySelector('.hero .eyebrow');
@@ -80,7 +106,7 @@ class WebsiteContentManager {
         // Update hero title
         const titleElement = document.querySelector('.hero h1');
         if (titleElement) {
-            titleElement.textContent = content.title || 'Ray-Ban Meta Glasses';
+            titleElement.innerHTML = content.title || 'Ray-Ban Meta Glasses';
         }
 
         // Update hero description
@@ -89,35 +115,51 @@ class WebsiteContentManager {
             descElement.textContent = content.description || 'Immersive, iconic, and innovative. Book your pair today.';
         }
 
-        // Update hero image if provided
-        if (content.image) {
-            const heroMedia = document.querySelector('.hero__media');
-            if (heroMedia) {
-                heroMedia.style.backgroundImage = `url(${content.image})`;
-                heroMedia.style.backgroundSize = 'cover';
-                heroMedia.style.backgroundPosition = 'center';
-            }
-        }
-    }
-
-    updateAnnouncement() {
-        const announcement = this.adminData.settings?.content?.announcement;
-        if (!announcement) return;
-
-        const noticeElement = document.querySelector('.notice');
-        if (noticeElement) {
-            if (announcement.visible) {
-                noticeElement.style.display = 'block';
-                noticeElement.querySelector('.container').textContent = announcement.text;
+        // Update hero images if provided
+        console.log('Hero images to update:', content.images);
+        if (content.images && content.images.length > 0) {
+            console.log('Updating hero images with', content.images.length, 'images');
+            // Trigger photo slider update if it exists
+            if (window.photoSliderInstance) {
+                console.log('Photo slider instance found, updating images');
+                window.photoSliderInstance.updateSliderImages(content.images);
             } else {
-                noticeElement.style.display = 'none';
+                console.log('Photo slider instance not ready, retrying in 100ms');
+                // If photo slider not ready, try again after a short delay
+                setTimeout(() => {
+                    if (window.photoSliderInstance) {
+                        console.log('Photo slider instance found on retry, updating images');
+                        window.photoSliderInstance.updateSliderImages(content.images);
+                    } else {
+                        console.log('Photo slider instance still not ready after retry');
+                    }
+                }, 100);
             }
+        } else {
+            console.log('No hero images to update');
         }
     }
+
 
     updateBrands() {
-        const brands = this.adminData.settings?.content?.brands;
-        if (!brands || !Array.isArray(brands)) return;
+        let brands = this.adminData.settings?.content?.brands;
+        // Initialize default brands if missing
+        if (!brands || !Array.isArray(brands)) {
+            brands = [
+                'Ray-Ban', 'Tom Ford', 'Prada', 'Cartier', 'Versace',
+                'Police', 'Gucci', 'Armani Exchange'
+            ];
+            // Persist defaults into admin data without overwriting other settings
+            try {
+                this.adminData = this.adminData || {};
+                this.adminData.settings = this.adminData.settings || {};
+                this.adminData.settings.content = this.adminData.settings.content || {};
+                this.adminData.settings.content.brands = brands;
+                localStorage.setItem('adminPanelData', JSON.stringify(this.adminData));
+            } catch (e) {
+                console.warn('Could not persist default brands:', e);
+            }
+        }
 
         // Update brand dropdown in product form
         const brandSelect = document.getElementById('productBrand');
@@ -186,11 +228,14 @@ class WebsiteContentManager {
             metaDesc.content = website.description;
         }
 
-        // Update logo text
-        const logo = document.querySelector('.logo');
-        if (logo && website.title) {
-            logo.textContent = website.title;
+        // Update logo - preserve image logo, only update alt text
+        const logoImg = document.querySelector('.logo-img');
+        if (logoImg && website.title) {
+            logoImg.alt = website.title + ' logo';
         }
+        
+        // Don't override the logo image with text - preserve the Monica Opto Hub logo
+        console.log('Logo preserved - not overriding Monica Opto Hub logo image');
 
         // Update contact email
         const emailLink = document.querySelector('a[href^="mailto:"]');
@@ -208,10 +253,6 @@ class WebsiteContentManager {
                 title: document.querySelector('.hero h1')?.textContent || '',
                 description: document.querySelector('.hero .lead')?.textContent || '',
                 image: ''
-            },
-            announcement: {
-                text: document.querySelector('.notice .container')?.textContent || '',
-                visible: document.querySelector('.notice')?.style.display !== 'none'
             },
             brands: this.adminData?.settings?.content?.brands || [],
             social: {
@@ -237,16 +278,15 @@ class WebsiteContentManager {
         this.loadAdminData();
         this.updateWebsiteContent();
         
-        // Also refresh products if productDisplay exists
-        if (window.productDisplay) {
-            window.productDisplay.loadProducts();
-            window.productDisplay.displayProductsOnPageLoad();
-        }
+        // DISABLED: Product refresh handled by admin panel to avoid conflicts
+        console.log('Product refresh handled by admin panel - skipping website content manager interference');
     }
 }
 
-// Initialize website content manager
-window.websiteContentManager = new WebsiteContentManager();
+// Initialize website content manager when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    window.websiteContentManager = new WebsiteContentManager();
+});
 
 // Global function for manual refresh
 window.refreshWebsiteContent = function() {

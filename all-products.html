@@ -10,7 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
 </head>
-<body class="theme-rose-gold">
+<body class="theme-blush">
     <a class="skip-link" href="#main">Skip to content</a>
 
     <header class="site-header">
@@ -22,27 +22,10 @@
                 <span class="sr-only">Toggle navigation</span>
             </button>
             <a class="logo" href="index.html" aria-label="Home">
-                <div class="monica-logo">
-                    <span class="logo-text">m</span>
-                    <span class="logo-text">n</span>
-                    <div class="logo-eye">
-                        <div class="eye-iris">
-                            <div class="eye-pupil"></div>
-                        </div>
-                        <div class="eye-curves">
-                            <div class="curve-top"></div>
-                            <div class="curve-bottom"></div>
-                        </div>
-                    </div>
-                    <span class="logo-text">i</span>
-                    <span class="logo-text">c</span>
-                    <span class="logo-text">a</span>
-                </div>
+                <img class="logo-img" src="assets/Logo monica.png" alt="Monica Opto Hub logo">
             </a>
             <nav id="primary-nav" class="nav" aria-label="Primary">
                 <ul>
-                    <li class="has-mega"><a href="men.html">Men</a></li>
-                    <li class="has-mega"><a href="women.html">Women</a></li>
                     <li class="has-mega">
                         <button class="mega-toggle" aria-expanded="false">Brands</button>
                         <div class="mega" role="menu" aria-label="Shop by brand">
@@ -87,7 +70,6 @@
                 </ul>
             </nav>
             <div class="header-actions">
-                <button class="action" data-theme-toggle aria-label="Toggle theme">Pink</button>
                 <button class="action" aria-label="Search">
                     <span class="icon">🔎</span>
                 </button>
@@ -97,11 +79,6 @@
                 <button class="action" aria-label="Cart">
                     <span class="icon">🛒</span>
                 </button>
-            </div>
-        </div>
-        <div class="notice" role="note">
-            <div class="container">
-                Our prices are being updated to reflect GST changes. Chat with us for revised prices.
             </div>
         </div>
         <div class="nav-overlay" data-overlay aria-hidden="true"></div>
@@ -164,15 +141,6 @@
                         </select>
                     </div>
                     <div>
-                        <label for="genderFilter" style="margin-right: 10px; font-weight: 500;">Gender:</label>
-                        <select id="genderFilter" style="padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px;">
-                            <option value="all">All Genders</option>
-                            <option value="men">Men</option>
-                            <option value="women">Women</option>
-                            <option value="unisex">Unisex</option>
-                        </select>
-                    </div>
-                    <div>
                         <label for="brandFilter" style="margin-right: 10px; font-weight: 500;">Brand:</label>
                         <select id="brandFilter" style="padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px;">
                             <option value="all">All Brands</option>
@@ -199,6 +167,9 @@
                             <option value="Michael Kors">Michael Kors</option>
                             <option value="David Walker">David Walker</option>
                             <option value="Mont Blanc">Mont Blanc</option>
+                            <option value="Police">Police</option>
+                            <option value="Gucci">Gucci</option>
+                            <option value="Armani Exchange">Armani Exchange</option>
                         </select>
                     </div>
                     <div>
@@ -277,12 +248,9 @@
                 </ul>
                 <div style="margin-top: 15px;">
                     <h4 style="color: #64748b; font-size: 0.9rem; margin-bottom: 8px;">Shop Address:</h4>
-                    <p style="color: #64748b; font-size: 0.85rem; line-height: 1.4; margin: 0;">
-                        E-3 41, Shop No 05<br>
-                        Ten Square Complex<br>
-                        Arera Colony<br>
-                        Bhopal
-                    </p>
+                    <a href="https://maps.app.goo.gl/JyPND1VMxGRisVMz6" target="_blank" rel="noopener" style="color: #7a534a; font-weight: 600; text-decoration: underline; font-size: 0.95rem;">
+                        E-3 41, Shop No 05, Ten Square Complex, Arera Colony, Bhopal
+                    </a>
                 </div>
             </div>
             <div>

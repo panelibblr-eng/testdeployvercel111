@@ -10,7 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
 </head>
-<body class="theme-rose-gold">
+<body class="theme-blush">
     <a class="skip-link" href="#main">Skip to content</a>
 
     <header class="site-header">
@@ -22,70 +22,48 @@
                 <span class="sr-only">Toggle navigation</span>
             </button>
             <a class="logo" href="#" aria-label="Home">
-                <div class="monica-logo">
-                    <span class="logo-text">m</span>
-                    <span class="logo-text">n</span>
-                    <div class="logo-eye">
-                        <div class="eye-iris">
-                            <div class="eye-pupil"></div>
-                        </div>
-                        <div class="eye-curves">
-                            <div class="curve-top"></div>
-                            <div class="curve-bottom"></div>
-                        </div>
-                    </div>
-                    <span class="logo-text">i</span>
-                    <span class="logo-text">c</span>
-                    <span class="logo-text">a</span>
-                </div>
+                <img class="logo-img" src="assets/Logo monica.png" alt="Monica Opto Hub logo">
             </a>
             <nav id="primary-nav" class="nav" aria-label="Primary">
                 <ul>
-                    <li class="has-mega"><a href="men.html">Men</a></li>
-                    <li class="has-mega"><a href="women.html">Women</a></li>
                     <li class="has-mega">
                         <button class="mega-toggle" aria-expanded="false">Brands</button>
                         <div class="mega" role="menu" aria-label="Shop by brand">
                             <div class="mega__col">
-                                <h4>A - C</h4>
-                                <a href="brand.html?brand=Boss">Boss</a>
-                                <a href="brand.html?brand=Burberry">Burberry</a>
-                                <a href="brand.html?brand=Calvin Klein">Calvin Klein</a>
-                                <a href="brand.html?brand=Carrera">Carrera</a>
-                            </div>
-                            <div class="mega__col">
-                                <h4>D - H</h4>
-                                <a href="brand.html?brand=David Walker">David Walker</a>
-                                <a href="brand.html?brand=Dolce & Gabbana">Dolce & Gabbana</a>
-                                <a href="brand.html?brand=Fastrack">Fastrack</a>
-                                <a href="brand.html?brand=French Connection">French Connection</a>
-                                <a href="brand.html?brand=Hugo">Hugo</a>
-                            </div>
-                            <div class="mega__col">
-                                <h4>I - M</h4>
-                                <a href="brand.html?brand=Idee">Idee</a>
-                                <a href="brand.html?brand=Irus">Irus</a>
-                                <a href="brand.html?brand=Marc Jacobs">Marc Jacobs</a>
-                                <a href="brand.html?brand=Michael Kors">Michael Kors</a>
-                                <a href="brand.html?brand=Mont Blanc">Mont Blanc</a>
-                            </div>
-                            <div class="mega__col">
-                                <h4>O - V</h4>
-                                <a href="brand.html?brand=Off-White">Off-White</a>
-                                <a href="brand.html?brand=Philipp Plein">Philipp Plein</a>
+                                <h4>Available Brands</h4>
                                 <a href="brand.html?brand=Ray-Ban">Ray-Ban</a>
-                                <a href="brand.html?brand=Scott">Scott</a>
+                                <a href="brand.html?brand=Gucci">Gucci</a>
                                 <a href="brand.html?brand=Tom Ford">Tom Ford</a>
-                                <a href="brand.html?brand=Tommy Hilfiger">Tommy Hilfiger</a>
-                                <a href="brand.html?brand=Titan">Titan</a>
-                                <a href="brand.html?brand=Versace">Versace</a>
-                                <a href="brand.html?brand=Vogue">Vogue</a>
+                                <a href="brand.html?brand=Prada">Prada</a>
+                                <a href="brand.html?brand=Cartier">Cartier</a>
+                                <a href="brand.html?brand=Johnson & Johnson">Johnson & Johnson</a>
                             </div>
                         </div>
                     </li>
                     <li><a href="appointment-form.html">Appointments</a></li>
                 </ul>
             </nav>
+            
+            <!-- Mobile Side Menu -->
+            <div class="mobile-side-menu" id="mobileSideMenu">
+                <div class="mobile-side-menu__header">
+                    <h3>Menu</h3>
+                    <button class="mobile-side-menu__close" aria-label="Close menu">✕</button>
+                </div>
+                <nav class="mobile-side-menu__nav">
+                    <ul>
+                        <li><a href="all-products.html?category=sunglasses">Sunglasses</a></li>
+                        <li><a href="all-products.html?category=optical-frames">Optical Frames</a></li>
+                        <li><a href="all-products.html?category=contact-lenses">Contact Lenses</a></li>
+                        <li><a href="brand.html">Brands</a></li>
+                        <li><a href="appointment-form.html">Appointments</a></li>
+                    </ul>
+                </nav>
+            </div>
+            
+            <!-- Mobile Menu Overlay -->
+            <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+            
             <div class="header-actions">
                 <button class="action" aria-label="Search">
                     <span class="icon">🔎</span>
@@ -98,11 +76,6 @@
                 </button>
             </div>
         </div>
-        <div class="notice" role="note">
-            <div class="container">
-                Our prices are being updated to reflect GST changes. Chat with us for revised prices.
-            </div>
-        </div>
         <div class="nav-overlay" data-overlay aria-hidden="true"></div>
     </header>
 
@@ -110,7 +83,7 @@
         <div class="drawer__panel">
             <div class="drawer__head">
                 <div class="drawer__logo">
-                    <div class="monica-logo">
+                    <div class="monica-logo" style="display:none">
                         <span class="logo-text">m</span>
                         <span class="logo-text">n</span>
                         <div class="logo-eye">
@@ -131,84 +104,190 @@
             </div>
             <div class="drawer__body">
                 <ul class="drawer__list">
+                    <li class="drawer__item"><button class="drawer__btn" data-accordion>Shop by Category <span class="plus">+</span></button>
+                        <div class="drawer__panelInner">
+                            <a href="all-products.html?category=sunglasses">Sunglasses</a>
+                            <a href="all-products.html?category=optical-frames">Optical Frames</a>
+                            <a href="all-products.html?category=contact-lenses">Contact Lenses</a>
+                        </div>
+                    </li>
                     <li class="drawer__item"><button class="drawer__btn" data-accordion>RayBan x Meta <span class="plus">+</span></button></li>
                     <!-- <li class="drawer__item"><button class="drawer__btn" data-accordion>Steals of the Month <span class="plus">+</span></button></li> -->
-                    <li class="drawer__item"><button class="drawer__btn" data-accordion>Men <span class="plus">+</span></button><div class="drawer__panelInner"><a href="men.html">Shop Men</a></div></li>
-                    <li class="drawer__item"><button class="drawer__btn" data-accordion>Women <span class="plus">+</span></button><div class="drawer__panelInner"><a href="women.html">Shop Women</a></div></li>
                     <li class="drawer__item"><button class="drawer__btn" data-accordion>Shop by Brand <span class="plus">+</span></button><div class="drawer__panelInner"><a href="#brands">All Brands</a></div></li>
-                    <li class="drawer__item"><button class="drawer__btn" data-accordion>Contact Lenses <span class="plus">+</span></button><div class="drawer__panelInner"><a href="contact-lenses.html">Browse lenses</a></div></li>
                     <li class="drawer__item"><button class="drawer__btn" data-accordion>About Us <span class="plus">+</span></button><div class="drawer__panelInner"><a href="appointment-form.html">Appointments</a></div></li>
                 </ul>
             </div>
         </div>
     </aside>
 
+    <!-- Announcement Banner with Continuous Scrolling -->
+    <div id="announcementBanner" class="announcement-banner">
+        <div class="announcement-scroll-wrapper">
+            <div class="announcement-scroll-content" id="announcementScrollContent">
+                <!-- Announcements will be duplicated for seamless loop -->
+            </div>
+            <button id="closeAnnouncement" class="announcement-close" aria-label="Close announcement">
+                <span>&times;</span>
+            </button>
+        </div>
+    </div>
+    
+    <!-- Immediate script to ensure announcement is visible on mobile -->
+    <script>
+        (function() {
+            function showAnnouncementOnMobile() {
+                const banner = document.getElementById('announcementBanner');
+                if (banner && window.innerWidth <= 768) {
+                    // Remove any inline display:none
+                    const style = banner.getAttribute('style');
+                    if (style) {
+                        const newStyle = style.replace(/display\s*:\s*none[^;]*;?/gi, '').trim();
+                        if (newStyle) {
+                            banner.setAttribute('style', newStyle);
+                        } else {
+                            banner.removeAttribute('style');
+                        }
+                    }
+                    // Force visible with multiple methods
+                    banner.style.setProperty('display', 'block', 'important');
+                    banner.style.setProperty('visibility', 'visible', 'important');
+                    banner.style.setProperty('opacity', '1', 'important');
+                    banner.style.display = 'block';
+                    banner.style.visibility = 'visible';
+                    banner.style.opacity = '1';
+                }
+            }
+            
+            // Run immediately if element exists
+            if (document.getElementById('announcementBanner')) {
+                showAnnouncementOnMobile();
+            }
+            
+            // Also run when DOM is ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', showAnnouncementOnMobile);
+            } else {
+                showAnnouncementOnMobile();
+            }
+            
+            // Run on window load as well
+            window.addEventListener('load', showAnnouncementOnMobile);
+        })();
+    </script>
+
     <main id="main">
         <section class="hero" aria-label="Featured">
             <div class="container hero__grid">
                 <div class="hero__content">
                     <p class="eyebrow">Now Trending</p>
-                    <h1>Ray-Ban Meta Glasses</h1>
+                    <h1>DAVID WALKER
+                            EYE WEAR</h1>  
                     <p class="lead">Immersive, iconic, and innovative. Book your pair today.</p>
                     <div class="actions">
                         <a class="btn btn--primary" href="appointment-form.html">Book Appointment</a>
                         <!-- <a class="btn" href="#steals">Shop Deals</a> -->
                     </div>
                 </div>
-                <div class="hero__media" aria-hidden="true">
-                    <div class="hero__card">Featured Collection</div>
-                </div>
+                  <div class="hero__media" aria-hidden="true">
+                     <div class="hero__card">
+                         <div class="photo-slider" id="heroSlider">
+                             <button class="slider-nav slider-nav--prev" id="sliderNavPrev" aria-label="Previous image">
+                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                     <path d="M15 18l-6-6 6-6"/>
+                                 </svg>
+                             </button>
+                             <button class="slider-nav slider-nav--next" id="sliderNavNext" aria-label="Next image">
+                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                     <path d="M9 18l6-6-6-6"/>
+                                 </svg>
+                             </button>
+                             <div class="slider-container">
+                                 <div class="slider-track" id="sliderTrack"></div>
+                             </div>
+                             <div class="slider-indicators" style="display: none;"></div>
+                             <div class="slider-counter" style="display: none;"></div>
+                         </div>
+                     </div>
+                  </div>
             </div>
         </section>
 
-        <section id="men" class="section">
+        <!-- Featured Products Section -->
+        <section class="section">
             <div class="container">
                 <div class="section__head">
-                    <h2 class="section__title">Men</h2>
-                    <a class="link" href="all-products.html">Shop all</a>
+                    <h2 class="section__title">Featured Collection</h2>
+                    <div class="slider-controls" aria-label="Carousel controls">
+                        <button class="slider-prev" id="featuredPrev" aria-label="Previous">←</button>
+                        <button class="slider-next" id="featuredNext" aria-label="Next">→</button>
+                    </div>
                 </div>
-                <div class="category-tiles">
-                    <a class="category-card" href="sunglasses.html"><span>Sunglasses</span></a>
-                    <a class="category-card" href="optical-frames.html"><span>Optical Frames</span></a>
-                    <a class="category-card" href="contact-lenses.html"><span>Contact Lenses</span></a>
+                <div class="product-slider" id="featuredProducts">
+                    <!-- Featured products will be loaded here -->
                 </div>
             </div>
         </section>
 
-        <section id="women" class="section section--strip">
+        <!-- Shop by Category Section -->
+        <section class="section section--strip">
             <div class="container">
                 <div class="section__head">
-                    <h2 class="section__title">Women</h2>
-                    <a class="link" href="all-products.html">Shop all</a>
+                    <h2 class="section__title">Shop by Category</h2>
+                    <p class="section__subtitle">Discover our complete collection of eyewear</p>
                 </div>
-                <div class="category-tiles">
-                    <a class="category-card" href="sunglasses.html"><span>Sunglasses</span></a>
-                    <a class="category-card" href="optical-frames.html"><span>Optical Frames</span></a>
-                    <a class="category-card" href="contact-lenses.html"><span>Contact Lenses</span></a>
+                <div class="category-tiles" style="gap: 2rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
+                    <a href="all-products.html?category=sunglasses" class="category-card" style="text-decoration: none; background: linear-gradient(to bottom, #ffffff 0%, #fefefe 100%); border: 1px solid rgba(222, 161, 147, 0.15); border-radius: 16px; padding: 3rem 2rem; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); position: relative; overflow: hidden;" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 12px 40px rgba(222, 161, 147, 0.15)'; this.style.borderColor='rgba(222, 161, 147, 0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0, 0, 0, 0.04)'; this.style.borderColor='rgba(222, 161, 147, 0.15)';">
+                        <div style="text-align: center;">
+                            <div style="margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid rgba(222, 161, 147, 0.1);">
+                                <span style="font-size: 3rem; font-weight: 300; letter-spacing: 2px; color: #7a534a; display: inline-block;">SUNGLASSES</span>
+                            </div>
+                            <h3 style="font-weight: 400; color: #1f2937; font-size: 1.1rem; letter-spacing: 0.5px; margin-bottom: 0.5rem; line-height: 1.6;">Exquisite designs from the world's most prestigious houses</h3>
+                            <p style="color: #94a3b8; font-size: 0.875rem; font-weight: 300; letter-spacing: 0.3px; margin-top: 0.5rem;">Explore Collection →</p>
+                        </div>
+                    </a>
+                    <a href="all-products.html?category=optical-frames" class="category-card" style="text-decoration: none; background: linear-gradient(to bottom, #ffffff 0%, #fefefe 100%); border: 1px solid rgba(232, 180, 184, 0.15); border-radius: 16px; padding: 3rem 2rem; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); position: relative; overflow: hidden;" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 12px 40px rgba(232, 180, 184, 0.15)'; this.style.borderColor='rgba(232, 180, 184, 0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0, 0, 0, 0.04)'; this.style.borderColor='rgba(232, 180, 184, 0.15)';">
+                        <div style="text-align: center;">
+                            <div style="margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid rgba(232, 180, 184, 0.1);">
+                                <span style="font-size: 3rem; font-weight: 300; letter-spacing: 2px; color: #7a534a; display: inline-block;">OPTICAL FRAMES</span>
+                            </div>
+                            <h3 style="font-weight: 400; color: #1f2937; font-size: 1.1rem; letter-spacing: 0.5px; margin-bottom: 0.5rem; line-height: 1.6;">Handcrafted frames with uncompromising attention to detail</h3>
+                            <p style="color: #94a3b8; font-size: 0.875rem; font-weight: 300; letter-spacing: 0.3px; margin-top: 0.5rem;">Explore Collection →</p>
+                        </div>
+                    </a>
+                    <a href="all-products.html?category=contact-lenses" class="category-card" style="text-decoration: none; background: linear-gradient(to bottom, #ffffff 0%, #fefefe 100%); border: 1px solid rgba(186, 134, 123, 0.15); border-radius: 16px; padding: 3rem 2rem; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); position: relative; overflow: hidden;" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 12px 40px rgba(186, 134, 123, 0.15)'; this.style.borderColor='rgba(186, 134, 123, 0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0, 0, 0, 0.04)'; this.style.borderColor='rgba(186, 134, 123, 0.15)';">
+                        <div style="text-align: center;">
+                            <div style="margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid rgba(186, 134, 123, 0.1);">
+                                <span style="font-size: 3rem; font-weight: 300; letter-spacing: 2px; color: #7a534a; display: inline-block;">CONTACT LENSES</span>
+                            </div>
+                            <h3 style="font-weight: 400; color: #1f2937; font-size: 1.1rem; letter-spacing: 0.5px; margin-bottom: 0.5rem; line-height: 1.6;">Advanced lens technology for discerning vision</h3>
+                            <p style="color: #94a3b8; font-size: 0.875rem; font-weight: 300; letter-spacing: 0.3px; margin-top: 0.5rem;">Explore Collection →</p>
+                        </div>
+                    </a>
                 </div>
             </div>
         </section>
-
-
 
         <section class="section">
             <div class="container">
                 <div class="section__head">
-                    <h2 class="section__title">#50YearsOfHeritage</h2>
+                    <h2 class="section__title">#35YearsOfHeritage</h2>
                 </div>
                 <ol class="timeline">
                     <li>
                         <div class="tl__year">1990</div>
-                        <div class="tl__desc">Where it all began. Opening the first boutique.</div>
+                        <div class="tl__desc">Eyewear Since 1990 !<br>
+                             A Heritage of Elegance and Precision
+                             For over thirty years, our atelier has been synonymous with refined vision. Every frame is a testament to artistry—handcrafted from the finest materials and tailored for effortless comfort. Steeped in tradition, shaped by innovation, our curated selection exudes quiet luxury and impeccable design. Indulge in a world where clarity meets beauty, and let each moment be seen through the lens of distinction.
+                             Experience eyewear reimagined—where sophistication is not just worn, but lived.</div> 
                     </li>
-                    <li>
+                    <!-- <li>
                         <div class="tl__year">2019</div>
                         <div class="tl__desc">Introduced unique independent eyewear brands to India.</div>
                     </li>
                     <li>
                         <div class="tl__year">2022</div>
                         <div class="tl__desc">Launched third boutique, elevating the luxury experience.</div>
-                    </li>
+                    </li> -->
                 </ol>
             </div>
         </section>
@@ -221,29 +300,12 @@
                     <a class="link" href="all-products.html">View all</a>
                 </div>
                 <div class="brand-grid">
-                    <a class="brand-card" href="brand.html?brand=Titan">Titan</a>
-                    <a class="brand-card" href="brand.html?brand=Fastrack">Fastrack</a>
-                    <a class="brand-card" href="brand.html?brand=Irus">Irus</a>
-                    <a class="brand-card" href="brand.html?brand=Idee">Idee</a>
-                    <a class="brand-card" href="brand.html?brand=French Connection">French Connection</a>
-                    <a class="brand-card" href="brand.html?brand=Tommy Hilfiger">Tommy Hilfiger</a>
-                    <a class="brand-card" href="brand.html?brand=Calvin Klein">Calvin Klein</a>
                     <a class="brand-card" href="brand.html?brand=Ray-Ban">Ray-Ban</a>
-                    <a class="brand-card" href="brand.html?brand=Carrera">Carrera</a>
-                    <a class="brand-card" href="brand.html?brand=Boss">Boss</a>
-                    <a class="brand-card" href="brand.html?brand=Hugo">Hugo</a>
-                    <a class="brand-card" href="brand.html?brand=Marc Jacobs">Marc Jacobs</a>
-                    <a class="brand-card" href="brand.html?brand=Versace">Versace</a>
-                    <a class="brand-card" href="brand.html?brand=Dolce & Gabbana">Dolce & Gabbana</a>
-                    <a class="brand-card" href="brand.html?brand=Burberry">Burberry</a>
-                    <a class="brand-card" href="brand.html?brand=Off-White">Off-White</a>
+                    <a class="brand-card" href="brand.html?brand=Gucci">Gucci</a>
                     <a class="brand-card" href="brand.html?brand=Tom Ford">Tom Ford</a>
-                    <a class="brand-card" href="brand.html?brand=Philipp Plein">Philipp Plein</a>
-                    <a class="brand-card" href="brand.html?brand=Scott">Scott</a>
-                    <a class="brand-card" href="brand.html?brand=Vogue">Vogue</a>
-                    <a class="brand-card" href="brand.html?brand=Michael Kors">Michael Kors</a>
-                    <a class="brand-card" href="brand.html?brand=David Walker">David Walker</a>
-                    <a class="brand-card" href="brand.html?brand=Mont Blanc">Mont Blanc</a>
+                    <a class="brand-card" href="brand.html?brand=Prada">Prada</a>
+                    <a class="brand-card" href="brand.html?brand=Cartier">Cartier</a>
+                    <a class="brand-card" href="brand.html?brand=Johnson & Johnson">Johnson & Johnson</a>
                 </div>
             </div>
         </section>
@@ -273,17 +335,108 @@
             </div>
         </section>
 
+        <!-- Store Locations Section -->
+        <section id="store-locations" class="section">
+            <div class="container">
+                <div class="section__head">
+                    <h2 class="section__title">Visit Our Stores</h2>
+                    <p class="section__subtitle">Experience luxury eyewear at our premium locations across Madhya Pradesh</p>
+                </div>
+                <div class="store-locations-grid">
+                    <div class="store-location-card">
+                        <div class="store-location__header">
+                            <h3 class="store-location__title">Indore - Jail Road</h3>
+                            <span class="store-location__badge">Main Store</span>
+                        </div>
+                        <div class="store-location__content">
+                            <p class="store-location__address">504, Mahatma Gandhi Rd, opp. Kothari market, Jail Road, Indore, Madhya Pradesh 452007, India</p>
+                            <div class="store-location__actions">
+                                <a href="https://maps.app.goo.gl/JyPND1VMxGRisVMz6" target="_blank" class="btn btn--ghost">📍 Get Directions</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="store-location-card">
+                        <div class="store-location__header">
+                            <h3 class="store-location__title">Indore - Race Course Road</h3>
+                            <span class="store-location__badge">Mall Location</span>
+                        </div>
+                        <div class="store-location__content">
+                            <p class="store-location__address">U.G.3 Darshan mall, opp. IDA Building, near Abhay prashal, Race Course Road, Indore, Madhya Pradesh 452003</p>
+                            <div class="store-location__actions">
+                                <a href="https://maps.google.com/maps?q=U.G.3+Darshan+mall+opp+IDA+Building+near+Abhay+prashal+Race+Course+Road+Indore" target="_blank" class="btn btn--ghost">📍 Get Directions</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="store-location-card">
+                        <div class="store-location__header">
+                            <h3 class="store-location__title">Indore - Mahalaxmi Nagar</h3>
+                            <span class="store-location__badge">Premium Location</span>
+                        </div>
+                        <div class="store-location__content">
+                            <p class="store-location__address">UG 1, 370 A, MAHALAXMI MAIN ROAD, opposite MELA GROUND, near by JOCKEY SHOWROOM, Sector A, Mahalaxmi Nagar, Indore, Madhya Pradesh 452010</p>
+                            <div class="store-location__actions">
+                                <a href="https://maps.google.com/maps?q=UG+1+370+A+MAHALAXMI+MAIN+ROAD+opposite+MELA+GROUND+near+JOCKEY+SHOWROOM+Sector+A+Mahalaxmi+Nagar+Indore" target="_blank" class="btn btn--ghost">📍 Get Directions</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="store-location-card">
+                        <div class="store-location__header">
+                            <h3 class="store-location__title">Indore - Usha Nagar</h3>
+                            <span class="store-location__badge">Community Store</span>
+                        </div>
+                        <div class="store-location__content">
+                            <p class="store-location__address">11, Annapurna Rd, Usha Nagar, Sudama Nagar, Indore, Madhya Pradesh 452009, India</p>
+                            <div class="store-location__actions">
+                                <a href="https://maps.google.com/maps?q=11+Annapurna+Rd+Usha+Nagar+Sudama+Nagar+Indore" target="_blank" class="btn btn--ghost">📍 Get Directions</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="store-location-card">
+                        <div class="store-location__header">
+                            <h3 class="store-location__title">Bhopal - Arera Colony</h3>
+                            <span class="store-location__badge">Main Store</span>
+                        </div>
+                        <div class="store-location__content">
+                            <p class="store-location__address">10 no. Market E3 arera colony, 6C6P+WM4 Bhopal, Madhya Pradesh, India</p>
+                            <div class="store-location__actions">
+                                <a href="https://maps.google.com/maps?q=10+no+Market+E3+arera+colony+Bhopal" target="_blank" class="btn btn--ghost">📍 Get Directions</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="store-location-card">
+                        <div class="store-location__header">
+                            <h3 class="store-location__title">Bhopal - Peer Gate Area</h3>
+                            <span class="store-location__badge">Capital City</span>
+                        </div>
+                        <div class="store-location__content">
+                            <p class="store-location__address">Near, Bus Stand Road, Thana Rd, Ghora Nakkas, Peer Gate Area, Bhopal, Madhya Pradesh 462001, India</p>
+                            <div class="store-location__actions">
+                                <a href="https://maps.google.com/maps?q=Near+Bus+Stand+Road+Thana+Rd+Ghora+Nakkas+Peer+Gate+Area+Bhopal" target="_blank" class="btn btn--ghost">📍 Get Directions</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <section class="section">
             <div class="container">
                 <h2 class="section__title">What our clients say</h2>
                 <div class="reviews">
                     <figure class="review">
-                        <blockquote>Exceptional curation and service. The consultation was spot on.</blockquote>
-                        <figcaption>— A. Sharma</figcaption>
+                        <div class="stars">⭐⭐⭐⭐⭐</div>
+                        <blockquote>"From the moment I entered the store, I felt I was in expert hands. The selection is curated with impeccable taste, and the service is discreet yet attentive. My glasses arrived beautifully packaged and fit like a dream."</blockquote>
+                        <figcaption>— Mahesh Rajpal, Bhopal</figcaption>
                     </figure>
                     <figure class="review">
-                        <blockquote>Luxurious experience from start to finish. Highly recommend.</blockquote>
-                        <figcaption>— R. Mehta</figcaption>
+                        <div class="stars">⭐⭐⭐⭐⭐</div>
+                        <blockquote>"Unparalleled service and sublime quality. The consultation was personalized and unhurried, and the end result feels tailored to perfection. These glasses have quickly become my signature look."</blockquote>
+                        <figcaption>— Abhijeet</figcaption>
                     </figure>
                 </div>
             </div>
@@ -304,20 +457,11 @@
             <div>
                 <h3 class="footer-title">Contact</h3>
                 <ul>
-                    <li><a href="#">Boutiques</a></li>
+                    <li><a href="#store-locations">All Store Locations</a></li>
                     <li><a href="tel:+917000532010">+91-7000532010</a></li>
                     <li><a href="mailto:Optohubmonica@gmail.com">Optohubmonica@gmail.com</a></li>
                     <li><a href="https://www.instagram.com/monicaoptohub?igsh=d3ZsMTA1ZzE5Zm0z&utm_source=qr" target="_blank">Instagram</a></li>
                 </ul>
-                <div style="margin-top: 15px;">
-                    <h4 style="color: #64748b; font-size: 0.9rem; margin-bottom: 8px;">Shop Address:</h4>
-                    <p style="color: #64748b; font-size: 0.85rem; line-height: 1.4; margin: 0;">
-                        E-3 41, Shop No 05<br>
-                        Ten Square Complex<br>
-                        Arera Colony<br>
-                        Bhopal
-                    </p>
-                </div>
             </div>
             <div>
                 <h3 class="footer-title">Join the club</h3>
@@ -357,11 +501,7 @@
         </div>
     </div>
 
-    <script src="js/main.js" defer></script>
-    <script src="js/api-client.js" defer></script>
-    <script src="js/products.js" defer></script>
-    <script src="js/website-content.js" defer></script>
-    <script src="js/analytics.js" defer></script>
+    
     
     <!-- Inline product initialization for immediate availability -->
     <script>
@@ -382,11 +522,43 @@
                 
                 if (window.productDisplay) {
                     console.log('Product system is ready!');
-                    // Force initialize if no products
-                    if (window.productDisplay.products.length === 0) {
-                        console.log('No products found, initializing...');
-                        window.productDisplay.initializeSampleProducts();
-                        window.productDisplay.displayProductsOnPageLoad();
+                    // Auto-cleanup old sample products from localStorage
+                    try {
+                        const adminData = JSON.parse(localStorage.getItem('adminPanelData') || '{}');
+                        const products = adminData.products || [];
+                        
+                        // List of old sample product names to remove
+                        const sampleProductNames = [
+                            'abc',
+                            'Ray-Ban Aviator Classic',
+                            'Gucci Oversized Square',
+                            'Prada Cat Eye Sunglasses',
+                            'Tom Ford Optical Frame',
+                            'Cartier Optical Frame'
+                        ];
+                        
+                        // Filter out sample products
+                        const filteredProducts = products.filter(p => {
+                            const isSample = sampleProductNames.includes(p.name);
+                            if (isSample) {
+                                console.log('🧹 Removing old sample product:', p.name);
+                            }
+                            return !isSample;
+                        });
+                        
+                        // If products were removed, update localStorage
+                        if (filteredProducts.length < products.length) {
+                            adminData.products = filteredProducts;
+                            localStorage.setItem('adminPanelData', JSON.stringify(adminData));
+                            console.log(`✅ Cleaned up ${products.length - filteredProducts.length} old sample products`);
+                            
+                            // Reload products after cleanup
+                            window.productDisplay.loadProducts().then(() => {
+                                window.productDisplay.displayProductsOnPageLoad();
+                            });
+                        }
+                    } catch (error) {
+                        console.error('Error cleaning up products:', error);
                     }
                 } else {
                     console.log('Product system not loaded yet, retrying...');
@@ -438,74 +610,8 @@
         window.forceInitProducts = function() {
             console.log('Force initializing products...');
             
-            // Create sample products directly with working placeholder images
-            const sampleProducts = [
-                {
-                    id: '1',
-                    name: 'Ray-Ban Aviator Classic',
-                    brand: 'Ray-Ban',
-                    price: 10990,
-                    category: 'sunglasses',
-                    gender: 'unisex',
-                    model: 'RB3025 001/58',
-                    description: 'Classic aviator sunglasses with crystal green lenses',
-                    image: 'https://via.placeholder.com/300x200/1e40af/ffffff?text=Ray-Ban+Aviator',
-                    featured: true,
-                    createdAt: new Date().toISOString()
-                },
-                {
-                    id: '2',
-                    name: 'Gucci Oversized Square',
-                    brand: 'Gucci',
-                    price: 20700,
-                    category: 'sunglasses',
-                    gender: 'women',
-                    model: 'GG0061S 001',
-                    description: 'Oversized square sunglasses with crystal lenses',
-                    image: 'https://via.placeholder.com/300x200/059669/ffffff?text=Gucci+Square',
-                    featured: true,
-                    createdAt: new Date().toISOString()
-                },
-                {
-                    id: '3',
-                    name: 'Tom Ford Optical Frame',
-                    brand: 'Tom Ford',
-                    price: 24500,
-                    category: 'optical-frames',
-                    gender: 'men',
-                    model: 'TF5156 001',
-                    description: 'Premium optical frame with titanium construction',
-                    image: 'https://via.placeholder.com/300x200/7c2d12/ffffff?text=Tom+Ford+Frame',
-                    featured: false,
-                    createdAt: new Date().toISOString()
-                },
-                {
-                    id: '4',
-                    name: 'Prada Cat Eye Sunglasses',
-                    brand: 'Prada',
-                    price: 33700,
-                    category: 'sunglasses',
-                    gender: 'women',
-                    model: 'PR17WS 1AB-1A4',
-                    description: 'Elegant cat eye sunglasses with crystal lenses',
-                    image: 'https://via.placeholder.com/300x200/be185d/ffffff?text=Prada+Cat+Eye',
-                    featured: true,
-                    createdAt: new Date().toISOString()
-                },
-                {
-                    id: '5',
-                    name: 'Cartier Optical Frame',
-                    brand: 'Cartier',
-                    price: 96500,
-                    category: 'optical-frames',
-                    gender: 'unisex',
-                    model: 'CT0014S 001',
-                    description: 'Luxury optical frame with gold accents',
-                    image: 'https://via.placeholder.com/300x200/dc2626/ffffff?text=Cartier+Luxury',
-                    featured: false,
-                    createdAt: new Date().toISOString()
-                }
-            ];
+            // Sample products removed - products should be added through admin panel only
+            const sampleProducts = [];
 
             // Save to localStorage
             const adminData = { products: sampleProducts };
@@ -519,7 +625,7 @@
             // Display products directly
             displayProductsDirectly(sampleProducts);
             
-            console.log('Products force initialized:', sampleProducts.length);
+            console.log('Products force initialized (empty - use admin panel to add products):', sampleProducts.length);
         };
 
         // Direct product display function
@@ -527,8 +633,10 @@
             console.log('Displaying products directly...');
             console.log('Products to display:', products.length);
             
-            // Display featured products
-            const featuredProducts = products.filter(p => p.featured);
+            // Display featured products (handle different featured value formats)
+            const featuredProducts = products.filter(p => {
+                return p.featured === true || p.featured === 1 || p.featured === '1' || p.featured === 'true';
+            });
             const featuredContainer = document.getElementById('featuredProducts');
             console.log('Featured container found:', !!featuredContainer);
             console.log('Featured products count:', featuredProducts.length);
@@ -649,29 +757,10 @@
                 console.error('Error loading products:', error);
             }
             
-            // If no products, use sample products
+            // If no products, show empty state
             if (products.length === 0) {
-                console.log('No products found, using sample products');
-                products = [
-                    {
-                        id: '1',
-                        name: 'Ray-Ban Aviator Classic',
-                        brand: 'Ray-Ban',
-                        price: 10990,
-                        category: 'sunglasses',
-                        featured: true,
-                        image: 'https://via.placeholder.com/300x200/1e40af/ffffff?text=Ray-Ban+Aviator'
-                    },
-                    {
-                        id: '2',
-                        name: 'Gucci Oversized Square',
-                        brand: 'Gucci',
-                        price: 20700,
-                        category: 'sunglasses',
-                        featured: true,
-                        image: 'https://via.placeholder.com/300x200/059669/ffffff?text=Gucci+Square'
-                    }
-                ];
+                console.log('No products found - products must be added through admin panel');
+                products = [];
             }
             
             // Get featured products
@@ -854,14 +943,8 @@
             }
             
             if (products.length === 0) {
-                console.log('No products found, creating sample products');
-                products = [
-                    { id: '1', name: 'abc', brand: 'Dolce & Gabbana', price: 21590, featured: true },
-                    { id: '2', name: 'Ray-Ban Aviator Classic', brand: 'Ray-Ban', price: 10990, featured: true },
-                    { id: '3', name: 'Gucci Oversized Square', brand: 'Gucci', price: 20700, featured: true },
-                    { id: '4', name: 'Prada Cat Eye Sunglasses', brand: 'Prada', price: 33700, featured: true },
-                    { id: '5', name: 'Tom Ford Aviator', brand: 'Tom Ford', price: 28900, featured: true }
-                ];
+                console.log('No products found - products must be added through admin panel');
+                products = [];
             }
             
             // Show first 5 products
@@ -870,7 +953,7 @@
             
             // Create product cards HTML with SVG placeholders (no external images)
             const productCardsHTML = productsToShow.map((product, index) => {
-                const colors = ['#8b5cf6', '#059669', '#dc2626', '#ea580c', '#7c3aed'];
+                const colors = ['#DEA193', '#059669', '#dc2626', '#ea580c', '#BA867B'];
                 const color = colors[index % colors.length];
                 
                 return `
@@ -1106,6 +1189,45 @@
             } catch (error) {
                 console.error('Error making aj featured:', error);
                 return 'Error: ' + error.message;
+            }
+        };
+        
+        // Function to clear all cached products and force reload from database
+        window.clearCachedProducts = async function() {
+            console.log('🧹 Clearing cached products...');
+            
+            try {
+                // Step 1: Clear localStorage
+                const adminData = JSON.parse(localStorage.getItem('adminPanelData') || '{}');
+                console.log('Products in localStorage before clear:', adminData.products?.length || 0);
+                
+                // Clear products from localStorage
+                adminData.products = [];
+                localStorage.setItem('adminPanelData', JSON.stringify(adminData));
+                console.log('✅ localStorage products cleared');
+                
+                // Step 2: Clear API cache
+                if (window.apiClient && window.apiClient.clearCache) {
+                    window.apiClient.clearCache();
+                    console.log('✅ API cache cleared');
+                }
+                
+                // Step 3: Force reload from backend
+                if (window.productDisplay) {
+                    console.log('🔄 Force reloading products from backend...');
+                    await window.productDisplay.loadProducts();
+                    window.productDisplay.displayProductsOnPageLoad();
+                    console.log('✅ Products reloaded from backend:', window.productDisplay.products.length);
+                    
+                    return `✅ Cache cleared! Loaded ${window.productDisplay.products.length} products from database.`;
+                } else {
+                    console.log('⚠️ ProductDisplay not available, reloading page...');
+                    location.reload();
+                    return '✅ Cache cleared! Page reloading...';
+                }
+            } catch (error) {
+                console.error('❌ Error clearing cache:', error);
+                return `❌ Error: ${error.message}`;
             }
         };
         
@@ -1416,9 +1538,11 @@
         
     </script>
     
-    <!-- Load JavaScript files -->
+    <!-- Load JavaScript files (single include set) -->
     <script src="js/api-client.js" defer></script>
+    <script src="js/idb.js" defer></script>
     <script src="js/main.js" defer></script>
+    <script src="js/brand-loader.js" defer></script>
     <script src="js/products.js" defer></script>
     <script src="js/website-content.js" defer></script>
     <script src="js/analytics.js" defer></script>

@@ -7,7 +7,6 @@ class AllProductsPage {
         this.productsPerPage = 12;
         this.filters = {
             category: 'all',
-            gender: 'all',
             brand: 'all',
             sortBy: 'newest'
         };
@@ -17,18 +16,28 @@ class AllProductsPage {
     init() {
         console.log('Initializing All Products page');
         this.setupEventListeners();
+        this.parseUrlParameters();
         this.loadProducts();
+    }
+
+    parseUrlParameters() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const category = urlParams.get('category');
+        if (category) {
+            this.filters.category = category;
+            const categorySelect = document.getElementById('categoryFilter');
+            if (categorySelect) {
+                categorySelect.value = category;
+            }
+        }
+        
+        console.log('URL parameters parsed:', { category });
     }
 
     setupEventListeners() {
         // Filter controls
         document.getElementById('categoryFilter').addEventListener('change', (e) => {
             this.filters.category = e.target.value;
-            this.applyFilters();
-        });
-
-        document.getElementById('genderFilter').addEventListener('change', (e) => {
-            this.filters.gender = e.target.value;
             this.applyFilters();
         });
 
@@ -74,21 +83,45 @@ class AllProductsPage {
         try {
             console.log('Loading all products...');
             
+            // Try API first
             if (window.apiClient) {
-                const response = await window.apiClient.getProducts();
-                this.products = response.products || [];
-                console.log('Products loaded from API:', this.products.length);
-            } else {
-                // Fallback to localStorage
-                const adminData = JSON.parse(localStorage.getItem('adminPanelData') || '{}');
-                this.products = adminData.products || [];
-                console.log('Products loaded from localStorage:', this.products.length);
+                try {
+                    const response = await window.apiClient.getProducts();
+                    this.products = response.products || [];
+                    console.log('Products loaded from API:', this.products.length);
+                    if (this.products.length > 0) {
+                        this.applyFilters();
+                        return;
+                    }
+                } catch (apiError) {
+                    console.warn('API failed, trying localStorage:', apiError);
+                }
+            }
+            
+            // Fallback to localStorage
+            const adminData = JSON.parse(localStorage.getItem('adminPanelData') || '{}');
+            this.products = adminData.products || [];
+            console.log('Products loaded from localStorage:', this.products.length);
+            
+            // If still no products, try direct fetch
+            if (this.products.length === 0) {
+                try {
+                    const apiUrl = (window.apiClient?.baseURL + '/products') || '/api/products';
+                    const response = await fetch(apiUrl);
+                    if (response.ok) {
+                        const data = await response.json();
+                        this.products = data.products || [];
+                        console.log('Products loaded from direct fetch:', this.products.length);
+                    }
+                } catch (fetchError) {
+                    console.warn('Direct fetch failed:', fetchError);
+                }
             }
             
             this.applyFilters();
         } catch (error) {
             console.error('Error loading products:', error);
-            this.showError('Failed to load products');
+            this.showError('Failed to load products. Please check if the server is running.');
         }
     }
 
@@ -102,13 +135,6 @@ class AllProductsPage {
         if (this.filters.category !== 'all') {
             this.filteredProducts = this.filteredProducts.filter(product => 
                 product.category === this.filters.category
-            );
-        }
-
-        // Apply gender filter
-        if (this.filters.gender !== 'all') {
-            this.filteredProducts = this.filteredProducts.filter(product => 
-                product.gender === this.filters.gender
             );
         }
 
@@ -207,7 +233,16 @@ class AllProductsPage {
     }
 
     renderProductCard(product) {
-        const imageUrl = product.image_url || product.image || this.getPlaceholderImage();
+        // Get the primary image or first available image
+        let imageUrl = this.getPlaceholderImage();
+        
+        if (product.images && product.images.length > 0) {
+            // Use the primary image or first image
+            const primaryImage = product.images.find(img => img.is_primary) || product.images[0];
+            imageUrl = primaryImage.image_url;
+        } else if (product.image_url) {
+            imageUrl = product.image_url;
+        }
         
         return `
             <article class="product-card">
@@ -216,12 +251,12 @@ class AllProductsPage {
                          alt="${product.name}" 
                          style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px;"
                          onerror="this.src='${this.getPlaceholderImage()}'">
+                    ${product.images && product.images.length > 1 ? `<div class="image-count-badge">+${product.images.length - 1}</div>` : ''}
                 </div>
                 <h3 class="product-card__title">${product.name}</h3>
                 <p class="product-card__price">₹ ${product.price.toLocaleString()}</p>
                 <div class="product-card__meta">
                     <span class="product-category">${product.category}</span>
-                    <span class="product-gender">${product.gender}</span>
                     <span class="product-brand">${product.brand}</span>
                 </div>
                 <button class="btn btn--ghost view-details-btn" data-product-id="${product.id}">View Details</button>
@@ -266,38 +301,33 @@ class AllProductsPage {
         const imageUrl = product.image_url || product.image || this.getPlaceholderImage();
         
         modal.innerHTML = `
-            <div style="background: white; padding: 30px; border-radius: 12px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px;">
-                    <h2 style="margin: 0; color: #0f172a; font-size: 1.8rem;">${product.name}</h2>
-                    <button class="close-modal-btn" style="background: none; border: none; font-size: 28px; cursor: pointer; color: #64748b; padding: 5px; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">&times;</button>
+            <div style="background: linear-gradient(135deg, #ffffff, #FCF8F7); padding: 30px; border-radius: 16px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(222, 161, 147, 0.3); border: 1px solid rgba(222, 161, 147, 0.2);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid rgba(222, 161, 147, 0.3); padding-bottom: 15px;">
+                    <h2 style="margin: 0; color: #7a534a; font-size: 1.8rem; font-weight: 700;">${product.name}</h2>
+                    <button class="close-modal-btn" style="background: rgba(222, 161, 147, 0.1); border: 1px solid rgba(222, 161, 147, 0.3); font-size: 28px; cursor: pointer; color: #7a534a; padding: 5px; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;">&times;</button>
                 </div>
                 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
                     <div>
-                        <img src="${imageUrl}" alt="${product.name}" style="width: 100%; height: 250px; object-fit: cover; border-radius: 8px; border: 2px solid #f1f5f9;">
+                        <img src="${imageUrl}" alt="${product.name}" style="width: 100%; height: 250px; object-fit: cover; border-radius: 12px; border: 2px solid rgba(222, 161, 147, 0.3);">
                     </div>
                     <div>
                         <div style="margin-bottom: 15px;">
-                            <strong style="color: #475569;">Brand:</strong> 
-                            <span style="color: #0f172a; font-weight: 500;">${product.brand}</span>
+                            <strong style="color: #7a534a;">Brand:</strong> 
+                            <span style="color: #1f2937; font-weight: 500;">${product.brand}</span>
                         </div>
                         
                         <div style="margin-bottom: 15px;">
-                            <strong style="color: #475569;">Category:</strong> 
-                            <span style="color: #0f172a; font-weight: 500;">${product.category}</span>
+                            <strong style="color: #7a534a;">Category:</strong> 
+                            <span style="color: #1f2937; font-weight: 500;">${product.category}</span>
                         </div>
                         
                         <div style="margin-bottom: 15px;">
-                            <strong style="color: #475569;">Gender:</strong> 
-                            <span style="color: #0f172a; font-weight: 500;">${product.gender}</span>
+                            <strong style="color: #7a534a;">Model:</strong> 
+                            <span style="color: #1f2937; font-weight: 500;">${product.model || 'N/A'}</span>
                         </div>
                         
-                        <div style="margin-bottom: 15px;">
-                            <strong style="color: #475569;">Model:</strong> 
-                            <span style="color: #0f172a; font-weight: 500;">${product.model || 'N/A'}</span>
-                        </div>
-                        
-                        <div style="margin-bottom: 20px; padding: 15px; background: linear-gradient(135deg, #8b5cf6, #a855f7); border-radius: 8px; text-align: center;">
+                        <div style="margin-bottom: 20px; padding: 15px; background: linear-gradient(135deg, #DEA193, #BA867B); border-radius: 12px; text-align: center; box-shadow: 0 4px 15px rgba(222, 161, 147, 0.3);">
                             <strong style="color: white; font-size: 1.1rem;">Price</strong><br>
                             <span style="color: white; font-size: 1.5em; font-weight: bold;">₹ ${product.price.toLocaleString()}</span>
                         </div>
@@ -305,17 +335,17 @@ class AllProductsPage {
                 </div>
                 
                 ${product.description ? `
-                    <div style="margin-bottom: 20px; padding: 15px; background: #f8fafc; border-radius: 8px; border-left: 4px solid #8b5cf6;">
-                        <strong style="color: #475569;">Description:</strong><br>
-                        <span style="color: #0f172a; line-height: 1.6;">${product.description}</span>
+                    <div style="margin-bottom: 20px; padding: 15px; background: linear-gradient(135deg, #F3DDD8, #F0D4CE); border-radius: 12px; border-left: 4px solid #DEA193;">
+                        <strong style="color: #7a534a;">Description:</strong><br>
+                        <span style="color: #1f2937; line-height: 1.6;">${product.description}</span>
                     </div>
                 ` : ''}
                 
                 <div style="display: flex; gap: 15px; margin-top: 25px;">
-                    <button class="whatsapp-modal-btn" style="background: linear-gradient(135deg, #25D366, #128C7E); color: white; border: none; padding: 15px 25px; border-radius: 8px; cursor: pointer; flex: 1; font-weight: bold; font-size: 1rem; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);">
+                    <button class="whatsapp-modal-btn" style="background: linear-gradient(135deg, #25D366, #128C7E); color: white; border: none; padding: 15px 25px; border-radius: 12px; cursor: pointer; flex: 1; font-weight: bold; font-size: 1rem; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3); transition: all 0.3s ease;">
                         📱 Contact via WhatsApp
                     </button>
-                    <button class="close-modal-btn" style="background: #64748b; color: white; border: none; padding: 15px 25px; border-radius: 8px; cursor: pointer; font-weight: bold;">
+                    <button class="close-modal-btn" style="background: linear-gradient(135deg, #DEA193, #BA867B); color: white; border: none; padding: 15px 25px; border-radius: 12px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 15px rgba(222, 161, 147, 0.3); transition: all 0.3s ease;">
                         Close
                     </button>
                 </div>
@@ -367,6 +397,24 @@ class AllProductsPage {
         }
     }
 
+    openWhatsApp(productName, productBrand) {
+        const message = `Hi! I am interested in ${productName} from ${productBrand}. Can you provide more information?`;
+        
+        console.log('WhatsApp message:', message);
+        
+        // Use the global WhatsApp function if available
+        if (typeof window.openWhatsApp === 'function') {
+            window.openWhatsApp(message);
+        } else {
+            // Fallback to direct WhatsApp URL
+            const cleanMessage = message.trim().replace(/\s+/g, ' ');
+            const encodedMessage = encodeURIComponent(cleanMessage);
+            const whatsappUrl = `https://wa.me/917000532010?text=${encodedMessage}`;
+            console.log('Fallback WhatsApp URL:', whatsappUrl);
+            window.open(whatsappUrl, '_blank');
+        }
+    }
+
     showError(message) {
         const container = document.getElementById('productsContainer');
         const loadingMessage = document.getElementById('loadingMessage');
@@ -387,14 +435,12 @@ class AllProductsPage {
 // Clear filters function
 function clearFilters() {
     document.getElementById('categoryFilter').value = 'all';
-    document.getElementById('genderFilter').value = 'all';
     document.getElementById('brandFilter').value = 'all';
     document.getElementById('sortBy').value = 'newest';
     
     if (window.allProductsPage) {
         window.allProductsPage.filters = {
             category: 'all',
-            gender: 'all',
             brand: 'all',
             sortBy: 'newest'
         };
@@ -406,6 +452,35 @@ function clearFilters() {
 document.addEventListener('DOMContentLoaded', function() {
     window.allProductsPage = new AllProductsPage();
 });
+
+// Debug function to check products
+window.debugAllProducts = function() {
+    console.log('=== ALL PRODUCTS DEBUG ===');
+    console.log('AllProductsPage instance:', window.allProductsPage);
+    console.log('Products in AllProductsPage:', window.allProductsPage?.products?.length || 0);
+    console.log('Filtered products:', window.allProductsPage?.filteredProducts?.length || 0);
+    
+    // Check API client
+    console.log('API Client available:', !!window.apiClient);
+    
+    // Check localStorage
+    const adminData = JSON.parse(localStorage.getItem('adminPanelData') || '{}');
+    console.log('LocalStorage products:', adminData.products?.length || 0);
+    
+    // Test direct API call
+    const apiUrl = (window.apiClient?.baseURL + '/products') || '/api/products';
+    fetch(apiUrl)
+        .then(response => response.json())
+        .then(data => {
+            console.log('Direct API call result:', data.products?.length || 0);
+            console.log('API products:', data.products);
+        })
+        .catch(error => {
+            console.error('Direct API call failed:', error);
+        });
+    
+    return 'Debug complete - check console for details';
+};
 
 // Add CSS for product meta
 const style = document.createElement('style');

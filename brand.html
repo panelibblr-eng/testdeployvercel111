@@ -10,7 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
 </head>
-<body class="theme-rose-gold">
+<body class="theme-blush brand-page">
     <a class="skip-link" href="#main">Skip to content</a>
 
     <header class="site-header">
@@ -22,64 +22,21 @@
                 <span class="sr-only">Toggle navigation</span>
             </button>
             <a class="logo" href="index.html" aria-label="Home">
-                <div class="monica-logo">
-                    <span class="logo-text">m</span>
-                    <span class="logo-text">n</span>
-                    <div class="logo-eye">
-                        <div class="eye-iris">
-                            <div class="eye-pupil"></div>
-                        </div>
-                        <div class="eye-curves">
-                            <div class="curve-top"></div>
-                            <div class="curve-bottom"></div>
-                        </div>
-                    </div>
-                    <span class="logo-text">i</span>
-                    <span class="logo-text">c</span>
-                    <span class="logo-text">a</span>
-                </div>
+                <img class="logo-img" src="assets/Logo monica.png" alt="Monica Opto Hub logo">
             </a>
             <nav id="primary-nav" class="nav" aria-label="Primary">
                 <ul>
-                    <li class="has-mega"><a href="men.html">Men</a></li>
-                    <li class="has-mega"><a href="women.html">Women</a></li>
                     <li class="has-mega">
                         <button class="mega-toggle" aria-expanded="false">Brands</button>
                         <div class="mega" role="menu" aria-label="Shop by brand">
                             <div class="mega__col">
-                                <h4>A - C</h4>
-                                <a href="brand.html?brand=Boss">Boss</a>
-                                <a href="brand.html?brand=Burberry">Burberry</a>
-                                <a href="brand.html?brand=Calvin Klein">Calvin Klein</a>
-                                <a href="brand.html?brand=Carrera">Carrera</a>
-                            </div>
-                            <div class="mega__col">
-                                <h4>D - H</h4>
-                                <a href="brand.html?brand=David Walker">David Walker</a>
-                                <a href="brand.html?brand=Dolce & Gabbana">Dolce & Gabbana</a>
-                                <a href="brand.html?brand=Fastrack">Fastrack</a>
-                                <a href="brand.html?brand=French Connection">French Connection</a>
-                                <a href="brand.html?brand=Hugo">Hugo</a>
-                            </div>
-                            <div class="mega__col">
-                                <h4>I - M</h4>
-                                <a href="brand.html?brand=Idee">Idee</a>
-                                <a href="brand.html?brand=Irus">Irus</a>
-                                <a href="brand.html?brand=Marc Jacobs">Marc Jacobs</a>
-                                <a href="brand.html?brand=Michael Kors">Michael Kors</a>
-                                <a href="brand.html?brand=Mont Blanc">Mont Blanc</a>
-                            </div>
-                            <div class="mega__col">
-                                <h4>O - V</h4>
-                                <a href="brand.html?brand=Off-White">Off-White</a>
-                                <a href="brand.html?brand=Philipp Plein">Philipp Plein</a>
+                                <h4>Available Brands</h4>
                                 <a href="brand.html?brand=Ray-Ban">Ray-Ban</a>
-                                <a href="brand.html?brand=Scott">Scott</a>
+                                <a href="brand.html?brand=Gucci">Gucci</a>
                                 <a href="brand.html?brand=Tom Ford">Tom Ford</a>
-                                <a href="brand.html?brand=Tommy Hilfiger">Tommy Hilfiger</a>
-                                <a href="brand.html?brand=Titan">Titan</a>
-                                <a href="brand.html?brand=Versace">Versace</a>
-                                <a href="brand.html?brand=Vogue">Vogue</a>
+                                <a href="brand.html?brand=Prada">Prada</a>
+                                <a href="brand.html?brand=Cartier">Cartier</a>
+                                <a href="brand.html?brand=Johnson & Johnson">Johnson & Johnson</a>
                             </div>
                         </div>
                     </li>
@@ -87,7 +44,6 @@
                 </ul>
             </nav>
             <div class="header-actions">
-                <button class="action" data-theme-toggle aria-label="Toggle theme">Pink</button>
                 <button class="action" aria-label="Search">
                     <span class="icon">🔎</span>
                 </button>
@@ -97,11 +53,6 @@
                 <button class="action" aria-label="Cart">
                     <span class="icon">🛒</span>
                 </button>
-            </div>
-        </div>
-        <div class="notice" role="note">
-            <div class="container">
-                Our prices are being updated to reflect GST changes. Chat with us for revised prices.
             </div>
         </div>
         <div class="nav-overlay" data-overlay aria-hidden="true"></div>
@@ -202,12 +153,9 @@
                 </ul>
                 <div style="margin-top: 15px;">
                     <h4 style="color: #64748b; font-size: 0.9rem; margin-bottom: 8px;">Shop Address:</h4>
-                    <p style="color: #64748b; font-size: 0.85rem; line-height: 1.4; margin: 0;">
-                        E-3 41, Shop No 05<br>
-                        Ten Square Complex<br>
-                        Arera Colony<br>
-                        Bhopal
-                    </p>
+                    <a href="https://maps.app.goo.gl/JyPND1VMxGRisVMz6" target="_blank" rel="noopener" style="color: #7a534a; font-weight: 600; text-decoration: underline; font-size: 0.95rem;">
+                        E-3 41, Shop No 05, Ten Square Complex, Arera Colony, Bhopal
+                    </a>
                 </div>
             </div>
             <div>
@@ -250,6 +198,7 @@
 
     <script src="js/main.js" defer></script>
     <script src="js/api-client.js" defer></script>
+    <script src="js/brand-loader.js" defer></script>
     <script src="js/brand-page.js" defer></script>
     <script src="js/analytics.js" defer></script>
 </body>

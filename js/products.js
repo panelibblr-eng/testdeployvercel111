@@ -2,12 +2,18 @@
 class ProductDisplay {
     constructor() {
         this.products = [];
-        this.useBackend = true; // Flag to enable/disable backend integration
-        this.init().catch(error => {
-            console.error('Error initializing ProductDisplay:', error);
-            // Fallback initialization
-            this.initializeSampleProducts();
-        });
+        this.useBackend = true; // Enable backend integration for products from server
+        this.initialized = false;
+        
+        // Initialize with timeout to prevent hanging
+        setTimeout(() => {
+            this.init().catch(error => {
+                console.error('Error initializing ProductDisplay:', error);
+                // Don't initialize sample products - products must be added through admin panel
+                this.products = [];
+                this.initialized = true;
+            });
+        }, 100);
     }
 
     async init() {
@@ -36,11 +42,17 @@ class ProductDisplay {
     }
 
     setupEventListeners() {
-        // Listen for admin panel updates
+        // Listen for admin panel updates (including deletions)
         window.addEventListener('adminDataUpdated', (event) => {
-            console.log('Admin data updated event received:', event.detail);
-            this.loadProducts();
-            this.displayProductsOnPageLoad();
+            console.log('Admin data updated event received (refreshing products):', event.detail);
+            // Force reload from backend to get fresh data after deletion
+            this.loadProducts().then(() => {
+                this.displayProductsOnPageLoad();
+                console.log('✅ Products refreshed after admin update');
+            }).catch(err => {
+                console.error('Error refreshing products:', err);
+                this.displayProductsOnPageLoad();
+            });
         });
 
         // Listen for storage changes
@@ -52,7 +64,7 @@ class ProductDisplay {
             }
         });
 
-        // Event delegation for View Details buttons
+        // Event delegation for View Details buttons and card sliders
         document.addEventListener('click', (e) => {
             if (e.target.classList.contains('view-details-btn')) {
                 e.preventDefault();
@@ -70,6 +82,31 @@ class ProductDisplay {
                     console.error('No product ID found on button');
                     console.log('Button attributes:', e.target.attributes);
                 }
+            }
+            
+            if (e.target.classList.contains('card-prev') || e.target.classList.contains('card-next')) {
+                const media = e.target.closest('.card-slider');
+                if (!media) return;
+                const slides = Array.from(media.querySelectorAll('.card-slide'));
+                if (slides.length < 2) return;
+                let idx = parseInt(media.getAttribute('data-idx') || '0');
+                idx += e.target.classList.contains('card-next') ? 1 : -1;
+                if (idx < 0) idx = slides.length - 1;
+                if (idx >= slides.length) idx = 0;
+                media.setAttribute('data-idx', String(idx));
+                slides.forEach((img, i) => img.style.display = i === idx ? 'block' : 'none');
+            }
+
+            // Allow clicking the image itself to advance to the next slide
+            if (e.target.classList.contains('card-slide')) {
+                const media = e.target.closest('.card-slider');
+                if (!media) return;
+                const slides = Array.from(media.querySelectorAll('.card-slide'));
+                if (slides.length < 2) return;
+                let idx = parseInt(media.getAttribute('data-idx') || '0');
+                idx = (idx + 1) % slides.length;
+                media.setAttribute('data-idx', String(idx));
+                slides.forEach((img, i) => img.style.display = i === idx ? 'block' : 'none');
             }
         });
 
@@ -106,21 +143,54 @@ class ProductDisplay {
         });
     }
 
-    // Load products from backend or localStorage
+    // Enhanced product loading with retry and fallback
     async loadProducts() {
         try {
             if (this.useBackend && window.apiClient) {
-                console.log('Loading products from backend...');
-                const response = await window.apiClient.getProducts();
-                this.products = response.products || [];
-                console.log('Backend products loaded:', this.products.length);
-            } else {
-                console.log('Loading products from localStorage...');
-                // Fallback to localStorage
-                const adminData = JSON.parse(localStorage.getItem('adminPanelData') || '{}');
-                this.products = adminData.products || [];
-                console.log('LocalStorage products loaded:', this.products.length);
+                console.log('🔄 Loading products from backend...');
+                
+                // Always try to load from backend first (products are publicly accessible)
+                // Don't require authentication for viewing products
+                try {
+                    const response = await window.apiClient.getProducts();
+                    this.products = response.products || [];
+                    console.log('✅ Backend products loaded:', this.products.length);
+                
+                // Debug: Log products and their images
+                if (this.products.length > 0) {
+                    console.log('First product sample:', this.products[0]);
+                    console.log('First product images:', this.products[0].images);
+                    
+                    // Find products with multiple images
+                    const productsWithImages = this.products.filter(p => p.images && p.images.length > 0);
+                    console.log(`Products with images: ${productsWithImages.length} out of ${this.products.length}`);
+                    
+                    if (productsWithImages.length > 0) {
+                        productsWithImages.forEach(p => {
+                            console.log(`Product "${p.name}" (ID: ${p.id}) has ${p.images.length} images:`, p.images.map(img => img.image_url || img));
+                        });
+                    }
+                }
+                
+                    // Clear cache to force fresh data
+                    if (window.apiClient) {
+                        window.apiClient.clearCache();
+                    }
+                    
+                    // Save to localStorage for offline use
+                    this.saveProducts();
+                    
+                    // Products loaded successfully from backend, return early
+                    return;
+                } catch (backendError) {
+                    console.warn('⚠️ Backend request failed, trying localStorage fallback:', backendError.message);
+                    // Fall through to localStorage fallback
+                }
             }
+            
+            // Fallback to localStorage if backend is not available
+            console.log('📦 Loading products from localStorage (backend unavailable)...');
+            this.loadProductsFromLocalStorage();
             
             // If no products found, try to initialize with sample data
             if (this.products.length === 0) {
@@ -131,17 +201,25 @@ class ProductDisplay {
                 this.products = this.products.map(product => ({
                     ...product,
                     featured: Boolean(product.featured), // Ensure boolean
+                    trending: Boolean(product.trending || product.trending === 1 || product.trending === '1'), // Ensure boolean, handle 0/1 from DB
                     price: Number(product.price) || 0, // Ensure number
                     createdAt: product.createdAt || new Date().toISOString(),
-                    updatedAt: product.updatedAt || new Date().toISOString()
+                    updatedAt: product.updatedAt || new Date().toISOString(),
+                    // Explicitly preserve images array
+                    images: product.images && Array.isArray(product.images) ? product.images : (product.image_url ? [{ image_url: product.image_url }] : [])
                 }));
                 
                 console.log('Products processed:', this.products.length);
                 console.log('Featured products after processing:', this.products.filter(p => p.featured).length);
+                
+                // Debug: Log products with multiple images
+                const productsWithMultipleImages = this.products.filter(p => p.images && p.images.length > 1);
+                if (productsWithMultipleImages.length > 0) {
+                    console.log(`Found ${productsWithMultipleImages.length} products with multiple images:`, productsWithMultipleImages.map(p => ({ id: p.id, name: p.name, imageCount: p.images.length })));
+                }
             }
         } catch (error) {
-            console.error('Error loading products:', error);
-            console.log('Falling back to localStorage...');
+            console.log('ℹ️ Backend loading failed, using localStorage fallback:', error.message);
             
             // Fallback to localStorage
             try {
@@ -159,93 +237,26 @@ class ProductDisplay {
         }
     }
 
+    loadProductsFromLocalStorage() {
+        try {
+            const adminDataRaw = localStorage.getItem('adminPanelData');
+            console.log('Raw adminPanelData from localStorage:', adminDataRaw);
+            const adminData = JSON.parse(adminDataRaw || '{}');
+            console.log('Parsed adminPanelData:', adminData);
+            this.products = adminData.products || [];
+            console.log('📦 LocalStorage products loaded:', this.products.length);
+            console.log('Products array:', this.products);
+        } catch (error) {
+            console.error('Error loading products from localStorage:', error);
+            this.products = [];
+        }
+    }
+
     // Initialize sample products if none exist
     initializeSampleProducts() {
-        const sampleProducts = [
-            {
-                id: 'abc-1',
-                name: 'abc',
-                brand: 'Dolce & Gabbana',
-                price: 21590,
-                category: 'sunglasses',
-                gender: 'men',
-                model: '',
-                description: 'Luxury sunglasses from Dolce & Gabbana',
-                image: 'https://via.placeholder.com/300x200/8b5cf6/ffffff?text=abc+D%26G',
-                featured: true,
-                createdAt: new Date().toISOString()
-            },
-            {
-                id: '1',
-                name: 'Ray-Ban Aviator Classic',
-                brand: 'Ray-Ban',
-                price: 10990,
-                category: 'sunglasses',
-                gender: 'unisex',
-                model: 'RB3025 001/58',
-                description: 'Classic aviator sunglasses with crystal green lenses',
-                image: 'https://via.placeholder.com/300x200/1e40af/ffffff?text=Ray-Ban+Aviator',
-                featured: true,
-                createdAt: new Date().toISOString()
-            },
-            {
-                id: '2',
-                name: 'Gucci Oversized Square',
-                brand: 'Gucci',
-                price: 20700,
-                category: 'sunglasses',
-                gender: 'women',
-                model: 'GG0061S 001',
-                description: 'Oversized square sunglasses with crystal lenses',
-                image: 'https://via.placeholder.com/300x200/059669/ffffff?text=Gucci+Square',
-                featured: true,
-                createdAt: new Date().toISOString()
-            },
-            {
-                id: '3',
-                name: 'Tom Ford Optical Frame',
-                brand: 'Tom Ford',
-                price: 24500,
-                category: 'optical-frames',
-                gender: 'men',
-                model: 'TF5156 001',
-                description: 'Premium optical frame with titanium construction',
-                image: 'https://via.placeholder.com/300x200/7c2d12/ffffff?text=Tom+Ford+Frame',
-                featured: false,
-                createdAt: new Date().toISOString()
-            },
-            {
-                id: '4',
-                name: 'Prada Cat Eye Sunglasses',
-                brand: 'Prada',
-                price: 33700,
-                category: 'sunglasses',
-                gender: 'women',
-                model: 'PR17WS 1AB-1A4',
-                description: 'Elegant cat eye sunglasses with crystal lenses',
-                image: 'https://via.placeholder.com/300x200/be185d/ffffff?text=Prada+Cat+Eye',
-                featured: true,
-                createdAt: new Date().toISOString()
-            },
-            {
-                id: '5',
-                name: 'Cartier Optical Frame',
-                brand: 'Cartier',
-                price: 96500,
-                category: 'optical-frames',
-                gender: 'unisex',
-                model: 'CT0014S 001',
-                description: 'Luxury optical frame with gold accents',
-                image: 'https://via.placeholder.com/300x200/dc2626/ffffff?text=Cartier+Luxury',
-                featured: false,
-                createdAt: new Date().toISOString()
-            }
-        ];
-
-        this.products = sampleProducts;
-        this.saveProducts();
-        console.log('Sample products initialized:', this.products.length);
-        console.log('Products saved to localStorage');
+        // Sample products removed - products should be added through admin panel only
+        this.products = [];
+        console.log('No sample products - products must be added through admin panel');
     }
 
     // Save products to localStorage (for admin panel integration)
@@ -270,12 +281,15 @@ class ProductDisplay {
 
     // Get featured products
     getFeaturedProducts() {
-        return this.products.filter(product => product.featured === true);
+        // Handle both boolean true and number 1 from database
+        return this.products.filter(product => {
+            return product.featured === true || product.featured === 1 || product.featured === '1' || product.featured === 'true';
+        });
     }
 
-    // Get products by gender
+    // Get products by gender (deprecated - kept for backward compatibility)
     getProductsByGender(gender) {
-        return this.products.filter(product => product.gender === gender);
+        return this.products; // Always return all products now
     }
 
     // Get placeholder image
@@ -285,15 +299,43 @@ class ProductDisplay {
 
     // Render product card
     renderProductCard(product) {
-        // Use placeholder image instead of external URLs to avoid 404 errors
-        const imageUrl = this.getPlaceholderImage();
+        // Build images for inline slider - check multiple sources
+        let sliderImages = [];
+        
+        // Priority 1: Use images array from product_images table
+        if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+            sliderImages = product.images.map(img => {
+                // Handle both object format { image_url: "..." } and string format
+                return typeof img === 'string' ? img : (img.image_url || img);
+            }).filter(img => img && img.trim() !== ''); // Filter out any null/undefined/empty values
+        }
+        
+        // Priority 2: If no images from array, check if image_url exists
+        if (sliderImages.length === 0 && product.image_url && product.image_url.trim() !== '') {
+            sliderImages = [product.image_url];
+        }
+        
+        // Priority 3: Fallback to placeholder
+        if (sliderImages.length === 0) {
+            sliderImages = [this.getPlaceholderImage()];
+        }
+        
+        // Debug log for products with multiple images
+        if (sliderImages.length > 1) {
+            console.log(`Product "${product.name}" has ${sliderImages.length} images:`, sliderImages);
+        }
+        
         return `
             <article class="product-card">
-                <div class="product-card__media">
-                    <img src="${imageUrl}" 
-                         alt="${product.name}" 
-                         style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px;"
-                         onerror="this.src='${this.getPlaceholderImage()}'">
+                <div class="product-card__media card-slider" data-idx="0" style="position: relative;">
+                    <button class="card-prev" type="button" onclick="window.cardSlidePrev(this)" aria-label="Previous image" style="position:absolute;left:8px;top:8px;background:rgba(222, 161, 147, 0.8);color:#fff;border:none;border-radius:8px;padding:6px 10px;cursor:pointer;z-index:3;transition: all 0.3s ease;">‹</button>
+                    ${sliderImages.map((src, i) => `
+                        <img class=\"card-slide\" src=\"${src}\" alt=\"${product.name}\" 
+                             style=\"width:100%; height:200px; object-fit:cover; border-radius:12px; display:${i===0?'block':'none'}; position:relative; z-index:1;\" 
+                             onclick=\"window.cardSlideNext(this)\"
+                             onerror="this.src='${this.getPlaceholderImage()}'"/>
+                    `).join('')}
+                    <button class="card-next" type="button" onclick="window.cardSlideNext(this)" aria-label="Next image" style="position:absolute;right:8px;top:8px;background:rgba(222, 161, 147, 0.8);color:#fff;border:none;border-radius:8px;padding:6px 10px;cursor:pointer;z-index:3;transition: all 0.3s ease;">›</button>
                 </div>
                 <h3 class="product-card__title">${product.name}</h3>
                 <p class="product-card__price">₹ ${product.price.toLocaleString()}</p>
@@ -310,7 +352,7 @@ class ProductDisplay {
     }
 
     // Display products in a container
-    displayProducts(containerId, category = 'all', limit = null) {
+    displayProducts(containerId, category = 'all', limit = null, gender = null) {
         const container = document.getElementById(containerId);
         if (!container) {
             // Only log error for containers that should exist on this page
@@ -322,6 +364,13 @@ class ProductDisplay {
         }
 
         let productsToShow = this.getProductsByCategory(category);
+        
+        // Filter by gender if specified
+        if (gender) {
+            productsToShow = productsToShow.filter(product => 
+                product.gender === gender || product.gender === 'unisex'
+            );
+        }
         
         if (limit) {
             productsToShow = productsToShow.slice(0, limit);
@@ -337,15 +386,65 @@ class ProductDisplay {
             return;
         }
 
+        console.log(`Displaying ${productsToShow.length} products in ${containerId} (category: ${category}, gender: ${gender || 'all'})`);
+
+        // Render products
         container.innerHTML = productsToShow.map(product => this.renderProductCard(product)).join('');
+
+        // Auto-rotate card sliders so additional images appear without clicking
+        const sliders = Array.from(container.querySelectorAll('.card-slider'));
+        sliders.forEach(slider => {
+            // Avoid attaching multiple intervals
+            if (slider.dataset.rotationAttached === 'true') return;
+            slider.dataset.rotationAttached = 'true';
+
+            const slides = Array.from(slider.querySelectorAll('.card-slide'));
+            if (slides.length < 2) return; // No need to rotate single-image cards
+
+            // Ensure initial state
+            slider.setAttribute('data-idx', slider.getAttribute('data-idx') || '0');
+
+            const advance = () => {
+                let idx = parseInt(slider.getAttribute('data-idx') || '0');
+                idx = (idx + 1) % slides.length;
+                slider.setAttribute('data-idx', String(idx));
+                slides.forEach((img, i) => img.style.display = i === idx ? 'block' : 'none');
+            };
+
+            // Start rotation
+            const intervalId = setInterval(advance, 2500);
+            slider.dataset.rotationIntervalId = String(intervalId);
+
+            // Pause on hover for better UX
+            slider.addEventListener('mouseenter', () => {
+                const id = parseInt(slider.dataset.rotationIntervalId || '0');
+                if (id) clearInterval(id);
+            });
+            slider.addEventListener('mouseleave', () => {
+                if (!slides || slides.length < 2) return;
+                const id = setInterval(advance, 2500);
+                slider.dataset.rotationIntervalId = String(id);
+            });
+        });
     }
 
-    // Display featured products
-    displayFeaturedProducts(containerId, limit = 4) {
+    // Display featured products with slider functionality
+    displayFeaturedProducts(containerId, limit = null) {
         const container = document.getElementById(containerId);
-        if (!container) return;
+        if (!container) {
+            console.warn('Featured products container not found:', containerId);
+            return;
+        }
 
-        const featuredProducts = this.getFeaturedProducts().slice(0, limit);
+        const allFeatured = this.getFeaturedProducts();
+        console.log('Total featured products found:', allFeatured.length);
+        console.log('Featured products:', allFeatured.map(p => ({ id: p.id, name: p.name, featured: p.featured })));
+        
+        const featuredProducts = limit 
+            ? allFeatured.slice(0, limit)
+            : allFeatured;
+        
+        console.log('Displaying featured products:', featuredProducts.length);
         
         if (featuredProducts.length === 0) {
             container.innerHTML = `
@@ -358,6 +457,57 @@ class ProductDisplay {
         }
 
         container.innerHTML = featuredProducts.map(product => this.renderProductCard(product)).join('');
+        console.log('Featured products HTML rendered, count:', featuredProducts.length);
+        
+        // Ensure container has proper width to show all products
+        const totalWidth = featuredProducts.length * (container.offsetWidth / 4); // 4 products visible at a time
+        container.style.width = '100%';
+        container.style.overflowX = 'auto';
+        
+        // Initialize slider navigation if controls exist
+        setTimeout(() => {
+            this.initFeaturedSlider();
+        }, 100);
+    }
+    
+    // Initialize featured products slider navigation
+    initFeaturedSlider() {
+        const container = document.getElementById('featuredProducts');
+        const prevBtn = document.getElementById('featuredPrev');
+        const nextBtn = document.getElementById('featuredNext');
+        
+        if (!container || !prevBtn || !nextBtn) return;
+        
+        const scrollAmount = 300; // Pixels to scroll per click
+        
+        prevBtn.addEventListener('click', () => {
+            container.scrollBy({
+                left: -scrollAmount,
+                behavior: 'smooth'
+            });
+        });
+        
+        nextBtn.addEventListener('click', () => {
+            container.scrollBy({
+                left: scrollAmount,
+                behavior: 'smooth'
+            });
+        });
+        
+        // Show/hide buttons based on scroll position
+        const updateButtonVisibility = () => {
+            const isAtStart = container.scrollLeft <= 0;
+            const isAtEnd = container.scrollLeft >= container.scrollWidth - container.clientWidth - 10;
+            
+            prevBtn.style.opacity = isAtStart ? '0.5' : '1';
+            prevBtn.style.pointerEvents = isAtStart ? 'none' : 'auto';
+            
+            nextBtn.style.opacity = isAtEnd ? '0.5' : '1';
+            nextBtn.style.pointerEvents = isAtEnd ? 'none' : 'auto';
+        };
+        
+        container.addEventListener('scroll', updateButtonVisibility);
+        updateButtonVisibility(); // Initial check
     }
 
     // View product details
@@ -374,6 +524,8 @@ class ProductDisplay {
         }
 
         console.log('Found product:', product);
+        console.log('Product images:', product.images);
+        console.log('Product image_url:', product.image_url);
 
         // Remove any existing modals
         const existingModals = document.querySelectorAll('.product-modal');
@@ -416,41 +568,75 @@ class ProductDisplay {
             document.head.appendChild(style);
         }
 
-        const imageUrl = product.image || this.getPlaceholderImage();
+        // Build images array for gallery - check multiple sources
+        let images = [];
         
+        // Priority 1: Use images array from product_images table
+        if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+            images = product.images.map(img => {
+                // Handle both object format { image_url: "..." } and string format
+                return typeof img === 'string' ? img : (img.image_url || img);
+            }).filter(img => img && img.trim() !== ''); // Filter out any null/undefined/empty values
+            
+            console.log(`Using ${images.length} images from product.images array`);
+        }
+        
+        // Priority 2: If no images from array, check if image_url exists
+        if (images.length === 0 && product.image_url && product.image_url.trim() !== '') {
+            images = [product.image_url];
+            console.log('Using single image_url:', product.image_url);
+        }
+        
+        // Priority 3: Fallback to placeholder
+        if (images.length === 0) {
+            images = [this.getPlaceholderImage()];
+            console.log('No images found, using placeholder');
+        }
+        
+        console.log('Final gallery images array:', images);
+        console.log('Final gallery images count:', images.length);
+        
+        let currentIndex = 0;
+
         modal.innerHTML = `
-            <div class="product-modal-content" style="background: white; padding: 30px; border-radius: 12px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px;">
-                    <h2 style="margin: 0; color: #0f172a; font-size: 1.8rem;">${product.name}</h2>
-                    <button class="close-modal-btn" style="background: none; border: none; font-size: 28px; cursor: pointer; color: #64748b; padding: 5px; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">&times;</button>
+            <div class="product-modal-content" style="background: linear-gradient(135deg, #ffffff, #FCF8F7); padding: 30px; border-radius: 16px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(222, 161, 147, 0.3); border: 1px solid rgba(222, 161, 147, 0.2);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid rgba(222, 161, 147, 0.3); padding-bottom: 15px;">
+                    <h2 style="margin: 0; color: #7a534a; font-size: 1.8rem; font-weight: 700;">${product.name}</h2>
+                    <button class="close-modal-btn" style="background: rgba(222, 161, 147, 0.1); border: 1px solid rgba(222, 161, 147, 0.3); font-size: 28px; cursor: pointer; color: #7a534a; padding: 5px; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;">&times;</button>
                 </div>
                 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
                     <div>
-                        <img src="${imageUrl}" alt="${product.name}" style="width: 100%; height: 250px; object-fit: cover; border-radius: 8px; border: 2px solid #f1f5f9;">
+                        <div style="position: relative;">
+                            ${images.length > 1 ? `<button class="gallery-prev" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);background:rgba(222, 161, 147, 0.8);color:#fff;border:none;border-radius:8px;padding:8px 12px;cursor:pointer;transition: all 0.3s ease;z-index:10;">‹</button>` : ''}
+                            <img class="gallery-main" src="${images[0]}" alt="${product.name}" style="width: 100%; height: 250px; object-fit: cover; border-radius: 12px; border: 2px solid rgba(222, 161, 147, 0.3);">
+                            ${images.length > 1 ? `<button class="gallery-next" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:rgba(222, 161, 147, 0.8);color:#fff;border:none;border-radius:8px;padding:8px 12px;cursor:pointer;transition: all 0.3s ease;z-index:10;">›</button>` : ''}
+                        </div>
+                        ${images.length > 1 ? `
+                        <div class="gallery-thumbs" style="display:flex;gap:8px;margin-top:10px;overflow-x:auto;">
+                            ${images.map((src, idx) => `
+                                <img data-index="${idx}" src="${src}" style="width:60px;height:60px;object-fit:cover;border-radius:8px;border:2px solid ${idx===0?'#DEA193':'rgba(222, 161, 147, 0.3)'};cursor:pointer;transition: all 0.3s ease;" />
+                            `).join('')}
+                        </div>
+                        ` : ''}
                     </div>
                     <div>
                         <div style="margin-bottom: 15px;">
-                            <strong style="color: #475569;">Brand:</strong> 
-                            <span style="color: #0f172a; font-weight: 500;">${product.brand}</span>
+                            <strong style="color: #7a534a;">Brand:</strong> 
+                            <span style="color: #1f2937; font-weight: 500;">${product.brand}</span>
                         </div>
                         
                         <div style="margin-bottom: 15px;">
-                            <strong style="color: #475569;">Category:</strong> 
-                            <span style="color: #0f172a; font-weight: 500;">${product.category}</span>
+                            <strong style="color: #7a534a;">Category:</strong> 
+                            <span style="color: #1f2937; font-weight: 500;">${product.category}</span>
                         </div>
                         
                         <div style="margin-bottom: 15px;">
-                            <strong style="color: #475569;">Gender:</strong> 
-                            <span style="color: #0f172a; font-weight: 500;">${product.gender}</span>
+                            <strong style="color: #7a534a;">Model:</strong> 
+                            <span style="color: #1f2937; font-weight: 500;">${product.model || 'N/A'}</span>
                         </div>
                         
-                        <div style="margin-bottom: 15px;">
-                            <strong style="color: #475569;">Model:</strong> 
-                            <span style="color: #0f172a; font-weight: 500;">${product.model || 'N/A'}</span>
-                        </div>
-                        
-                        <div style="margin-bottom: 20px; padding: 15px; background: linear-gradient(135deg, #8b5cf6, #a855f7); border-radius: 8px; text-align: center;">
+                        <div style="margin-bottom: 20px; padding: 15px; background: linear-gradient(135deg, #DEA193, #BA867B); border-radius: 12px; text-align: center; box-shadow: 0 4px 15px rgba(222, 161, 147, 0.3);">
                             <strong style="color: white; font-size: 1.1rem;">Price</strong><br>
                             <span style="color: white; font-size: 1.5em; font-weight: bold;">₹ ${product.price.toLocaleString()}</span>
                         </div>
@@ -458,17 +644,17 @@ class ProductDisplay {
                 </div>
                 
                 ${product.description ? `
-                    <div style="margin-bottom: 20px; padding: 15px; background: #f8fafc; border-radius: 8px; border-left: 4px solid #8b5cf6;">
-                        <strong style="color: #475569;">Description:</strong><br>
-                        <span style="color: #0f172a; line-height: 1.6;">${product.description}</span>
+                    <div style="margin-bottom: 20px; padding: 15px; background: linear-gradient(135deg, #F3DDD8, #F0D4CE); border-radius: 12px; border-left: 4px solid #DEA193;">
+                        <strong style="color: #7a534a;">Description:</strong><br>
+                        <span style="color: #1f2937; line-height: 1.6;">${product.description}</span>
                     </div>
                 ` : ''}
                 
                 <div style="display: flex; gap: 15px; margin-top: 25px;">
-                    <button class="whatsapp-modal-btn" style="background: linear-gradient(135deg, #25D366, #128C7E); color: white; border: none; padding: 15px 25px; border-radius: 8px; cursor: pointer; flex: 1; font-weight: bold; font-size: 1rem; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);">
+                    <button class="whatsapp-modal-btn" style="background: linear-gradient(135deg, #25D366, #128C7E); color: white; border: none; padding: 15px 25px; border-radius: 12px; cursor: pointer; flex: 1; font-weight: bold; font-size: 1rem; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3); transition: all 0.3s ease;">
                         📱 Contact via WhatsApp
                     </button>
-                    <button class="close-modal-btn" style="background: #64748b; color: white; border: none; padding: 15px 25px; border-radius: 8px; cursor: pointer; font-weight: bold;">
+                    <button class="close-modal-btn" style="background: linear-gradient(135deg, #DEA193, #BA867B); color: white; border: none; padding: 15px 25px; border-radius: 12px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 15px rgba(222, 161, 147, 0.3); transition: all 0.3s ease;">
                         Close
                     </button>
                 </div>
@@ -480,6 +666,10 @@ class ProductDisplay {
         // Add event listeners for modal interactions
         const closeButtons = modal.querySelectorAll('.close-modal-btn');
         const whatsappButton = modal.querySelector('.whatsapp-modal-btn');
+        const mainImg = modal.querySelector('.gallery-main');
+        const prevBtn = images.length > 1 ? modal.querySelector('.gallery-prev') : null;
+        const nextBtn = images.length > 1 ? modal.querySelector('.gallery-next') : null;
+        const thumbs = images.length > 1 ? Array.from(modal.querySelectorAll('.gallery-thumbs img')) : [];
         
         closeButtons.forEach(btn => {
             btn.addEventListener('click', () => {
@@ -488,6 +678,24 @@ class ProductDisplay {
             });
         });
         
+        function showImage(index) {
+            if (images.length === 0) return;
+            if (index < 0) index = images.length - 1;
+            if (index >= images.length) index = 0; // Wrap around to first image
+            currentIndex = index;
+            if (mainImg) {
+                mainImg.src = images[currentIndex];
+            }
+            if (thumbs && thumbs.length > 0) {
+                thumbs.forEach((t, i) => t.style.borderColor = i === currentIndex ? '#DEA193' : 'rgba(222, 161, 147, 0.3)');
+            }
+        }
+        if (prevBtn && images.length > 1) prevBtn.addEventListener('click', () => showImage(currentIndex - 1));
+        if (nextBtn && images.length > 1) nextBtn.addEventListener('click', () => showImage(currentIndex + 1));
+        if (thumbs && thumbs.length > 0) {
+            thumbs.forEach(t => t.addEventListener('click', (e) => showImage(parseInt(e.currentTarget.getAttribute('data-index')))));
+        }
+
         if (whatsappButton) {
             whatsappButton.addEventListener('click', () => {
                 const message = `Hi! I am interested in ${product.name} from ${product.brand}. Can you provide more information?`;
@@ -532,15 +740,31 @@ class ProductDisplay {
         // Listen for storage changes to update products when admin panel adds new ones
         window.addEventListener('storage', (e) => {
             if (e.key === 'adminPanelData') {
+                console.log('Storage event received, updating products smoothly...');
                 this.loadProducts();
                 this.refreshAllDisplays();
             }
         });
 
-        // Custom event for same-page updates
-        window.addEventListener('adminDataUpdated', () => {
-            this.loadProducts();
-            this.refreshAllDisplays();
+        // Custom event for same-page updates - use smooth update instead of full refresh
+        window.addEventListener('adminDataUpdated', (e) => {
+            console.log('Admin data updated event received, updating products smoothly...');
+            if (e.detail && e.detail.products) {
+                // Only update if products actually changed
+                const newProducts = e.detail.products;
+                if (JSON.stringify(this.products) !== JSON.stringify(newProducts)) {
+                    console.log('Products changed, updating smoothly...');
+                    this.products = newProducts;
+                    this.saveProducts();
+                    this.refreshAllDisplays();
+                } else {
+                    console.log('Products unchanged, skipping update');
+                }
+            } else {
+                // Fallback to loading from localStorage
+                this.loadProducts();
+                this.refreshAllDisplays();
+            }
         });
     }
 
@@ -563,17 +787,36 @@ class ProductDisplay {
             this.displayProducts('opticalFramesGrid', 'optical-frames');
         }
         
-        // Display trending products (show latest 4 products)
-        const latestProducts = this.products.slice(-4).reverse();
-        const trendingContainer = document.querySelector('.product-slider');
-        if (trendingContainer) {
-            trendingContainer.innerHTML = latestProducts.map(product => this.renderProductCard(product)).join('');
+        // Display women's category-specific products
+        if (document.getElementById('womenSunglassesGrid')) {
+            this.displayProducts('womenSunglassesGrid', 'sunglasses', null, 'women');
+        }
+        if (document.getElementById('womenOpticalFramesGrid')) {
+            this.displayProducts('womenOpticalFramesGrid', 'optical-frames', null, 'women');
         }
         
-        // Also try to display in trendingProducts container if it exists
+        // Display trending products (show products marked as trending, or fallback to latest 4)
+        const trendingProducts = this.products.filter(p => {
+            // Handle both boolean true and number 1 from database
+            return p.trending === true || p.trending === 1 || p.trending === '1' || p.trending === 'true';
+        });
+        const productsToShow = trendingProducts.length > 0 
+            ? trendingProducts.slice(0, 4) // Show up to 4 trending products
+            : this.products.slice(-4).reverse(); // Fallback to latest 4 products
+        
+        console.log(`Found ${trendingProducts.length} trending products:`, trendingProducts.map(p => p.name));
+        
+        // ONLY display in trendingProducts container (not featuredProducts)
         const trendingProductsContainer = document.getElementById('trendingProducts');
         if (trendingProductsContainer) {
-            trendingProductsContainer.innerHTML = latestProducts.map(product => this.renderProductCard(product)).join('');
+            trendingProductsContainer.innerHTML = productsToShow.map(product => this.renderProductCard(product)).join('');
+            console.log(`Displayed ${productsToShow.length} trending products in trendingProducts container`);
+        } else {
+            console.warn('Trending products container not found');
+        }
+        
+        if (trendingProducts.length > 0) {
+            console.log(`Displaying ${productsToShow.length} trending products (out of ${trendingProducts.length} total trending)`);
         }
         
         console.log('Products displayed:', this.products.length);
@@ -602,11 +845,32 @@ class ProductDisplay {
             this.displayProducts('opticalFramesGrid', 'optical-frames');
         }
         
-        // Refresh trending products (show latest 4 products)
-        const latestProducts = this.products.slice(-4).reverse();
-        const trendingContainer = document.querySelector('.product-slider');
-        if (trendingContainer) {
-            trendingContainer.innerHTML = latestProducts.map(product => this.renderProductCard(product)).join('');
+        // Refresh women's category-specific displays
+        if (document.getElementById('womenSunglassesGrid')) {
+            this.displayProducts('womenSunglassesGrid', 'sunglasses', null, 'women');
+        }
+        if (document.getElementById('womenOpticalFramesGrid')) {
+            this.displayProducts('womenOpticalFramesGrid', 'optical-frames', null, 'women');
+        }
+        
+        // Refresh trending products (show products marked as trending, or fallback to latest 4)
+        const trendingProducts = this.products.filter(p => {
+            // Handle both boolean true and number 1 from database
+            return p.trending === true || p.trending === 1 || p.trending === '1' || p.trending === 'true';
+        });
+        const productsToShow = trendingProducts.length > 0 
+            ? trendingProducts.slice(0, 4) // Show up to 4 trending products
+            : this.products.slice(-4).reverse(); // Fallback to latest 4 products
+        
+        // ONLY display in trendingProducts container (not featuredProducts)
+        const trendingProductsContainer = document.getElementById('trendingProducts');
+        if (trendingProductsContainer) {
+            trendingProductsContainer.innerHTML = productsToShow.map(product => this.renderProductCard(product)).join('');
+            console.log(`Refreshed: Displayed ${productsToShow.length} trending products in trendingProducts container`);
+        }
+        
+        if (trendingProducts.length > 0) {
+            console.log(`Refreshed: Found ${trendingProducts.length} total trending products`);
         }
     }
 
@@ -641,12 +905,44 @@ class ProductDisplay {
 
     // Delete a product (called from admin panel)
     deleteProduct(productId) {
+        console.log(`🗑️ Removing product ${productId} from frontend display...`);
+        
+        // Remove from products array
+        const beforeCount = this.products.length;
         this.products = this.products.filter(p => p.id !== productId);
+        const afterCount = this.products.length;
+        
+        if (beforeCount > afterCount) {
+            console.log(`✅ Product ${productId} removed from products array (${beforeCount} → ${afterCount})`);
+        }
+        
+        // Save updated products list to localStorage (remove deleted product)
         this.saveProducts();
+        
+        // Clear API cache to force fresh data
+        if (window.apiClient) {
+            window.apiClient.clearCache();
+        }
+        
+        // Immediately refresh all displays to remove deleted product
         this.refreshAllDisplays();
         
-        // Dispatch custom event
-        window.dispatchEvent(new CustomEvent('adminDataUpdated'));
+        // Force reload from backend after a short delay to ensure deletion is complete
+        setTimeout(() => {
+            this.loadProducts().then(() => {
+                this.displayProductsOnPageLoad();
+                console.log('✅ Products reloaded from backend after deletion');
+            }).catch(err => {
+                console.error('Error reloading products:', err);
+                // Even if reload fails, refresh display with current products
+                this.displayProductsOnPageLoad();
+            });
+        }, 500);
+        
+        // Dispatch custom event to notify other components
+        window.dispatchEvent(new CustomEvent('adminDataUpdated', { 
+            detail: { action: 'delete', productId: productId } 
+        }));
     }
 }
 
@@ -702,10 +998,24 @@ document.addEventListener('click', (e) => {
     }
 });
 
-// Auto-refresh products every 5 seconds (in case admin panel is open in another tab)
+// Auto-refresh products every 30 seconds (reduced frequency to avoid disruption)
+// Only run if ProductDisplay is properly initialized
 setInterval(() => {
-    window.productDisplay.loadProducts();
-}, 5000);
+    if (window.productDisplay && window.productDisplay.products) {
+        try {
+            // Only refresh if admin panel is not currently active (to avoid disruption)
+            const isAdminPanelActive = window.location.pathname.includes('admin.html');
+            if (!isAdminPanelActive) {
+                // Removed console.log to reduce noise - auto-refresh happens silently
+                window.productDisplay.loadProducts();
+            }
+            // Removed else console.log - silent skip
+        } catch (error) {
+            // Only log actual errors, not routine operations
+            console.error('Auto-refresh error:', error);
+        }
+    }
+}, 30000); // Increased from 5 seconds to 30 seconds
 
 // Manual refresh function for debugging
 window.refreshProducts = function() {
@@ -826,6 +1136,37 @@ window.forceReloadProducts = async function() {
     }
 };
 
+// Global function to force load products from backend API
+window.forceLoadFromBackend = async function() {
+    console.log('Force loading products from backend API...');
+    
+    try {
+        const apiUrl = (window.apiClient?.baseURL + '/products') || '/api/products';
+        const response = await fetch(apiUrl);
+        if (response.ok) {
+            const data = await response.json();
+            console.log('✅ Backend API response:', data);
+            
+            if (window.productDisplay) {
+                window.productDisplay.products = data.products || [];
+                window.productDisplay.saveProducts();
+                window.productDisplay.displayProductsOnPageLoad();
+                console.log('✅ Products loaded from backend API:', window.productDisplay.products.length);
+                return `Successfully loaded ${window.productDisplay.products.length} products from backend`;
+            } else {
+                console.log('❌ ProductDisplay not available');
+                return 'ProductDisplay not available';
+            }
+        } else {
+            console.log('❌ Backend API error:', response.status, response.statusText);
+            return `Backend API error: ${response.status} ${response.statusText}`;
+        }
+    } catch (error) {
+        console.error('❌ Error loading from backend API:', error);
+        return `Error: ${error.message}`;
+    }
+};
+
 // Global function to check product status
 window.checkProductStatus = function() {
     console.log('=== PRODUCT STATUS CHECK ===');
@@ -908,4 +1249,32 @@ window.testViewButton = function() {
         console.error('❌ First button has no product ID');
         return '❌ First button has no product ID';
     }
+};
+
+// Global card slider navigation functions
+window.cardSlideNext = function(element) {
+    const media = element.closest('.card-slider');
+    if (!media) return;
+    
+    const slides = Array.from(media.querySelectorAll('.card-slide'));
+    if (slides.length < 2) return;
+    
+    let idx = parseInt(media.getAttribute('data-idx') || '0');
+    idx = (idx + 1) % slides.length;
+    media.setAttribute('data-idx', String(idx));
+    slides.forEach((img, i) => img.style.display = i === idx ? 'block' : 'none');
+};
+
+window.cardSlidePrev = function(element) {
+    const media = element.closest('.card-slider');
+    if (!media) return;
+    
+    const slides = Array.from(media.querySelectorAll('.card-slide'));
+    if (slides.length < 2) return;
+    
+    let idx = parseInt(media.getAttribute('data-idx') || '0');
+    idx = idx - 1;
+    if (idx < 0) idx = slides.length - 1;
+    media.setAttribute('data-idx', String(idx));
+    slides.forEach((img, i) => img.style.display = i === idx ? 'block' : 'none');
 };

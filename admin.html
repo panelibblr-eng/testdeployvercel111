@@ -10,7 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/admin.css">
 </head>
-<body>
+<body class="theme-blush">
     <!-- Login Screen -->
     <div id="loginScreen" class="login-screen">
         <div class="login-container">
@@ -20,11 +20,11 @@
                 <form id="loginForm" class="login-form">
                     <div class="form-group">
                         <label for="username">Username</label>
-                        <input type="text" id="username" name="username" required>
+                        <input type="text" id="username" name="username" autocomplete="username" required>
                     </div>
                     <div class="form-group">
                         <label for="password">Password</label>
-                        <input type="password" id="password" name="password" required>
+                        <input type="password" id="password" name="password" autocomplete="current-password" required>
                     </div>
                     <button type="submit" class="btn btn--primary btn--full">Login</button>
                 </form>
@@ -39,6 +39,11 @@
         <header class="admin-header">
             <div class="admin-header-content">
                 <div class="admin-logo">
+                    <button id="mobileMenuToggle" class="mobile-menu-toggle" aria-label="Toggle menu">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
                     <h1>Monica Opto Hub</h1>
                     <span class="admin-badge">Admin Panel</span>
                 </div>
@@ -48,15 +53,36 @@
             </div>
         </header>
 
+        <!-- Mobile Navigation Overlay -->
+        <div id="mobileNavOverlay" class="mobile-nav-overlay"></div>
+
         <!-- Navigation -->
-            <nav class="admin-nav">
+        <nav class="admin-nav" id="adminNav">
             <ul class="admin-nav-list">
-                <li><a href="#dashboard" class="nav-link active" data-section="dashboard">Dashboard</a></li>
-                <li><a href="#products" class="nav-link" data-section="products">Products</a></li>
-                <li><a href="#content" class="nav-link" data-section="content">Content</a></li>
-                <li><a href="#appointments" class="nav-link" data-section="appointments">Appointments</a></li>
-                <li><a href="#analytics" class="nav-link" data-section="analytics">Analytics</a></li>
-                <li><a href="#settings" class="nav-link" data-section="settings">Settings</a></li>
+                <li><a href="#dashboard" class="nav-link active" data-section="dashboard">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-text">Dashboard</span>
+                </a></li>
+                <li><a href="#products" class="nav-link" data-section="products">
+                    <span class="nav-icon">📦</span>
+                    <span class="nav-text">Products</span>
+                </a></li>
+                <li><a href="#content" class="nav-link" data-section="content">
+                    <span class="nav-icon">✏️</span>
+                    <span class="nav-text">Content</span>
+                </a></li>
+                <li><a href="#appointments" class="nav-link" data-section="appointments">
+                    <span class="nav-icon">📅</span>
+                    <span class="nav-text">Appointments</span>
+                </a></li>
+                <li><a href="#analytics" class="nav-link" data-section="analytics">
+                    <span class="nav-icon">📈</span>
+                    <span class="nav-text">Analytics</span>
+                </a></li>
+                <li><a href="#settings" class="nav-link" data-section="settings">
+                    <span class="nav-icon">⚙️</span>
+                    <span class="nav-text">Settings</span>
+                </a></li>
             </ul>
         </nav>
 
@@ -129,8 +155,6 @@
                 <div class="category-nav">
                     <div class="category-tabs">
                         <button class="category-tab active" data-category="all">All Products</button>
-                        <button class="category-tab" data-category="men">Men</button>
-                        <button class="category-tab" data-category="women">Women</button>
                         <button class="category-tab" data-category="sunglasses">Sunglasses</button>
                         <button class="category-tab" data-category="optical-frames">Optical Frames</button>
                         <button class="category-tab" data-category="contact-lenses">Contact Lenses</button>
@@ -177,6 +201,9 @@
                                         <option value="Michael Kors">Michael Kors</option>
                                         <option value="David Walker">David Walker</option>
                                         <option value="Mont Blanc">Mont Blanc</option>
+                                        <option value="Police">Police</option>
+                                        <option value="Gucci">Gucci</option>
+                                        <option value="Armani Exchange">Armani Exchange</option>
                                     </select>
                                 </div>
                             </div>
@@ -197,15 +224,6 @@
                             </div>
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label for="productGender">Gender</label>
-                                    <select id="productGender" name="productGender" required>
-                                        <option value="">Select Gender</option>
-                                        <option value="men">Men</option>
-                                        <option value="women">Women</option>
-                                        <option value="unisex">Unisex</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
                                     <label for="productModel">Model Code</label>
                                     <input type="text" id="productModel" name="productModel" placeholder="e.g., 1830SK 004 55">
                                 </div>
@@ -215,14 +233,25 @@
                                 <textarea id="productDescription" name="productDescription" rows="3" placeholder="Product description..."></textarea>
                             </div>
                             <div class="form-group">
-                                <label for="productImage">Product Image URL</label>
-                                <input type="url" id="productImage" name="productImage" placeholder="https://example.com/image.jpg">
+                                <label for="productImages">Product Images</label>
+                                <input type="file" id="productImages" name="images" multiple accept="image/*" class="file-input">
+                                <div class="file-input-info">
+                                    <small>Select multiple images (JPG, PNG, GIF, WebP). First image will be the primary image.</small>
+                                </div>
+                                <div id="imagePreview" class="image-preview"></div>
                             </div>
                             <div class="form-group">
                                 <label class="checkbox-label">
                                     <input type="checkbox" id="productFeatured" name="productFeatured">
                                     <span class="checkmark"></span>
                                     Featured Product
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="productTrending" name="productTrending">
+                                    <span class="checkmark"></span>
+                                    Trending Product
                                 </label>
                             </div>
                             <div class="form-actions">
@@ -238,17 +267,30 @@
                     <div class="list-header">
                         <h3>All Products</h3>
                         <div class="list-controls">
-                            <input type="text" id="searchProducts" placeholder="Search products..." class="search-input">
-                            <select id="filterCategory" class="filter-select">
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <input type="text" id="searchProducts" placeholder="Search products by name, brand, model..." class="search-input" aria-label="Search products">
+                                <button id="searchBtn" class="btn btn--primary" onclick="adminPanel.performSearch()" style="min-width: 80px;">🔍 Search</button>
+                                <button id="clearSearchBtn" class="btn btn--ghost" onclick="adminPanel.clearSearch()" style="display: none;">✕ Clear</button>
+                            </div>
+                            <select id="filterCategory" class="filter-select" aria-label="Filter products by category">
                                 <option value="">All Categories</option>
                                 <option value="sunglasses">Sunglasses</option>
                                 <option value="optical-frames">Optical Frames</option>
                                 <option value="contact-lenses">Contact Lenses</option>
                             </select>
+                            <select id="filterUpdated" class="filter-select" aria-label="Filter by update status" style="min-width: 150px;">
+                                <option value="">All Products</option>
+                                <option value="recent">Recently Updated</option>
+                                <option value="today">Updated Today</option>
+                                <option value="this-week">This Week</option>
+                            </select>
+                            <button id="bulkImportBtn" class="btn btn--secondary">Bulk Import</button>
+                            <button id="inventoryImportBtn" class="btn btn--secondary">Inventory Import</button>
                         </div>
                     </div>
                     <div id="productsTable" class="products-table">
                         <div class="table-header">
+                            <div class="table-cell">Select</div>
                             <div class="table-cell">Image</div>
                             <div class="table-cell">Name</div>
                             <div class="table-cell">Brand</div>
@@ -269,7 +311,7 @@
                 <div class="section-header">
                     <h2>Appointment Management</h2>
                     <div class="appointment-controls">
-                        <select id="appointmentStatus" class="filter-select">
+                        <select id="appointmentStatus" class="filter-select" aria-label="Filter appointments by status">
                             <option value="all">All Appointments</option>
                             <option value="pending">Pending</option>
                             <option value="confirmed">Confirmed</option>
@@ -317,8 +359,8 @@
                     <div class="list-header">
                         <h3>Appointments & Contact Inquiries</h3>
                         <div class="list-controls">
-                            <input type="text" id="searchAppointments" placeholder="Search appointments..." class="search-input">
-                            <select id="appointmentType" class="filter-select">
+                            <input type="text" id="searchAppointments" placeholder="Search appointments..." class="search-input" aria-label="Search appointments">
+                            <select id="appointmentType" class="filter-select" aria-label="Filter appointments by type">
                                 <option value="all">All Types</option>
                                 <option value="appointment">Appointments</option>
                                 <option value="contact">Contact Inquiries</option>
@@ -366,7 +408,7 @@
                 <div class="section-header">
                     <h2>Visitor Analytics</h2>
                     <div class="analytics-controls">
-                        <select id="analyticsPeriod" class="filter-select">
+                        <select id="analyticsPeriod" class="filter-select" aria-label="Select analytics time period">
                             <option value="7">Last 7 days</option>
                             <option value="30" selected>Last 30 days</option>
                             <option value="90">Last 90 days</option>
@@ -430,7 +472,7 @@
 
                 <div class="content-grid">
                     <div class="content-card">
-                        <h3>Hero Section</h3>
+                        <h3>Hero Section Slider</h3>
                         <form id="heroContentForm">
                             <div class="form-group">
                                 <label for="heroEyebrow">Eyebrow Text</label>
@@ -438,32 +480,64 @@
                             </div>
                             <div class="form-group">
                                 <label for="heroTitle">Main Title</label>
-                                <input type="text" id="heroTitle" name="heroTitle" value="Ray-Ban Meta Glasses">
+                                <input type="text" id="heroTitle" name="heroTitle" value="David Walker 
+                                <br>EyeWear">
                             </div>
                             <div class="form-group">
                                 <label for="heroDescription">Description</label>
                                 <textarea id="heroDescription" name="heroDescription" rows="2">Immersive, iconic, and innovative. Book your pair today.</textarea>
                             </div>
+                            
+                            <!-- Hero Slider Images Management -->
                             <div class="form-group">
-                                <label for="heroImage">Hero Image URL</label>
-                                <input type="url" id="heroImage" name="heroImage" placeholder="https://example.com/hero-image.jpg">
+                                <label>Hero Slider Images</label>
+                                <div id="heroImagesContainer" class="hero-images-container">
+                                    <!-- Images will be populated here -->
+                                </div>
+                                <div class="image-upload-section">
+                                    <input type="file" id="heroImageUpload" accept="image/*" multiple style="display: none;" aria-label="Upload hero section images">
+                                    <button type="button" id="uploadHeroImagesBtn" class="btn btn--secondary">
+                                        <span class="btn-icon">📁</span>
+                                        Upload Images
+                                    </button>
+                                    <button type="button" id="addImageUrlBtn" class="btn btn--secondary">
+                                        <span class="btn-icon">🔗</span>
+                                        Add Image URL
+                                    </button>
+                                </div>
+                                <div class="image-url-form" id="imageUrlForm" style="display: none;">
+                                    <div class="form-group">
+                                        <label for="newImageUrl">Image URL</label>
+                                        <input type="url" id="newImageUrl" placeholder="https://example.com/image.jpg">
+                                        <label for="newImageAlt">Image Description</label>
+                                        <input type="text" id="newImageAlt" placeholder="Image description">
+                                        <button type="button" id="addUrlBtn" class="btn btn--primary">Add URL</button>
+                                        <button type="button" id="cancelUrlBtn" class="btn btn--ghost">Cancel</button>
+                                    </div>
+                                </div>
                             </div>
+                            
                             <button type="submit" class="btn btn--primary">Update Hero Section</button>
                         </form>
                     </div>
 
+
                     <div class="content-card">
-                        <h3>Site Announcements</h3>
+                        <h3>Announcement Settings</h3>
                         <form id="announcementForm">
+                <div class="form-group">
+                    <label for="announcementText">Announcement Text (One per line)</label>
+                    <textarea id="announcementText" rows="4" placeholder="Enter announcement text (one per line)">Buy 1 get 1 on David Walker Eyewear.
+🎉 New Collection: Premium Designer Frames Now Available!
+📞 Book Your Eye Test Today - Expert Optometrists Available
+💎 Limited Time: 20% Off All Sunglasses Collection
+🌟 Free Eye Consultation with Every Purchase
+🛍️ Same Day Delivery Available for All Orders</textarea>
+                </div>
                             <div class="form-group">
-                                <label for="announcementText">Announcement Text</label>
-                                <textarea id="announcementText" name="announcementText" rows="2">Our prices are being updated to reflect GST changes. Chat with us for revised prices.</textarea>
-                            </div>
-                            <div class="form-group">
-                                <label class="checkbox-label">
-                                    <input type="checkbox" id="announcementVisible" name="announcementVisible">
-                                    <span class="checkmark"></span>
-                                    Show Announcement
+                                <label>
+                                    <input type="checkbox" id="announcementVisible" checked>
+                                    Show announcement on website
                                 </label>
                             </div>
                             <button type="submit" class="btn btn--primary">Update Announcement</button>
@@ -479,6 +553,7 @@
                             </div>
                             <form id="addBrandForm" class="add-brand-form">
                                 <div class="form-group">
+                                    <label for="newBrandName">Brand Name</label>
                                     <input type="text" id="newBrandName" placeholder="Brand Name" required>
                                     <button type="submit" class="btn btn--primary">Add Brand</button>
                                 </div>
@@ -491,7 +566,7 @@
                         <form id="socialMediaForm">
                             <div class="form-group">
                                 <label for="whatsappNumber">WhatsApp Number</label>
-                                <input type="tel" id="whatsappNumber" name="whatsappNumber" value="917000532010">
+                                <input type="tel" id="whatsappNumber" name="whatsappNumber" value="917000532010" autocomplete="tel">
                             </div>
                             <div class="form-group">
                                 <label for="instagramHandle">Instagram Handle</label>
@@ -519,11 +594,11 @@
                         <form id="adminSettingsForm">
                             <div class="form-group">
                                 <label for="adminUsername">Username</label>
-                                <input type="text" id="adminUsername" name="adminUsername" value="admin">
+                                <input type="text" id="adminUsername" name="adminUsername" value="admin" autocomplete="username">
                             </div>
                             <div class="form-group">
                                 <label for="adminPassword">New Password</label>
-                                <input type="password" id="adminPassword" name="adminPassword" placeholder="Leave blank to keep current">
+                                <input type="password" id="adminPassword" name="adminPassword" autocomplete="new-password" placeholder="Leave blank to keep current">
                             </div>
                             <button type="submit" class="btn btn--primary">Update Settings</button>
                         </form>
@@ -542,11 +617,11 @@
                             </div>
                             <div class="form-group">
                                 <label for="contactPhone">Contact Phone</label>
-                                <input type="tel" id="contactPhone" name="contactPhone" value="+91-7000532010">
+                                <input type="tel" id="contactPhone" name="contactPhone" value="+91-7000532010" autocomplete="tel">
                             </div>
                             <div class="form-group">
                                 <label for="contactEmail">Contact Email</label>
-                                <input type="email" id="contactEmail" name="contactEmail" value="Optohubmonica@gmail.com">
+                                <input type="email" id="contactEmail" name="contactEmail" value="Optohubmonica@gmail.com" autocomplete="email">
                             </div>
                             <button type="submit" class="btn btn--primary">Update Website</button>
                         </form>
@@ -559,14 +634,147 @@
                             <button class="btn btn--ghost" onclick="importData()">Import Data</button>
                             <button class="btn btn--danger" onclick="clearAllData()">Clear All Data</button>
                         </div>
-                        <input type="file" id="importFile" accept=".json" style="display: none;" onchange="handleImportFile(event)">
+                        <input type="file" id="importFile" accept=".json" style="display: none;" onchange="handleImportFile(event)" aria-label="Import JSON data file">
                     </div>
                 </div>
             </section>
         </main>
     </div>
 
+    <!-- Bulk Import Modal -->
+    <div id="bulkImportModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Bulk Import Products</h3>
+                <button class="modal-close" onclick="hideBulkImportModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="import-instructions">
+                    <h4>Instructions:</h4>
+                    <ol>
+                        <li>Download the CSV template below</li>
+                        <li>Fill in your product data (at least 100 products recommended)</li>
+                        <li><strong>Image URLs:</strong> Add up to 3 image URLs per product (image_url, image_url_2, image_url_3)</li>
+                        <li>Upload the completed CSV file</li>
+                        <li>Review the preview and confirm import</li>
+                    </ol>
+                    <div style="margin-top: 1rem; padding: 0.75rem; background: #f0f9ff; border-radius: 6px; border-left: 4px solid #0ea5e9;">
+                        <strong>💡 Image Tips:</strong>
+                        <ul style="margin: 0.5rem 0 0 1rem;">
+                            <li>Use high-quality image URLs (JPG, PNG, WebP)</li>
+                            <li>First image (image_url) will be the primary product image</li>
+                            <li>Additional images (image_url_2, image_url_3) are optional</li>
+                            <li>Leave image fields empty if no images available</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="import-actions">
+                    <button id="downloadTemplateBtn" class="btn btn--secondary">Download CSV Template</button>
+                    <input type="file" id="csvFileInput" accept=".csv" style="display: none;" onchange="handleCSVFile(event)" aria-label="Select CSV file for bulk product import">
+                    <button id="selectCSVBtn" class="btn btn--primary">Select CSV File</button>
+                </div>
+                
+                <div id="csvPreview" class="csv-preview" style="display: none;">
+                    <h4>Preview (First 10 rows):</h4>
+                    <div id="previewTable" class="preview-table"></div>
+                    <div class="import-summary">
+                        <p id="importSummary"></p>
+                    </div>
+                    <div class="import-confirm">
+                        <button id="confirmImportBtn" class="btn btn--success">Confirm Import</button>
+                        <button class="btn btn--ghost" onclick="hideBulkImportModal()">Cancel</button>
+                    </div>
+                </div>
+                
+                <div id="importProgress" class="import-progress" style="display: none;">
+                    <div class="progress-bar">
+                        <div id="progressFill" class="progress-fill"></div>
+                    </div>
+                    <p id="progressText">Importing products...</p>
+                </div>
+                
+                <div id="importResults" class="import-results" style="display: none;">
+                    <h4>Import Results:</h4>
+                    <div id="resultsContent"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inventory Import Modal -->
+    <div id="inventoryImportModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Inventory Report Import</h3>
+                <button class="modal-close" onclick="hideInventoryImportModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="import-instructions">
+                    <h4>Inventory Report Format:</h4>
+                    <p>Upload your inventory report CSV with the following columns:</p>
+                    <div style="margin: 1rem 0; padding: 1rem; background: #f8fafc; border-radius: 6px; border-left: 4px solid #3b82f6;">
+                        <strong>Required Columns:</strong>
+                        <ul style="margin: 0.5rem 0 0 1rem;">
+                            <li><strong>SI No:</strong> Serial number</li>
+                            <li><strong>Product:</strong> Product type (Contact Lens, Lens, Sunglasses, Frame)</li>
+                            <li><strong>Product Code:</strong> Model code</li>
+                            <li><strong>Description:</strong> Product description</li>
+                            <li><strong>Branch Name:</strong> Location/branch</li>
+                            <li><strong>Quantity:</strong> Stock quantity</li>
+                            <li><strong>Pieces Per Box:</strong> Packaging information</li>
+                            <li><strong>Total Number Of Pieces:</strong> Calculated total</li>
+                            <li><strong>Average Unit Price:</strong> Price per unit</li>
+                            <li><strong>Average Tax %:</strong> Tax percentage</li>
+                            <li><strong>Total Purchase (Rs):</strong> Total cost</li>
+                        </ul>
+                    </div>
+                    <div style="margin-top: 1rem; padding: 0.75rem; background: #fef3c7; border-radius: 6px; border-left: 4px solid #f59e0b;">
+                        <strong>⚠️ Important:</strong>
+                        <ul style="margin: 0.5rem 0 0 1rem;">
+                            <li>Product types will be mapped: "Sunglasses" → sunglasses, "Frame" → optical-frames, "Contact Lens"/"Lens" → contact-lenses</li>
+                            <li>Gender will be set to "unisex" by default (can be updated later)</li>
+                            <li>Images will need to be added manually after import</li>
+                            <li>Quantity and pricing information will be preserved for inventory management</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="import-actions">
+                    <button id="downloadInventoryTemplateBtn" class="btn btn--secondary">Download Inventory Template</button>
+                    <input type="file" id="inventoryFileInput" accept=".csv" style="display: none;" onchange="handleInventoryFile(event)" aria-label="Select inventory CSV file for bulk import">
+                    <button id="selectInventoryBtn" class="btn btn--primary">Select Inventory CSV</button>
+                </div>
+                
+                <div id="inventoryPreview" class="csv-preview" style="display: none;">
+                    <h4>Preview (First 10 rows):</h4>
+                    <div id="inventoryPreviewTable" class="preview-table"></div>
+                    <div class="import-summary">
+                        <p id="inventoryImportSummary"></p>
+                    </div>
+                    <div class="import-confirm">
+                        <button id="confirmInventoryImportBtn" class="btn btn--success">Confirm Import</button>
+                        <button class="btn btn--ghost" onclick="hideInventoryImportModal()">Cancel</button>
+                    </div>
+                </div>
+                
+                <div id="inventoryImportProgress" class="import-progress" style="display: none;">
+                    <div class="progress-bar">
+                        <div id="inventoryProgressFill" class="progress-fill"></div>
+                    </div>
+                    <p id="inventoryProgressText">Importing inventory...</p>
+                </div>
+                
+                <div id="inventoryImportResults" class="import-results" style="display: none;">
+                    <h4>Import Results:</h4>
+                    <div id="inventoryResultsContent"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="js/api-client.js"></script>
+    <script src="js/idb.js"></script>
     <script src="js/admin.js"></script>
 </body>
 </html>

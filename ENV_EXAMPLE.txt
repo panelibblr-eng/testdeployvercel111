@@ -1,0 +1,49 @@
+# Monica Opto Hub - Environment Variables
+# Copy this to .env and fill in your production values
+
+# Node Environment
+NODE_ENV=production
+
+# Server Port
+PORT=3001
+
+# Database Configuration
+# MongoDB Connection String
+# Format: mongodb://[username:password@]host[:port][/database][?options]
+# Examples:
+#   Local: mongodb://localhost:27017/monica-opto-hub
+#   MongoDB Atlas: mongodb+srv://username:password@cluster.mongodb.net/monica-opto-hub
+#   Vercel/MongoDB: Use MONGODB_URI from your MongoDB provider
+MONGODB_URI=mongodb://localhost:27017/monica-opto-hub
+# Alternative environment variable name (some providers use this)
+MONGODB_CONNECTION_STRING=mongodb://localhost:27017/monica-opto-hub
+
+# JWT Secret (USE A STRONG RANDOM STRING IN PRODUCTION)
+# Generate with: openssl rand -base64 32
+JWT_SECRET=change-this-to-a-random-secret-in-production
+
+# Session Secret
+SESSION_SECRET=change-this-to-a-random-secret-in-production
+
+# File Upload Configuration
+MAX_FILE_SIZE=5242880
+UPLOAD_PATH=./uploads
+
+# CORS Configuration
+# In production, set this to your actual domain
+CORS_ORIGIN=https://yourdomain.com
+
+# Rate Limiting
+RATE_LIMIT_WINDOW_MS=900000
+RATE_LIMIT_MAX_REQUESTS=100
+
+# API Configuration
+API_URL=http://localhost:3001
+
+# Analytics (Optional)
+ANALYTICS_ENABLED=true
+
+# Admin Default Credentials (CHANGE IN PRODUCTION!)
+ADMIN_EMAIL=admin@monicaoptohub.com
+ADMIN_PASSWORD=changeme123
+
