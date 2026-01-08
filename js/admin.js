@@ -493,7 +493,14 @@ class AdminPanel {
             
             if (response && response.products && Array.isArray(response.products)) {
                 console.log('✅ Products loaded via API client:', response.products.length);
-                return { success: true, data: response.products };
+                // Normalize product IDs (_id to id) for compatibility
+                const normalizedProducts = response.products.map(p => {
+                    if (p._id && !p.id) {
+                        p.id = p._id;
+                    }
+                    return p;
+                });
+                return { success: true, data: normalizedProducts };
             } else {
                 console.warn('⚠️ API client response format issue, trying direct fetch...');
                 return await this.loadProductsFromBackendDirect();
@@ -520,7 +527,14 @@ class AdminPanel {
             
             if (data && data.success && data.products && Array.isArray(data.products)) {
                 console.log('✅ Products loaded via direct fetch:', data.products.length);
-                return { success: true, data: data.products };
+                // Normalize product IDs (_id to id) for compatibility
+                const normalizedProducts = data.products.map(p => {
+                    if (p._id && !p.id) {
+                        p.id = p._id;
+                    }
+                    return p;
+                });
+                return { success: true, data: normalizedProducts };
             } else {
                 console.error('❌ Invalid response format from backend');
                 return { success: false, error: 'Invalid response format' };
@@ -988,18 +1002,62 @@ class AdminPanel {
             
             if (existingProductId) {
                 console.log('Updating existing product with ID:', existingProductId);
+                
+                // Normalize product IDs first
+                this.products = this.products.map(p => {
+                    if (p._id && !p.id) {
+                        p.id = p._id;
+                    }
+                    return p;
+                });
+                
+                // Find product by id or _id
+                const productIndex = this.products.findIndex(p => p.id === existingProductId || p._id === existingProductId);
+                const actualId = productIndex !== -1 ? (this.products[productIndex].id || this.products[productIndex]._id) : existingProductId;
+                
+                console.log('Product index:', productIndex, 'Actual ID:', actualId);
+                
                 // Update existing product
                 if (this.useBackend && window.apiClient) {
-                    // Send FormData (with files) directly
-                    const updatedProduct = await window.apiClient.updateProduct(existingProductId, formData);
-                    // Update local products list
-                    const index = this.products.findIndex(p => p.id === existingProductId);
-                    if (index !== -1) {
-                        this.products[index] = {
-                            ...this.products[index],
-                            ...updatedProduct,
-                            updatedAt: new Date().toISOString()
-                        };
+                    try {
+                        console.log('Updating product in backend with ID:', actualId);
+                        // Send FormData (with files) directly
+                        const updatedProduct = await window.apiClient.updateProduct(actualId, formData);
+                        console.log('✅ Product updated in backend:', updatedProduct);
+                        
+                        // Normalize the returned product ID
+                        if (updatedProduct._id && !updatedProduct.id) {
+                            updatedProduct.id = updatedProduct._id;
+                        }
+                        
+                        // Update local products list
+                        if (productIndex !== -1) {
+                            this.products[productIndex] = {
+                                ...this.products[productIndex],
+                                ...updatedProduct,
+                                id: updatedProduct.id || updatedProduct._id || actualId,
+                                updatedAt: new Date().toISOString()
+                            };
+                        }
+                    } catch (error) {
+                        console.error('❌ Error updating product in backend:', error);
+                        // Check if it's a database error
+                        const errorMsg = error.message || String(error);
+                        if (errorMsg.includes('503') || errorMsg.includes('Database not available')) {
+                            this.showMessage('⚠️ Database not available. Changes saved to local storage only. They will sync when database is available.', 'warning');
+                        } else if (errorMsg.includes('404')) {
+                            this.showMessage('⚠️ Product not found in database. Changes saved to local storage only.', 'warning');
+                        } else {
+                            this.showMessage('⚠️ Error updating in backend: ' + errorMsg + '. Changes saved to local storage only.', 'warning');
+                        }
+                        // Still update local storage even if backend fails
+                        if (productIndex !== -1) {
+                            product.id = actualId;
+                            product.createdAt = this.products[productIndex].createdAt;
+                            product.updatedAt = new Date().toISOString();
+                            this.products[productIndex] = product;
+                            this.saveData();
+                        }
                     }
                 } else {
                     const index = this.products.findIndex(p => p.id === existingProductId);
@@ -1385,9 +1443,27 @@ class AdminPanel {
     }
 
     editProduct(productId) {
-        const product = this.products.find(p => p.id === productId);
+        console.log('Edit product called with ID:', productId);
+        // Normalize product IDs first
+        this.products = this.products.map(p => {
+            if (p._id && !p.id) {
+                p.id = p._id;
+            }
+            return p;
+        });
+        // Try both id and _id for compatibility
+        const product = this.products.find(p => p.id === productId || p._id === productId);
         if (product) {
+            // Normalize ID if needed
+            if (product._id && !product.id) {
+                product.id = product._id;
+            }
+            console.log('Found product to edit:', product);
             this.showProductForm(product);
+        } else {
+            console.error('Product not found with ID:', productId);
+            console.log('Available products:', this.products.map(p => ({ id: p.id, _id: p._id, name: p.name })));
+            this.showMessage('Product not found. Please refresh the page.', 'error');
         }
     }
 
@@ -1401,23 +1477,50 @@ class AdminPanel {
         try {
             console.log(`🗑️ Deleting product ${productId}...`);
             
+            // Normalize product IDs in the array first
+            this.products = this.products.map(p => {
+                if (p._id && !p.id) {
+                    p.id = p._id;
+                }
+                return p;
+            });
+            
+            // Find product to get actual ID (could be id or _id)
+            const productToDelete = this.products.find(p => p.id === productId || p._id === productId);
+            const actualId = productToDelete ? (productToDelete.id || productToDelete._id) : productId;
+            
+            console.log('Product to delete found:', !!productToDelete, 'Actual ID:', actualId);
+            
             // DELETE FROM BACKEND FIRST (permanent deletion from database)
             if (this.useBackend && window.apiClient) {
                 try {
-                    await window.apiClient.deleteProduct(productId);
-                    console.log('✅ Product permanently deleted from backend database');
+                    console.log('Deleting from backend with ID:', actualId);
+                    const response = await window.apiClient.deleteProduct(actualId);
+                    console.log('✅ Product permanently deleted from backend database:', response);
                 } catch (error) {
-                    // If backend returns 404, it means product doesn't exist in DB
-                    console.log('ℹ️ Product not found in backend:', error.message);
+                    // Check error type and show appropriate message
+                    const errorMsg = error.message || String(error);
+                    console.error('❌ Error deleting from backend:', error);
+                    
+                    if (errorMsg.includes('503') || errorMsg.includes('Database not available')) {
+                        this.showMessage('⚠️ Database not available. Product removed from local storage only. It will be deleted from database when connection is restored.', 'warning');
+                    } else if (errorMsg.includes('404')) {
+                        // If backend returns 404, it means product doesn't exist in DB
+                        console.log('ℹ️ Product not found in backend (already deleted or never existed)');
+                    } else {
+                        this.showMessage('⚠️ Error deleting from backend: ' + errorMsg + '. Product removed from local storage only.', 'warning');
+                    }
                 }
             }
             
-            // Remove from local products array
-            const existsLocally = this.products.some(p => p.id === productId);
+            // Remove from local products array (check both id and _id)
+            const existsLocally = this.products.some(p => p.id === productId || p._id === productId);
             if (existsLocally) {
-                this.products = this.products.filter(p => p.id !== productId);
+                this.products = this.products.filter(p => p.id !== productId && p._id !== productId);
                 this.saveData();
                 console.log('✅ Product removed from local storage');
+            } else {
+                console.warn('⚠️ Product not found in local array:', productId);
             }
             
             // Also remove from frontend product display if it exists

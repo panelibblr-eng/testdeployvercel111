@@ -1,0 +1,69 @@
+# Dependencies
+node_modules/
+
+# Database files (not needed in serverless)
+database/*.sqlite
+database/*.db
+*.sqlite
+*.db
+
+# Development files
+.env
+.env.local
+.env.development
+.env.test
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build files
+build/
+dist/
+*.map
+
+# Android build files
+android/
+*.apk
+*.aab
+
+# Test files
+test/
+tests/
+__tests__/
+*.test.js
+*.spec.js
+
+# Documentation (optional - remove if you want to include)
+*.md
+!README.md
+
+# Scripts (optional - remove if needed)
+scripts/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Uploads (will be recreated, but don't deploy existing uploads)
+uploads/products/*
+uploads/videos/*
+!uploads/.gitkeep
+
+# Git
+.git/
+.gitignore
+

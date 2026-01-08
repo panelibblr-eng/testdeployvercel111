@@ -68,7 +68,19 @@ router.post('/login', handleAsync(async (req, res) => {
   }
   
   try {
-    await ensureDatabaseConnection();
+    // Try to connect to database, but handle connection failures gracefully
+    try {
+      await ensureDatabaseConnection();
+    } catch (dbError) {
+      // Database connection failed - provide helpful error message
+      console.error('Database connection failed during login:', dbError.message);
+      return res.status(503).json({ 
+        success: false,
+        error: 'Database unavailable',
+        message: 'MongoDB connection failed. Please check your database connection. Error: ' + dbError.message,
+        timestamp: new Date().toISOString()
+      });
+    }
     
     const user = await AdminUser.findOne({ username });
     

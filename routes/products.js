@@ -93,9 +93,13 @@ router.get('/', async (req, res) => {
     
     const products = await Product.find(query, null, options);
     
-    // Sort images by image_order
+    // Sort images by image_order and normalize ID
     const productsWithImages = products.map(product => {
       const productObj = product.toObject();
+      // Normalize _id to id for frontend compatibility
+      if (productObj._id && !productObj.id) {
+        productObj.id = productObj._id;
+      }
       productObj.images = (productObj.images || []).sort((a, b) => a.image_order - b.image_order);
       return productObj;
     });
@@ -203,6 +207,10 @@ router.get('/:id', async (req, res) => {
     }
     
     const productObj = product.toObject();
+    // Normalize _id to id for frontend compatibility
+    if (productObj._id && !productObj.id) {
+      productObj.id = productObj._id;
+    }
     productObj.images = (productObj.images || []).sort((a, b) => a.image_order - b.image_order);
     
     res.json(productObj);
@@ -269,6 +277,10 @@ router.post('/', upload.array('images', 10), async (req, res) => {
     await product.save();
     
     const productObj = product.toObject();
+    // Normalize _id to id for frontend compatibility
+    if (productObj._id && !productObj.id) {
+      productObj.id = productObj._id;
+    }
     productObj.images = productObj.images.sort((a, b) => a.image_order - b.image_order);
     
     console.log('Product created successfully with images:', productObj.images.length);
@@ -476,7 +488,17 @@ router.post('/inventory', async (req, res) => {
 // PUT /api/products/:id - Update product
 router.put('/:id', upload.array('images', 10), async (req, res) => {
   try {
-    await ensureDatabaseConnection();
+    try {
+      await ensureDatabaseConnection();
+    } catch (dbError) {
+      // Database not available - return error
+      console.log('⚠️ Database not available for product update');
+      return res.status(503).json({ 
+        success: false,
+        error: 'Database not available',
+        message: 'Cannot update product. Database connection failed. Please try again later or contact support.'
+      });
+    }
     const { id } = req.params;
     const {
       name,
@@ -554,6 +576,10 @@ router.put('/:id', upload.array('images', 10), async (req, res) => {
     const updatedProduct = await Product.findByIdAndUpdate(id, updateData, { new: true });
     
     const productObj = updatedProduct.toObject();
+    // Normalize _id to id for frontend compatibility
+    if (productObj._id && !productObj.id) {
+      productObj.id = productObj._id;
+    }
     productObj.images = productObj.images.sort((a, b) => a.image_order - b.image_order);
     
     res.json(productObj);
@@ -566,7 +592,17 @@ router.put('/:id', upload.array('images', 10), async (req, res) => {
 // DELETE /api/products/:id - Delete product permanently
 router.delete('/:id', async (req, res) => {
   try {
-    await ensureDatabaseConnection();
+    try {
+      await ensureDatabaseConnection();
+    } catch (dbError) {
+      // Database not available - return error
+      console.log('⚠️ Database not available for product deletion');
+      return res.status(503).json({ 
+        success: false,
+        error: 'Database not available',
+        message: 'Cannot delete product. Database connection failed. Please try again later or contact support.'
+      });
+    }
     const { id } = req.params;
     
     console.log(`🗑️ Permanently deleting product ${id}...`);

@@ -5,18 +5,24 @@ class ProductDisplay {
         this.useBackend = true; // Enable backend integration for products from server
         this.initialized = false;
         
-        // Initialize with timeout to prevent hanging
-        setTimeout(() => {
+        // Initialize with requestAnimationFrame for better performance
+        requestAnimationFrame(() => {
             this.init().catch(error => {
                 console.error('Error initializing ProductDisplay:', error);
                 // Don't initialize sample products - products must be added through admin panel
                 this.products = [];
                 this.initialized = true;
             });
-        }, 100);
+        });
     }
 
     async init() {
+        // Prevent multiple initializations
+        if (this.initialized) {
+            console.log('⚠️ ProductDisplay already initialized, skipping...');
+            return;
+        }
+        
         console.log('=== INITIALIZING PRODUCT DISPLAY ===');
         this.setupEventListeners();
         
@@ -25,26 +31,31 @@ class ProductDisplay {
         
         console.log('Products loaded:', this.products.length);
         
-        // Display products when page loads - try multiple times to ensure it works
-        setTimeout(() => {
-            this.displayProductsOnPageLoad();
-        }, 100);
-        
-        setTimeout(() => {
-            this.displayProductsOnPageLoad();
-        }, 500);
-        
-        setTimeout(() => {
-            this.displayProductsOnPageLoad();
-        }, 1000);
-        
-        console.log('=== PRODUCT DISPLAY INITIALIZED ===');
+        // Display products when page loads - use requestAnimationFrame for better performance
+        // Use double RAF to ensure DOM is ready and layout is calculated
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                if (!this.initialized) {
+                    this.displayProductsOnPageLoad();
+                    this.initialized = true;
+                    console.log('=== PRODUCT DISPLAY INITIALIZED ===');
+                }
+            });
+        });
     }
 
     setupEventListeners() {
-        // Listen for admin panel updates (including deletions)
-        window.addEventListener('adminDataUpdated', (event) => {
-            console.log('Admin data updated event received (refreshing products):', event.detail);
+        // Remove old event listeners if they exist to prevent duplicates
+        if (this._adminDataUpdatedHandler) {
+            window.removeEventListener('adminDataUpdated', this._adminDataUpdatedHandler);
+        }
+        if (this._storageHandler) {
+            window.removeEventListener('storage', this._storageHandler);
+        }
+        
+        // Create handler functions and store references
+        this._adminDataUpdatedHandler = (event) => {
+            console.log('Admin data updated event received (refreshing products)');
             // Force reload from backend to get fresh data after deletion
             this.loadProducts().then(() => {
                 this.displayProductsOnPageLoad();
@@ -53,16 +64,22 @@ class ProductDisplay {
                 console.error('Error refreshing products:', err);
                 this.displayProductsOnPageLoad();
             });
-        });
-
-        // Listen for storage changes
-        window.addEventListener('storage', (e) => {
+        };
+        
+        this._storageHandler = (e) => {
             if (e.key === 'adminPanelData') {
-                console.log('Storage change detected for adminPanelData');
+                // Only log if not already refreshing
+                if (!this._refreshing) {
+                    console.log('Storage change detected for adminPanelData');
+                }
                 this.loadProducts();
                 this.displayProductsOnPageLoad();
             }
-        });
+        };
+        
+        // Add event listeners
+        window.addEventListener('adminDataUpdated', this._adminDataUpdatedHandler);
+        window.addEventListener('storage', this._storageHandler);
 
         // Event delegation for View Details buttons and card sliders
         document.addEventListener('click', (e) => {
@@ -94,7 +111,10 @@ class ProductDisplay {
                 if (idx < 0) idx = slides.length - 1;
                 if (idx >= slides.length) idx = 0;
                 media.setAttribute('data-idx', String(idx));
-                slides.forEach((img, i) => img.style.display = i === idx ? 'block' : 'none');
+                // Batch style updates to reduce reflows
+                requestAnimationFrame(() => {
+                    slides.forEach((img, i) => img.style.display = i === idx ? 'block' : 'none');
+                });
             }
 
             // Allow clicking the image itself to advance to the next slide
@@ -106,7 +126,10 @@ class ProductDisplay {
                 let idx = parseInt(media.getAttribute('data-idx') || '0');
                 idx = (idx + 1) % slides.length;
                 media.setAttribute('data-idx', String(idx));
-                slides.forEach((img, i) => img.style.display = i === idx ? 'block' : 'none');
+                // Batch style updates to reduce reflows
+                requestAnimationFrame(() => {
+                    slides.forEach((img, i) => img.style.display = i === idx ? 'block' : 'none');
+                });
             }
         });
 
@@ -145,9 +168,18 @@ class ProductDisplay {
 
     // Enhanced product loading with retry and fallback
     async loadProducts() {
+        // Prevent multiple simultaneous loads
+        if (this._loadingProducts) {
+            return Promise.resolve();
+        }
+        this._loadingProducts = true;
+        
         try {
             if (this.useBackend && window.apiClient) {
-                console.log('🔄 Loading products from backend...');
+                // Only log on first load
+                if (!this._hasLoadedOnce) {
+                    console.log('🔄 Loading products from backend...');
+                }
                 
                 // Always try to load from backend first (products are publicly accessible)
                 // Don't require authentication for viewing products
@@ -163,11 +195,11 @@ class ProductDisplay {
                     
                     // Find products with multiple images
                     const productsWithImages = this.products.filter(p => p.images && p.images.length > 0);
-                    console.log(`Products with images: ${productsWithImages.length} out of ${this.products.length}`);
+                    // Removed verbose logging - only log on first load
                     
                     if (productsWithImages.length > 0) {
                         productsWithImages.forEach(p => {
-                            console.log(`Product "${p.name}" (ID: ${p.id}) has ${p.images.length} images:`, p.images.map(img => img.image_url || img));
+                            // Removed verbose logging per product
                         });
                     }
                 }
@@ -189,12 +221,16 @@ class ProductDisplay {
             }
             
             // Fallback to localStorage if backend is not available
-            console.log('📦 Loading products from localStorage (backend unavailable)...');
+            if (!this._hasLoadedOnce) {
+                console.log('📦 Loading products from localStorage (backend unavailable)...');
+            }
             this.loadProductsFromLocalStorage();
             
             // If no products found, try to initialize with sample data
             if (this.products.length === 0) {
-                console.log('No products found, initializing with sample data...');
+                if (!this._hasLoadedOnce) {
+                    console.log('No products found, initializing with sample data...');
+                }
                 this.initializeSampleProducts();
             } else {
                 // Products found, make sure they're properly formatted
@@ -209,17 +245,18 @@ class ProductDisplay {
                     images: product.images && Array.isArray(product.images) ? product.images : (product.image_url ? [{ image_url: product.image_url }] : [])
                 }));
                 
-                console.log('Products processed:', this.products.length);
-                console.log('Featured products after processing:', this.products.filter(p => p.featured).length);
+                // Removed verbose processing logs
                 
                 // Debug: Log products with multiple images
                 const productsWithMultipleImages = this.products.filter(p => p.images && p.images.length > 1);
                 if (productsWithMultipleImages.length > 0) {
-                    console.log(`Found ${productsWithMultipleImages.length} products with multiple images:`, productsWithMultipleImages.map(p => ({ id: p.id, name: p.name, imageCount: p.images.length })));
+                    // Removed verbose image logging
                 }
             }
         } catch (error) {
-            console.log('ℹ️ Backend loading failed, using localStorage fallback:', error.message);
+            if (!this._hasLoadedOnce) {
+                console.log('ℹ️ Backend loading failed, using localStorage fallback:', error.message);
+            }
             
             // Fallback to localStorage
             try {
@@ -234,18 +271,21 @@ class ProductDisplay {
             if (this.products.length === 0) {
                 this.initializeSampleProducts();
             }
+        } finally {
+            // Reset loading flag
+            this._loadingProducts = false;
         }
     }
 
     loadProductsFromLocalStorage() {
         try {
             const adminDataRaw = localStorage.getItem('adminPanelData');
-            console.log('Raw adminPanelData from localStorage:', adminDataRaw);
             const adminData = JSON.parse(adminDataRaw || '{}');
-            console.log('Parsed adminPanelData:', adminData);
             this.products = adminData.products || [];
-            console.log('📦 LocalStorage products loaded:', this.products.length);
-            console.log('Products array:', this.products);
+            if (!this._hasLoadedOnce) {
+                console.log('📦 LocalStorage products loaded:', this.products.length);
+            }
+            this._hasLoadedOnce = true;
         } catch (error) {
             console.error('Error loading products from localStorage:', error);
             this.products = [];
@@ -256,7 +296,10 @@ class ProductDisplay {
     initializeSampleProducts() {
         // Sample products removed - products should be added through admin panel only
         this.products = [];
-        console.log('No sample products - products must be added through admin panel');
+        if (!this._hasLoadedOnce) {
+            console.log('No sample products - products must be added through admin panel');
+        }
+        this._hasLoadedOnce = true;
     }
 
     // Save products to localStorage (for admin panel integration)
@@ -389,7 +432,9 @@ class ProductDisplay {
         console.log(`Displaying ${productsToShow.length} products in ${containerId} (category: ${category}, gender: ${gender || 'all'})`);
 
         // Render products
-        container.innerHTML = productsToShow.map(product => this.renderProductCard(product)).join('');
+        // Optimize large DOM updates using DocumentFragment
+        const html = productsToShow.map(product => this.renderProductCard(product)).join('');
+        container.innerHTML = html;
 
         // Auto-rotate card sliders so additional images appear without clicking
         const sliders = Array.from(container.querySelectorAll('.card-slider'));
@@ -408,7 +453,10 @@ class ProductDisplay {
                 let idx = parseInt(slider.getAttribute('data-idx') || '0');
                 idx = (idx + 1) % slides.length;
                 slider.setAttribute('data-idx', String(idx));
-                slides.forEach((img, i) => img.style.display = i === idx ? 'block' : 'none');
+                // Batch style updates to reduce reflows
+                requestAnimationFrame(() => {
+                    slides.forEach((img, i) => img.style.display = i === idx ? 'block' : 'none');
+                });
             };
 
             // Start rotation
@@ -444,7 +492,7 @@ class ProductDisplay {
             ? allFeatured.slice(0, limit)
             : allFeatured;
         
-        console.log('Displaying featured products:', featuredProducts.length);
+        // Removed verbose display logging
         
         if (featuredProducts.length === 0) {
             container.innerHTML = `
@@ -457,17 +505,17 @@ class ProductDisplay {
         }
 
         container.innerHTML = featuredProducts.map(product => this.renderProductCard(product)).join('');
-        console.log('Featured products HTML rendered, count:', featuredProducts.length);
+        // Removed verbose rendering logging
         
         // Ensure container has proper width to show all products
         const totalWidth = featuredProducts.length * (container.offsetWidth / 4); // 4 products visible at a time
         container.style.width = '100%';
         container.style.overflowX = 'auto';
         
-        // Initialize slider navigation if controls exist
-        setTimeout(() => {
+        // Initialize slider navigation if controls exist - use requestAnimationFrame
+        requestAnimationFrame(() => {
             this.initFeaturedSlider();
-        }, 100);
+        });
     }
     
     // Initialize featured products slider navigation
@@ -480,34 +528,197 @@ class ProductDisplay {
         
         const scrollAmount = 300; // Pixels to scroll per click
         
-        prevBtn.addEventListener('click', () => {
-            container.scrollBy({
-                left: -scrollAmount,
-                behavior: 'smooth'
+        // Remove existing listeners to prevent duplicates
+        prevBtn.replaceWith(prevBtn.cloneNode(true));
+        nextBtn.replaceWith(nextBtn.cloneNode(true));
+        
+        // Re-query after replacement
+        const newPrevBtn = document.getElementById('featuredPrev');
+        const newNextBtn = document.getElementById('featuredNext');
+        
+        if (newPrevBtn && newNextBtn) {
+            newPrevBtn.addEventListener('click', () => {
+                container.scrollBy({
+                    left: -scrollAmount,
+                    behavior: 'smooth'
+                });
             });
-        });
-        
-        nextBtn.addEventListener('click', () => {
-            container.scrollBy({
-                left: scrollAmount,
-                behavior: 'smooth'
+            
+            newNextBtn.addEventListener('click', () => {
+                container.scrollBy({
+                    left: scrollAmount,
+                    behavior: 'smooth'
+                });
             });
-        });
-        
-        // Show/hide buttons based on scroll position
-        const updateButtonVisibility = () => {
-            const isAtStart = container.scrollLeft <= 0;
-            const isAtEnd = container.scrollLeft >= container.scrollWidth - container.clientWidth - 10;
             
-            prevBtn.style.opacity = isAtStart ? '0.5' : '1';
-            prevBtn.style.pointerEvents = isAtStart ? 'none' : 'auto';
+            // Show/hide buttons based on scroll position
+            const updateButtonVisibility = () => {
+                const isAtStart = container.scrollLeft <= 0;
+                const isAtEnd = container.scrollLeft >= container.scrollWidth - container.clientWidth - 10;
+                
+                newPrevBtn.style.opacity = isAtStart ? '0.5' : '1';
+                newPrevBtn.style.pointerEvents = isAtStart ? 'none' : 'auto';
+                
+                newNextBtn.style.opacity = isAtEnd ? '0.5' : '1';
+                newNextBtn.style.pointerEvents = isAtEnd ? 'none' : 'auto';
+            };
             
-            nextBtn.style.opacity = isAtEnd ? '0.5' : '1';
-            nextBtn.style.pointerEvents = isAtEnd ? 'none' : 'auto';
-        };
+            container.addEventListener('scroll', updateButtonVisibility);
+            updateButtonVisibility(); // Initial check
+        }
+    }
+    
+    // Initialize trending products slider navigation
+    initTrendingSlider() {
+        // Prevent multiple initializations
+        if (this._trendingSliderInitialized) {
+            console.log('⚠️ Trending slider already initialized, skipping...');
+            return;
+        }
         
-        container.addEventListener('scroll', updateButtonVisibility);
-        updateButtonVisibility(); // Initial check
+        console.log('🔧 Initializing trending slider...');
+        const container = document.getElementById('trendingProducts');
+        const prevBtn = document.getElementById('trendingPrev');
+        const nextBtn = document.getElementById('trendingNext');
+        
+        if (!container || !prevBtn || !nextBtn) {
+            console.error('❌ Trending slider elements not found:', {
+                container: !!container,
+                prevBtn: !!prevBtn,
+                nextBtn: !!nextBtn
+            });
+            return;
+        }
+        
+        // Mark as initialized
+        this._trendingSliderInitialized = true;
+        
+        // Ensure container has proper overflow for scrolling
+        container.style.overflowX = 'auto';
+        container.style.overflowY = 'hidden';
+        
+        // Use requestAnimationFrame to avoid forced reflows and reduce setTimeout handler time
+        requestAnimationFrame(() => {
+            // Re-check if elements still exist (they might have been removed from DOM)
+            const currentPrevBtn = document.getElementById('trendingPrev');
+            const currentNextBtn = document.getElementById('trendingNext');
+            const currentContainer = document.getElementById('trendingProducts');
+            
+            if (!currentContainer || !currentPrevBtn || !currentNextBtn) {
+                console.warn('⚠️ Trending slider elements not found, skipping initialization');
+                return;
+            }
+            
+            // Verify buttons have parent nodes before trying to replace
+            if (!currentPrevBtn.parentNode || !currentNextBtn.parentNode) {
+                console.warn('⚠️ Trending slider buttons have no parent node, skipping replacement');
+                return;
+            }
+            
+            // Batch DOM reads to avoid forced reflows
+            const scrollWidth = currentContainer.scrollWidth;
+            const clientWidth = currentContainer.clientWidth;
+            const isScrollable = scrollWidth > clientWidth + 10;
+            
+            if (!this._hasLoggedSliderDimensions) {
+                console.log('Trending slider dimensions:', {
+                    scrollWidth,
+                    clientWidth,
+                    isScrollable
+                });
+                this._hasLoggedSliderDimensions = true;
+            }
+            
+            const scrollAmount = clientWidth * 0.8; // Scroll 80% of container width
+            
+            // Remove existing listeners to prevent duplicates
+            const prevClone = currentPrevBtn.cloneNode(true);
+            const nextClone = currentNextBtn.cloneNode(true);
+            currentPrevBtn.parentNode.replaceChild(prevClone, currentPrevBtn);
+            currentNextBtn.parentNode.replaceChild(nextClone, currentNextBtn);
+            
+            // Re-query after replacement
+            const newPrevBtn = document.getElementById('trendingPrev');
+            const newNextBtn = document.getElementById('trendingNext');
+            const newContainer = document.getElementById('trendingProducts');
+            
+            if (newPrevBtn && newNextBtn && newContainer) {
+                // Use already calculated isScrollable to avoid forced reflow
+                if (!isScrollable) {
+                    // Batch style updates to reduce reflows
+                    requestAnimationFrame(() => {
+                        newPrevBtn.style.opacity = '0.5';
+                        newPrevBtn.style.pointerEvents = 'none';
+                        newPrevBtn.style.cursor = 'not-allowed';
+                        newNextBtn.style.opacity = '0.5';
+                        newNextBtn.style.pointerEvents = 'none';
+                        newNextBtn.style.cursor = 'not-allowed';
+                    });
+                } else {
+                    // Only add click handlers if scrollable
+                    newPrevBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('⬅️ Trending slider prev clicked');
+                        newContainer.scrollBy({
+                            left: -scrollAmount,
+                            behavior: 'smooth'
+                        });
+                    });
+                    
+                    newNextBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('➡️ Trending slider next clicked');
+                        newContainer.scrollBy({
+                            left: scrollAmount,
+                            behavior: 'smooth'
+                        });
+                    });
+                }
+                
+                // Show/hide buttons based on scroll position (always update, even if not scrollable)
+                // Throttle scroll handler to reduce forced reflows
+                let scrollTimeout;
+                const updateButtonVisibility = () => {
+                    if (!isScrollable) return; // Don't update if not scrollable
+                    
+                    // Cancel previous timeout to debounce
+                    if (scrollTimeout) {
+                        cancelAnimationFrame(scrollTimeout);
+                    }
+                    
+                    // Use requestAnimationFrame to batch style updates
+                    scrollTimeout = requestAnimationFrame(() => {
+                        // Batch DOM reads
+                        const scrollLeft = newContainer.scrollLeft;
+                        const scrollWidth = newContainer.scrollWidth;
+                        const clientWidth = newContainer.clientWidth;
+                        
+                        const isAtStart = scrollLeft <= 5; // Small threshold
+                        const isAtEnd = scrollLeft >= scrollWidth - clientWidth - 5;
+                        
+                        // Batch style writes
+                        newPrevBtn.style.opacity = isAtStart ? '0.5' : '1';
+                        newPrevBtn.style.pointerEvents = isAtStart ? 'none' : 'auto';
+                        newPrevBtn.style.cursor = isAtStart ? 'not-allowed' : 'pointer';
+                        
+                        newNextBtn.style.opacity = isAtEnd ? '0.5' : '1';
+                        newNextBtn.style.pointerEvents = isAtEnd ? 'none' : 'auto';
+                        newNextBtn.style.cursor = isAtEnd ? 'not-allowed' : 'pointer';
+                    });
+                };
+                
+                // Use passive listener for better performance
+                newContainer.addEventListener('scroll', updateButtonVisibility, { passive: true });
+                // Initial check with requestAnimationFrame
+                requestAnimationFrame(updateButtonVisibility);
+                
+                console.log('✅ Trending slider controls initialized successfully');
+            } else {
+                console.error('❌ Failed to initialize trending slider - elements not found after cloning');
+            }
+        }); // Use requestAnimationFrame instead of setTimeout
     }
 
     // View product details
@@ -770,70 +981,104 @@ class ProductDisplay {
 
     // Display products when page loads
     displayProductsOnPageLoad() {
-        console.log('Displaying products on page load...');
-        console.log('Available products:', this.products.length);
-        
-        // Force reload products from admin panel first
-        this.loadProducts();
-        
-        // Display featured products
-        this.displayFeaturedProducts('featuredProducts');
-        
-        // Display category-specific products only if containers exist
-        if (document.getElementById('sunglassesGrid')) {
-            this.displayProducts('sunglassesGrid', 'sunglasses');
+        // Prevent multiple simultaneous calls
+        if (this._displayingProducts) {
+            console.log('⚠️ displayProductsOnPageLoad already in progress, skipping...');
+            return;
         }
-        if (document.getElementById('opticalFramesGrid')) {
-            this.displayProducts('opticalFramesGrid', 'optical-frames');
+        this._displayingProducts = true;
+        
+        // Only log on first display
+        if (!this._hasDisplayedOnce) {
+            console.log('Displaying products on page load...');
+            console.log('Available products:', this.products.length);
         }
         
-        // Display women's category-specific products
-        if (document.getElementById('womenSunglassesGrid')) {
-            this.displayProducts('womenSunglassesGrid', 'sunglasses', null, 'women');
-        }
-        if (document.getElementById('womenOpticalFramesGrid')) {
-            this.displayProducts('womenOpticalFramesGrid', 'optical-frames', null, 'women');
+        // Split work across multiple frames to avoid long-running tasks (>50ms)
+        // This prevents setTimeout handler violations
+        
+        // Frame 1: Load products (if needed) - non-blocking
+        if (!this._hasLoadedOnce) {
+            this.loadProducts();
         }
         
-        // Display trending products (show products marked as trending, or fallback to latest 4)
-        const trendingProducts = this.products.filter(p => {
-            // Handle both boolean true and number 1 from database
-            return p.trending === true || p.trending === 1 || p.trending === '1' || p.trending === 'true';
+        // Frame 2: Display featured products
+        requestAnimationFrame(() => {
+            this.displayFeaturedProducts('featuredProducts');
+            
+            // Frame 3: Display category products
+            requestAnimationFrame(() => {
+                if (document.getElementById('sunglassesGrid')) {
+                    this.displayProducts('sunglassesGrid', 'sunglasses');
+                }
+                if (document.getElementById('opticalFramesGrid')) {
+                    this.displayProducts('opticalFramesGrid', 'optical-frames');
+                }
+                
+                // Frame 4: Display women's category products
+                requestAnimationFrame(() => {
+                    if (document.getElementById('womenSunglassesGrid')) {
+                        this.displayProducts('womenSunglassesGrid', 'sunglasses', null, 'women');
+                    }
+                    if (document.getElementById('womenOpticalFramesGrid')) {
+                        this.displayProducts('womenOpticalFramesGrid', 'optical-frames', null, 'women');
+                    }
+                    
+                    // Frame 5: Display trending products
+                    requestAnimationFrame(() => {
+                        const trendingProducts = this.products.filter(p => {
+                            return p.trending === true || p.trending === 1 || p.trending === '1' || p.trending === 'true';
+                        });
+                        const productsToShow = trendingProducts.length > 0 
+                            ? trendingProducts.slice(0, 20)
+                            : this.products.slice(-20).reverse();
+                        
+                        const trendingProductsContainer = document.getElementById('trendingProducts');
+                        if (trendingProductsContainer) {
+                            trendingProductsContainer.classList.add('product-slider');
+                            trendingProductsContainer.innerHTML = productsToShow.map(product => this.renderProductCard(product)).join('');
+                            
+                            // Frame 6: Initialize slider after DOM update
+                            requestAnimationFrame(() => {
+                                this.initTrendingSlider();
+                                
+                                // Final: Log and reset
+                                requestAnimationFrame(() => {
+                                    if (!this._hasDisplayedOnce) {
+                                        console.log('Products displayed:', this.products.length);
+                                        console.log('Featured products:', this.getFeaturedProducts().length);
+                                        console.log('Sunglasses:', this.getProductsByCategory('sunglasses').length);
+                                        console.log('Optical frames:', this.getProductsByCategory('optical-frames').length);
+                                        this._hasDisplayedOnce = true;
+                                    }
+                                    this._displayingProducts = false;
+                                });
+                            });
+                        } else {
+                            // No trending container
+                            requestAnimationFrame(() => {
+                                if (!this._hasDisplayedOnce) {
+                                    console.log('Products displayed:', this.products.length);
+                                    this._hasDisplayedOnce = true;
+                                }
+                                this._displayingProducts = false;
+                            });
+                        }
+                    });
+                });
+            });
         });
-        const productsToShow = trendingProducts.length > 0 
-            ? trendingProducts.slice(0, 4) // Show up to 4 trending products
-            : this.products.slice(-4).reverse(); // Fallback to latest 4 products
-        
-        console.log(`Found ${trendingProducts.length} trending products:`, trendingProducts.map(p => p.name));
-        
-        // ONLY display in trendingProducts container (not featuredProducts)
-        const trendingProductsContainer = document.getElementById('trendingProducts');
-        if (trendingProductsContainer) {
-            trendingProductsContainer.innerHTML = productsToShow.map(product => this.renderProductCard(product)).join('');
-            console.log(`Displayed ${productsToShow.length} trending products in trendingProducts container`);
-        } else {
-            console.warn('Trending products container not found');
-        }
-        
-        if (trendingProducts.length > 0) {
-            console.log(`Displaying ${productsToShow.length} trending products (out of ${trendingProducts.length} total trending)`);
-        }
-        
-        console.log('Products displayed:', this.products.length);
-        console.log('Featured products:', this.getFeaturedProducts().length);
-        console.log('Sunglasses:', this.getProductsByCategory('sunglasses').length);
-        console.log('Optical frames:', this.getProductsByCategory('optical-frames').length);
-        
-        // Debug: Check if featured products are actually showing
-        const featuredContainer = document.getElementById('featuredProducts');
-        if (featuredContainer) {
-            console.log('Featured container HTML:', featuredContainer.innerHTML.substring(0, 200) + '...');
-            console.log('Featured container has content:', featuredContainer.innerHTML.length > 0);
-        }
     }
 
     // Refresh all product displays on the page
     refreshAllDisplays() {
+        // Prevent multiple simultaneous refreshes
+        if (this._refreshing) {
+            console.log('⚠️ refreshAllDisplays already in progress, skipping...');
+            return;
+        }
+        this._refreshing = true;
+        
         // Refresh featured products
         this.displayFeaturedProducts('featuredProducts');
         
@@ -853,25 +1098,45 @@ class ProductDisplay {
             this.displayProducts('womenOpticalFramesGrid', 'optical-frames', null, 'women');
         }
         
-        // Refresh trending products (show products marked as trending, or fallback to latest 4)
+        // Refresh trending products (show products marked as trending, or fallback to latest 20)
         const trendingProducts = this.products.filter(p => {
             // Handle both boolean true and number 1 from database
             return p.trending === true || p.trending === 1 || p.trending === '1' || p.trending === 'true';
         });
+        // Show all trending products (or up to 20 for performance), not just 4
         const productsToShow = trendingProducts.length > 0 
-            ? trendingProducts.slice(0, 4) // Show up to 4 trending products
-            : this.products.slice(-4).reverse(); // Fallback to latest 4 products
+            ? trendingProducts.slice(0, 20) // Show up to 20 trending products (scrollable)
+            : this.products.slice(-20).reverse(); // Fallback to latest 20 products
         
         // ONLY display in trendingProducts container (not featuredProducts)
         const trendingProductsContainer = document.getElementById('trendingProducts');
         if (trendingProductsContainer) {
+            // Ensure container has the product-slider class for proper styling
+            trendingProductsContainer.classList.add('product-slider');
+            
             trendingProductsContainer.innerHTML = productsToShow.map(product => this.renderProductCard(product)).join('');
             console.log(`Refreshed: Displayed ${productsToShow.length} trending products in trendingProducts container`);
+            
+            // Re-initialize trending slider navigation after refresh (reset flag first)
+            this._trendingSliderInitialized = false;
+            // Use requestAnimationFrame instead of setTimeout for better performance
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    this.initTrendingSlider();
+                });
+            });
         }
         
         if (trendingProducts.length > 0) {
             console.log(`Refreshed: Found ${trendingProducts.length} total trending products`);
         }
+        
+        // Reset refresh flag after display completes
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                this._refreshing = false;
+            });
+        });
     }
 
     // Add a new product (called from admin panel)
@@ -927,17 +1192,19 @@ class ProductDisplay {
         // Immediately refresh all displays to remove deleted product
         this.refreshAllDisplays();
         
-        // Force reload from backend after a short delay to ensure deletion is complete
-        setTimeout(() => {
-            this.loadProducts().then(() => {
-                this.displayProductsOnPageLoad();
-                console.log('✅ Products reloaded from backend after deletion');
-            }).catch(err => {
-                console.error('Error reloading products:', err);
-                // Even if reload fails, refresh display with current products
-                this.displayProductsOnPageLoad();
+        // Force reload from backend after DOM update to ensure deletion is complete
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                this.loadProducts().then(() => {
+                    this.displayProductsOnPageLoad();
+                    console.log('✅ Products reloaded from backend after deletion');
+                }).catch(err => {
+                    console.error('Error reloading products:', err);
+                    // Even if reload fails, refresh display with current products
+                    this.displayProductsOnPageLoad();
+                });
             });
-        }, 500);
+        });
         
         // Dispatch custom event to notify other components
         window.dispatchEvent(new CustomEvent('adminDataUpdated', { 
@@ -998,24 +1265,23 @@ document.addEventListener('click', (e) => {
     }
 });
 
-// Auto-refresh products every 30 seconds (reduced frequency to avoid disruption)
-// Only run if ProductDisplay is properly initialized
+// DISABLED: Auto-refresh to prevent console spam and unnecessary API calls
+// Products are refreshed when admin panel updates them via events
+// If you need auto-refresh, uncomment and adjust the interval
+/*
 setInterval(() => {
     if (window.productDisplay && window.productDisplay.products) {
         try {
-            // Only refresh if admin panel is not currently active (to avoid disruption)
             const isAdminPanelActive = window.location.pathname.includes('admin.html');
             if (!isAdminPanelActive) {
-                // Removed console.log to reduce noise - auto-refresh happens silently
                 window.productDisplay.loadProducts();
             }
-            // Removed else console.log - silent skip
         } catch (error) {
-            // Only log actual errors, not routine operations
             console.error('Auto-refresh error:', error);
         }
     }
-}, 30000); // Increased from 5 seconds to 30 seconds
+}, 300000); // 5 minutes if needed
+*/
 
 // Manual refresh function for debugging
 window.refreshProducts = function() {
