@@ -16,6 +16,7 @@ class ApiClient {
             } else {
                 // For production, use same origin (no hardcoded localhost)
                 // This works for both same-domain and subdomain deployments
+                // Also works with Netlify Functions via redirects
                 const apiPort = port && port !== '80' && port !== '443' ? `:${port}` : '';
                 this.baseURL = `${protocol}//${hostname}${apiPort}/api`;
             }

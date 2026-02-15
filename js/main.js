@@ -1565,10 +1565,12 @@ function initAllInteractiveElements() {
         }
     });
     
-    // Initialize slider controls
+    // Initialize slider controls for trending section (generic fallback)
+    // Note: Featured and trending sliders are now initialized separately in products.js
+    // This is kept as a fallback for any other sliders with [data-slider] attribute
     const slider = document.querySelector('[data-slider]');
-    const prev = document.querySelector('.slider-prev');
-    const next = document.querySelector('.slider-next');
+    const prev = document.querySelector('.slider-prev:not(#featuredPrev):not(#trendingPrev)');
+    const next = document.querySelector('.slider-next:not(#featuredNext):not(#trendingNext)');
     
     if (slider && prev && next) {
         const scrollAmount = 320;
@@ -1578,23 +1580,20 @@ function initAllInteractiveElements() {
         next.replaceWith(next.cloneNode(true));
         
         // Re-query after replacement
-        const newPrev = document.querySelector('.slider-prev');
-        const newNext = document.querySelector('.slider-next');
+        const newPrev = document.querySelector('.slider-prev:not(#featuredPrev):not(#trendingPrev)');
+        const newNext = document.querySelector('.slider-next:not(#featuredNext):not(#trendingNext)');
         
         if (newPrev && newNext) {
             newPrev.addEventListener('click', () => {
-                // Removed verbose logging - user interactions don't need console logs
                 slider.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
             });
             
             newNext.addEventListener('click', () => {
-                // Removed verbose logging
                 slider.scrollBy({ left: scrollAmount, behavior: 'smooth' });
             });
             
-            // Removed verbose logging - only log on first initialization
             if (!window.__sliderInitialized) {
-                console.log('✅ Slider controls initialized');
+                console.log('✅ Generic slider controls initialized');
                 window.__sliderInitialized = true;
             }
         }
