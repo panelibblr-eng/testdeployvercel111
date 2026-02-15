@@ -1,0 +1,102 @@
+[build]
+  # Build command (not needed for static site, but can run npm install)
+  command = "npm install"
+  # Publish directory - Netlify will serve static files from here
+  publish = "."
+
+[build.environment]
+  NODE_VERSION = "18"
+
+# Netlify Functions configuration
+[functions]
+  # Directory where Netlify Functions are located
+  directory = "netlify/functions"
+  # Node.js version for functions
+  node_bundler = "esbuild"
+
+# Redirect rules for API routes to Netlify Functions
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/server"
+  status = 200
+  force = true
+
+# Serve static files
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  conditions = {Role = ["admin"]}
+
+# Admin panel routing
+[[redirects]]
+  from = "/admin"
+  to = "/admin.html"
+  status = 200
+
+# All products page
+[[redirects]]
+  from = "/all-products"
+  to = "/all-products.html"
+  status = 200
+
+# Category pages
+[[redirects]]
+  from = "/men"
+  to = "/men.html"
+  status = 200
+
+[[redirects]]
+  from = "/women"
+  to = "/women.html"
+  status = 200
+
+[[redirects]]
+  from = "/sunglasses"
+  to = "/sunglasses.html"
+  status = 200
+
+[[redirects]]
+  from = "/optical-frames"
+  to = "/optical-frames.html"
+  status = 200
+
+[[redirects]]
+  from = "/contact-lenses"
+  to = "/contact-lenses.html"
+  status = 200
+
+[[redirects]]
+  from = "/brand"
+  to = "/brand.html"
+  status = 200
+
+[[redirects]]
+  from = "/appointment"
+  to = "/appointment-form.html"
+  status = 200
+
+# Headers for security
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# Cache static assets
+[[headers]]
+  for = "/css/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/js/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
