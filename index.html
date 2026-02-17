@@ -9,6 +9,76 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
+    <style>
+        /* Category card hover effects - replacing inline onmouseover/onmouseout handlers */
+        .category-card {
+            text-decoration: none;
+            background: linear-gradient(to bottom, #ffffff 0%, #fefefe 100%);
+            border-radius: 16px;
+            padding: 3rem 2rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            position: relative;
+            overflow: hidden;
+            display: block;
+        }
+        .category-card--sunglasses {
+            border: 1px solid rgba(222, 161, 147, 0.15);
+        }
+        .category-card--sunglasses:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 40px rgba(222, 161, 147, 0.15);
+            border-color: rgba(222, 161, 147, 0.3);
+        }
+        .category-card--optical {
+            border: 1px solid rgba(232, 180, 184, 0.15);
+        }
+        .category-card--optical:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 40px rgba(232, 180, 184, 0.15);
+            border-color: rgba(232, 180, 184, 0.3);
+        }
+        .category-card--lenses {
+            border: 1px solid rgba(186, 134, 123, 0.15);
+        }
+        .category-card--lenses:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 40px rgba(186, 134, 123, 0.15);
+            border-color: rgba(186, 134, 123, 0.3);
+        }
+        .category-card__inner {
+            text-align: center;
+        }
+        .category-card__label-wrap {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+        }
+        .category-card--sunglasses .category-card__label-wrap { border-bottom: 1px solid rgba(222, 161, 147, 0.1); }
+        .category-card--optical .category-card__label-wrap { border-bottom: 1px solid rgba(232, 180, 184, 0.1); }
+        .category-card--lenses .category-card__label-wrap { border-bottom: 1px solid rgba(186, 134, 123, 0.1); }
+        .category-card__label {
+            font-size: 3rem;
+            font-weight: 300;
+            letter-spacing: 2px;
+            color: #7a534a;
+            display: inline-block;
+        }
+        .category-card__title {
+            font-weight: 400;
+            color: #1f2937;
+            font-size: 1.1rem;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+            line-height: 1.6;
+        }
+        .category-card__link {
+            color: #94a3b8;
+            font-size: 0.875rem;
+            font-weight: 300;
+            letter-spacing: 0.3px;
+            margin-top: 0.5rem;
+        }
+    </style>
 </head>
 <body class="theme-blush">
     <a class="skip-link" href="#main">Skip to content</a>
@@ -112,7 +182,6 @@
                         </div>
                     </li>
                     <li class="drawer__item"><button class="drawer__btn" data-accordion>RayBan x Meta <span class="plus">+</span></button></li>
-                    <!-- <li class="drawer__item"><button class="drawer__btn" data-accordion>Steals of the Month <span class="plus">+</span></button></li> -->
                     <li class="drawer__item"><button class="drawer__btn" data-accordion>Shop by Brand <span class="plus">+</span></button><div class="drawer__panelInner"><a href="#brands">All Brands</a></div></li>
                     <li class="drawer__item"><button class="drawer__btn" data-accordion>About Us <span class="plus">+</span></button><div class="drawer__panelInner"><a href="appointment-form.html">Appointments</a></div></li>
                 </ul>
@@ -131,84 +200,39 @@
             </button>
         </div>
     </div>
-    
-    <!-- Immediate script to ensure announcement is visible on mobile -->
-    <script>
-        (function() {
-            function showAnnouncementOnMobile() {
-                const banner = document.getElementById('announcementBanner');
-                if (banner && window.innerWidth <= 768) {
-                    // Remove any inline display:none
-                    const style = banner.getAttribute('style');
-                    if (style) {
-                        const newStyle = style.replace(/display\s*:\s*none[^;]*;?/gi, '').trim();
-                        if (newStyle) {
-                            banner.setAttribute('style', newStyle);
-                        } else {
-                            banner.removeAttribute('style');
-                        }
-                    }
-                    // Force visible with multiple methods
-                    banner.style.setProperty('display', 'block', 'important');
-                    banner.style.setProperty('visibility', 'visible', 'important');
-                    banner.style.setProperty('opacity', '1', 'important');
-                    banner.style.display = 'block';
-                    banner.style.visibility = 'visible';
-                    banner.style.opacity = '1';
-                }
-            }
-            
-            // Run immediately if element exists
-            if (document.getElementById('announcementBanner')) {
-                showAnnouncementOnMobile();
-            }
-            
-            // Also run when DOM is ready
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', showAnnouncementOnMobile);
-            } else {
-                showAnnouncementOnMobile();
-            }
-            
-            // Run on window load as well
-            window.addEventListener('load', showAnnouncementOnMobile);
-        })();
-    </script>
 
     <main id="main">
         <section class="hero" aria-label="Featured">
             <div class="container hero__grid">
                 <div class="hero__content">
                     <p class="eyebrow">Now Trending</p>
-                    <h1>DAVID WALKER
-                            EYE WEAR</h1>  
+                    <h1>DAVID WALKER EYE WEAR</h1>  
                     <p class="lead">Immersive, iconic, and innovative. Book your pair today.</p>
                     <div class="actions">
                         <a class="btn btn--primary" href="appointment-form.html">Book Appointment</a>
-                        <!-- <a class="btn" href="#steals">Shop Deals</a> -->
                     </div>
                 </div>
-                  <div class="hero__media" aria-hidden="true">
-                     <div class="hero__card">
-                         <div class="photo-slider" id="heroSlider">
-                             <button class="slider-nav slider-nav--prev" id="sliderNavPrev" aria-label="Previous image">
-                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                     <path d="M15 18l-6-6 6-6"/>
-                                 </svg>
-                             </button>
-                             <button class="slider-nav slider-nav--next" id="sliderNavNext" aria-label="Next image">
-                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                     <path d="M9 18l6-6-6-6"/>
-                                 </svg>
-                             </button>
-                             <div class="slider-container">
-                                 <div class="slider-track" id="sliderTrack"></div>
-                             </div>
-                             <div class="slider-indicators" style="display: none;"></div>
-                             <div class="slider-counter" style="display: none;"></div>
-                         </div>
-                     </div>
-                  </div>
+                <div class="hero__media" aria-hidden="true">
+                    <div class="hero__card">
+                        <div class="photo-slider" id="heroSlider">
+                            <button class="slider-nav slider-nav--prev" id="sliderNavPrev" aria-label="Previous image">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M15 18l-6-6 6-6"/>
+                                </svg>
+                            </button>
+                            <button class="slider-nav slider-nav--next" id="sliderNavNext" aria-label="Next image">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M9 18l6-6-6-6"/>
+                                </svg>
+                            </button>
+                            <div class="slider-container">
+                                <div class="slider-track" id="sliderTrack"></div>
+                            </div>
+                            <div class="slider-indicators" style="display: none;"></div>
+                            <div class="slider-counter" style="display: none;"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -236,31 +260,31 @@
                     <p class="section__subtitle">Discover our complete collection of eyewear</p>
                 </div>
                 <div class="category-tiles" style="gap: 2rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
-                    <a href="all-products.html?category=sunglasses" class="category-card" style="text-decoration: none; background: linear-gradient(to bottom, #ffffff 0%, #fefefe 100%); border: 1px solid rgba(222, 161, 147, 0.15); border-radius: 16px; padding: 3rem 2rem; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); position: relative; overflow: hidden;" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 12px 40px rgba(222, 161, 147, 0.15)'; this.style.borderColor='rgba(222, 161, 147, 0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0, 0, 0, 0.04)'; this.style.borderColor='rgba(222, 161, 147, 0.15)';">
-                        <div style="text-align: center;">
-                            <div style="margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid rgba(222, 161, 147, 0.1);">
-                                <span style="font-size: 3rem; font-weight: 300; letter-spacing: 2px; color: #7a534a; display: inline-block;">SUNGLASSES</span>
+                    <a href="all-products.html?category=sunglasses" class="category-card category-card--sunglasses">
+                        <div class="category-card__inner">
+                            <div class="category-card__label-wrap">
+                                <span class="category-card__label">SUNGLASSES</span>
                             </div>
-                            <h3 style="font-weight: 400; color: #1f2937; font-size: 1.1rem; letter-spacing: 0.5px; margin-bottom: 0.5rem; line-height: 1.6;">Exquisite designs from the world's most prestigious houses</h3>
-                            <p style="color: #94a3b8; font-size: 0.875rem; font-weight: 300; letter-spacing: 0.3px; margin-top: 0.5rem;">Explore Collection →</p>
+                            <h3 class="category-card__title">Exquisite designs from the world's most prestigious houses</h3>
+                            <p class="category-card__link">Explore Collection →</p>
                         </div>
                     </a>
-                    <a href="all-products.html?category=optical-frames" class="category-card" style="text-decoration: none; background: linear-gradient(to bottom, #ffffff 0%, #fefefe 100%); border: 1px solid rgba(232, 180, 184, 0.15); border-radius: 16px; padding: 3rem 2rem; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); position: relative; overflow: hidden;" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 12px 40px rgba(232, 180, 184, 0.15)'; this.style.borderColor='rgba(232, 180, 184, 0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0, 0, 0, 0.04)'; this.style.borderColor='rgba(232, 180, 184, 0.15)';">
-                        <div style="text-align: center;">
-                            <div style="margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid rgba(232, 180, 184, 0.1);">
-                                <span style="font-size: 3rem; font-weight: 300; letter-spacing: 2px; color: #7a534a; display: inline-block;">OPTICAL FRAMES</span>
+                    <a href="all-products.html?category=optical-frames" class="category-card category-card--optical">
+                        <div class="category-card__inner">
+                            <div class="category-card__label-wrap">
+                                <span class="category-card__label">OPTICAL FRAMES</span>
                             </div>
-                            <h3 style="font-weight: 400; color: #1f2937; font-size: 1.1rem; letter-spacing: 0.5px; margin-bottom: 0.5rem; line-height: 1.6;">Handcrafted frames with uncompromising attention to detail</h3>
-                            <p style="color: #94a3b8; font-size: 0.875rem; font-weight: 300; letter-spacing: 0.3px; margin-top: 0.5rem;">Explore Collection →</p>
+                            <h3 class="category-card__title">Handcrafted frames with uncompromising attention to detail</h3>
+                            <p class="category-card__link">Explore Collection →</p>
                         </div>
                     </a>
-                    <a href="all-products.html?category=contact-lenses" class="category-card" style="text-decoration: none; background: linear-gradient(to bottom, #ffffff 0%, #fefefe 100%); border: 1px solid rgba(186, 134, 123, 0.15); border-radius: 16px; padding: 3rem 2rem; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); position: relative; overflow: hidden;" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 12px 40px rgba(186, 134, 123, 0.15)'; this.style.borderColor='rgba(186, 134, 123, 0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0, 0, 0, 0.04)'; this.style.borderColor='rgba(186, 134, 123, 0.15)';">
-                        <div style="text-align: center;">
-                            <div style="margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid rgba(186, 134, 123, 0.1);">
-                                <span style="font-size: 3rem; font-weight: 300; letter-spacing: 2px; color: #7a534a; display: inline-block;">CONTACT LENSES</span>
+                    <a href="all-products.html?category=contact-lenses" class="category-card category-card--lenses">
+                        <div class="category-card__inner">
+                            <div class="category-card__label-wrap">
+                                <span class="category-card__label">CONTACT LENSES</span>
                             </div>
-                            <h3 style="font-weight: 400; color: #1f2937; font-size: 1.1rem; letter-spacing: 0.5px; margin-bottom: 0.5rem; line-height: 1.6;">Advanced lens technology for discerning vision</h3>
-                            <p style="color: #94a3b8; font-size: 0.875rem; font-weight: 300; letter-spacing: 0.3px; margin-top: 0.5rem;">Explore Collection →</p>
+                            <h3 class="category-card__title">Advanced lens technology for discerning vision</h3>
+                            <p class="category-card__link">Explore Collection →</p>
                         </div>
                     </a>
                 </div>
@@ -280,18 +304,9 @@
                              For over thirty years, our atelier has been synonymous with refined vision. Every frame is a testament to artistry—handcrafted from the finest materials and tailored for effortless comfort. Steeped in tradition, shaped by innovation, our curated selection exudes quiet luxury and impeccable design. Indulge in a world where clarity meets beauty, and let each moment be seen through the lens of distinction.
                              Experience eyewear reimagined—where sophistication is not just worn, but lived.</div> 
                     </li>
-                    <!-- <li>
-                        <div class="tl__year">2019</div>
-                        <div class="tl__desc">Introduced unique independent eyewear brands to India.</div>
-                    </li>
-                    <li>
-                        <div class="tl__year">2022</div>
-                        <div class="tl__desc">Launched third boutique, elevating the luxury experience.</div>
-                    </li> -->
                 </ol>
             </div>
         </section>
-
 
         <section id="brands" class="section">
             <div class="container">
@@ -355,7 +370,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="store-location-card">
                         <div class="store-location__header">
                             <h3 class="store-location__title">Indore - Race Course Road</h3>
@@ -368,7 +382,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="store-location-card">
                         <div class="store-location__header">
                             <h3 class="store-location__title">Indore - Mahalaxmi Nagar</h3>
@@ -381,7 +394,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="store-location-card">
                         <div class="store-location__header">
                             <h3 class="store-location__title">Indore - Usha Nagar</h3>
@@ -394,7 +406,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="store-location-card">
                         <div class="store-location__header">
                             <h3 class="store-location__title">Bhopal - Arera Colony</h3>
@@ -407,7 +418,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="store-location-card">
                         <div class="store-location__header">
                             <h3 class="store-location__title">Bhopal - Peer Gate Area</h3>
@@ -501,1044 +511,7 @@
         </div>
     </div>
 
-    
-    
-    <!-- Inline product initialization for immediate availability -->
-    <script>
-        // Wait for products.js to load, then initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(function() {
-                // Initialize ProductDisplay
-                if (typeof ProductDisplay !== 'undefined' && !window.productDisplay) {
-                    window.productDisplay = new ProductDisplay();
-                    console.log('ProductDisplay initialized');
-                }
-                
-                // Initialize WebsiteContentManager
-                if (typeof WebsiteContentManager !== 'undefined' && !window.websiteContentManager) {
-                    window.websiteContentManager = new WebsiteContentManager();
-                    console.log('WebsiteContentManager initialized');
-                }
-                
-                if (window.productDisplay) {
-                    console.log('Product system is ready!');
-                    // Auto-cleanup old sample products from localStorage
-                    try {
-                        const adminData = JSON.parse(localStorage.getItem('adminPanelData') || '{}');
-                        const products = adminData.products || [];
-                        
-                        // List of old sample product names to remove
-                        const sampleProductNames = [
-                            'abc',
-                            'Ray-Ban Aviator Classic',
-                            'Gucci Oversized Square',
-                            'Prada Cat Eye Sunglasses',
-                            'Tom Ford Optical Frame',
-                            'Cartier Optical Frame'
-                        ];
-                        
-                        // Filter out sample products
-                        const filteredProducts = products.filter(p => {
-                            const isSample = sampleProductNames.includes(p.name);
-                            if (isSample) {
-                                console.log('🧹 Removing old sample product:', p.name);
-                            }
-                            return !isSample;
-                        });
-                        
-                        // If products were removed, update localStorage
-                        if (filteredProducts.length < products.length) {
-                            adminData.products = filteredProducts;
-                            localStorage.setItem('adminPanelData', JSON.stringify(adminData));
-                            console.log(`✅ Cleaned up ${products.length - filteredProducts.length} old sample products`);
-                            
-                            // Reload products after cleanup
-                            window.productDisplay.loadProducts().then(() => {
-                                window.productDisplay.displayProductsOnPageLoad();
-                            });
-                        }
-                    } catch (error) {
-                        console.error('Error cleaning up products:', error);
-                    }
-                } else {
-                    console.log('Product system not loaded yet, retrying...');
-                    setTimeout(arguments.callee, 1000);
-                }
-            }, 1000);
-        });
-
-        // Create global functions for manual control
-        window.refreshProducts = function() {
-            console.log('Manual refresh triggered...');
-            if (window.productDisplay && window.productDisplay.loadProducts) {
-                window.productDisplay.loadProducts();
-                if (window.productDisplay.displayProductsOnPageLoad) {
-                    window.productDisplay.displayProductsOnPageLoad();
-                }
-            } else {
-                console.log('Product system not available');
-            }
-        };
-
-        // Test function to verify admin panel integration
-        window.testAdminIntegration = function() {
-            console.log('Testing admin panel integration...');
-            
-            // Check if admin panel data exists
-            const adminData = localStorage.getItem('adminPanelData');
-            console.log('Admin data exists:', !!adminData);
-            
-            if (adminData) {
-                const parsed = JSON.parse(adminData);
-                console.log('Admin products count:', parsed.products?.length || 0);
-                console.log('Admin settings:', parsed.settings ? 'Present' : 'Missing');
-            }
-            
-            // Check if ProductDisplay is working
-            console.log('ProductDisplay available:', !!window.productDisplay);
-            if (window.productDisplay) {
-                console.log('Current products count:', window.productDisplay.products.length);
-                console.log('Featured products:', window.productDisplay.getFeaturedProducts().length);
-            }
-            
-            // Check if WebsiteContentManager is working
-            console.log('WebsiteContentManager available:', !!window.websiteContentManager);
-            
-            return 'Test completed - check console for details';
-        };
-
-        window.forceInitProducts = function() {
-            console.log('Force initializing products...');
-            
-            // Sample products removed - products should be added through admin panel only
-            const sampleProducts = [];
-
-            // Save to localStorage
-            const adminData = { products: sampleProducts };
-            localStorage.setItem('adminPanelData', JSON.stringify(adminData));
-            
-            // Set products in productDisplay if it exists
-            if (window.productDisplay) {
-                window.productDisplay.products = sampleProducts;
-            }
-            
-            // Display products directly
-            displayProductsDirectly(sampleProducts);
-            
-            console.log('Products force initialized (empty - use admin panel to add products):', sampleProducts.length);
-        };
-
-        // Direct product display function
-        function displayProductsDirectly(products) {
-            console.log('Displaying products directly...');
-            console.log('Products to display:', products.length);
-            
-            // Display featured products (handle different featured value formats)
-            const featuredProducts = products.filter(p => {
-                return p.featured === true || p.featured === 1 || p.featured === '1' || p.featured === 'true';
-            });
-            const featuredContainer = document.getElementById('featuredProducts');
-            console.log('Featured container found:', !!featuredContainer);
-            console.log('Featured products count:', featuredProducts.length);
-            
-            if (featuredContainer) {
-                featuredContainer.innerHTML = featuredProducts.map(product => renderProductCard(product)).join('');
-                console.log('Featured products displayed:', featuredProducts.length);
-                console.log('Featured container HTML:', featuredContainer.innerHTML.substring(0, 100) + '...');
-            } else {
-                console.log('Featured container NOT found!');
-            }
-            
-            // Display sunglasses
-            const sunglasses = products.filter(p => p.category === 'sunglasses');
-            const sunglassesContainer = document.getElementById('sunglassesGrid');
-            console.log('Sunglasses container found:', !!sunglassesContainer);
-            
-            if (sunglassesContainer) {
-                sunglassesContainer.innerHTML = sunglasses.map(product => renderProductCard(product)).join('');
-                console.log('Sunglasses displayed:', sunglasses.length);
-            } else {
-                console.log('Sunglasses container NOT found!');
-            }
-            
-            // Display optical frames
-            const opticalFrames = products.filter(p => p.category === 'optical-frames');
-            const opticalFramesContainer = document.getElementById('opticalFramesGrid');
-            console.log('Optical frames container found:', !!opticalFramesContainer);
-            
-            if (opticalFramesContainer) {
-                opticalFramesContainer.innerHTML = opticalFrames.map(product => renderProductCard(product)).join('');
-                console.log('Optical frames displayed:', opticalFrames.length);
-            } else {
-                console.log('Optical frames container NOT found!');
-            }
-            
-            // Display trending products
-            const latestProducts = products.slice(-4).reverse();
-            const trendingContainer = document.getElementById('trendingProducts');
-            console.log('Trending container found:', !!trendingContainer);
-            
-            if (trendingContainer) {
-                trendingContainer.innerHTML = latestProducts.map(product => renderProductCard(product)).join('');
-                console.log('Trending products displayed:', latestProducts.length);
-            } else {
-                console.log('Trending container NOT found!');
-            }
-            
-            // Also try to find any container with class 'grid-4'
-            const gridContainers = document.querySelectorAll('.grid-4');
-            console.log('Found grid-4 containers:', gridContainers.length);
-            
-            if (gridContainers.length > 0) {
-                console.log('Displaying products in first grid-4 container...');
-                gridContainers[0].innerHTML = products.slice(0, 4).map(product => renderProductCard(product)).join('');
-            }
-        }
-
-        // Simple product card renderer
-        function renderProductCard(product) {
-            const imageUrl = product.image || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xMDAgODBDMTEwLjQ2MSA4MCAxMjAgODkuNTM5IDEyMCAxMDBDMTIwIDExMC40NjEgMTEwLjQ2MSAxMjAgMTAwIDEyMEM4OS41MzkxIDEyMCA4MCAxMTAuNDYxIDgwIDEwMEM4MCA4OS41MzkgODkuNTM5MSA4MCAxMDAgODBaIiBmaWxsPSIjOUNBM0FGIi8+CjxwYXRoIGQ9Ik0xMDAgMTQwQzEwNS41MjMgMTQwIDExMCAxMzUuNTIzIDExMCAxMzBDMTEwIDEyNC40NzcgMTA1LjUyMyAxMjAgMTAwIDEyMEM5NC40NzcyIDEyMCA5MCAxMjQuNDc3IDkwIDEzMEM5MCAxMzUuNTIzIDk0LjQ3NzIgMTQwIDEwMCAxNDBaIiBmaWxsPSIjOUNBM0FGIi8+Cjwvc3ZnPgo=';
-            
-            return `
-                <article class="product-card">
-                    <div class="product-card__media">
-                        <img src="${imageUrl}" 
-                             alt="${product.name}" 
-                             style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px;"
-                             onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xMDAgODBDMTEwLjQ2MSA4MCAxMjAgODkuNTM5IDEyMCAxMDBDMTIwIDExMC40NjEgMTEwLjQ2MSAxMjAgMTAwIDEyMEM4OS41MzkxIDEyMCA4MCAxMTAuNDYxIDgwIDEwMEM4MCA4OS41MzkgODkuNTM5MSA4MCAxMDAgODBaIiBmaWxsPSIjOUNBM0FGIi8+CjxwYXRoIGQ9Ik0xMDAgMTQwQzEwNS41MjMgMTQwIDExMCAxMzUuNTIzIDExMCAxMzBDMTEwIDEyNC40NzcgMTA1LjUyMyAxMjAgMTAwIDEyMEM5NC40NzcyIDEyMCA5MCAxMjQuNDc3IDkwIDEzMEM5MCAxMzUuNTIzIDk0LjQ3NzIgMTQwIDEwMCAxNDBaIiBmaWxsPSIjOUNBM0FGIi8+Cjwvc3ZnPgo='">
-                    </div>
-                    <h3 class="product-card__title">${product.name}</h3>
-                    <p class="product-card__price">₹ ${product.price.toLocaleString()}</p>
-                    <button class="btn btn--ghost" onclick="window.open('https://wa.me/917000532010?text=' + encodeURIComponent('Hi! I am interested in ${product.name} (${product.brand}). Can you provide more information?'), '_blank')">View Details</button>
-                </article>
-            `;
-        }
-
-        // Test function to create a visible product
-        window.testProduct = function() {
-            console.log('Creating test product...');
-            
-            // Create a simple test product
-            const testProduct = `
-                <div style="background: #f0f0f0; padding: 20px; margin: 20px; border-radius: 8px; border: 2px solid #007bff;">
-                    <h3 style="color: #007bff; margin: 0 0 10px 0;">🧪 TEST PRODUCT</h3>
-                    <img src="https://via.placeholder.com/200x150/007bff/ffffff?text=TEST+PRODUCT" 
-                         style="width: 200px; height: 150px; border-radius: 4px; margin: 10px 0;">
-                    <p><strong>Name:</strong> Test Product</p>
-                    <p><strong>Price:</strong> ₹1,000</p>
-                    <p><strong>Brand:</strong> Test Brand</p>
-                    <button onclick="alert('Test product clicked!')" 
-                            style="background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;">
-                        Test Button
-                    </button>
-                </div>
-            `;
-            
-            // Add it to the top of the page
-            const testContainer = document.createElement('div');
-            testContainer.innerHTML = testProduct;
-            testContainer.style.cssText = 'position: fixed; top: 10px; right: 10px; z-index: 9999; max-width: 300px;';
-            document.body.appendChild(testContainer);
-            
-            console.log('Test product created! Look for the blue box in the top-right corner.');
-        };
-
-        // Force visible products function
-        window.showProductsNow = function() {
-            console.log('Creating visible products section...');
-            
-            // Load real products from localStorage
-            let products = [];
-            try {
-                const adminData = JSON.parse(localStorage.getItem('adminPanelData') || '{}');
-                products = adminData.products || [];
-                console.log('Loaded real products:', products.length);
-            } catch (error) {
-                console.error('Error loading products:', error);
-            }
-            
-            // If no products, show empty state
-            if (products.length === 0) {
-                console.log('No products found - products must be added through admin panel');
-                products = [];
-            }
-            
-            // Get featured products
-            const featuredProducts = products.filter(p => p.featured === true);
-            console.log('Featured products:', featuredProducts.length);
-            console.log('All products:', products);
-            console.log('Featured products details:', featuredProducts);
-            
-            // Create product cards HTML
-            const productCardsHTML = featuredProducts.map(product => {
-                const imageUrl = product.image || `https://via.placeholder.com/300x200/8b5cf6/ffffff?text=${encodeURIComponent(product.name)}`;
-                return `
-                    <article class="product-card">
-                        <div class="product-card__media">
-                            <img src="${imageUrl}" 
-                                 alt="${product.name}"
-                                 onerror="this.src='https://via.placeholder.com/300x200/8b5cf6/ffffff?text=${encodeURIComponent(product.name)}'">
-                        </div>
-                        <h3 class="product-card__title">${product.name}</h3>
-                        <p class="product-card__price">₹${product.price.toLocaleString()}</p>
-                        <button class="btn" onclick="window.open('https://wa.me/917000532010?text=' + encodeURIComponent('Hi! I am interested in ${product.name} (${product.brand}). Can you provide more information?'), '_blank')">
-                            📱 Contact via WhatsApp
-                        </button>
-                    </article>
-                `;
-            }).join('');
-            
-            // Create a very visible products section
-            const productsSection = `
-                <div class="products-section">
-                    <h2>🛍️ Featured Products</h2>
-                    
-                    <div class="products-grid">
-                        ${productCardsHTML}
-                    </div>
-                    
-                    <div style="text-align: center; margin-top: 30px;">
-                        <p style="color: #666; font-size: 1.1em;">All products are available for purchase. Contact us via WhatsApp for more information!</p>
-                    </div>
-                </div>
-            `;
-            
-            // Add it to the Gucci Spotlight section
-            const featuredContainer = document.getElementById('featuredProducts');
-            if (featuredContainer) {
-                // Replace the content of the featured products container
-                featuredContainer.innerHTML = productsSection;
-                console.log('Products section added to Gucci Spotlight area!');
-            } else {
-                // If featured container not found, try to find the Gucci Spotlight section
-                const gucciSection = document.querySelector('h2:contains("Gucci Spotlight")') || 
-                                   document.querySelector('h2[class*="section__title"]');
-                if (gucciSection) {
-                    const productsContainer = document.createElement('div');
-                    productsContainer.innerHTML = productsSection;
-                    productsContainer.style.cssText = 'margin: 20px auto; max-width: 1200px;';
-                    gucciSection.parentElement.appendChild(productsContainer);
-                    console.log('Products section added near Gucci Spotlight!');
-                } else {
-                    // Fallback: add after header
-                    const header = document.querySelector('header');
-                    if (header) {
-                        const productsContainer = document.createElement('div');
-                        productsContainer.innerHTML = productsSection;
-                        productsContainer.style.cssText = 'margin: 20px auto; max-width: 1200px;';
-                        header.insertAdjacentElement('afterend', productsContainer);
-                        console.log('Products section added after header (fallback)!');
-                    }
-                }
-            }
-            
-            console.log('Visible products section created! You should see a green-bordered section with 5 products.');
-        };
-
-        // Show all products function (for debugging)
-        window.showAllProducts = function() {
-            console.log('Showing all products...');
-            
-            // Load real products from localStorage
-            let products = [];
-            try {
-                const adminData = JSON.parse(localStorage.getItem('adminPanelData') || '{}');
-                products = adminData.products || [];
-                console.log('Loaded real products:', products.length);
-                console.log('All products:', products);
-                
-                // Debug: Check if adminPanelData exists
-                console.log('Admin data exists:', !!adminData);
-                console.log('Products in admin data:', adminData.products);
-            } catch (error) {
-                console.error('Error loading products:', error);
-            }
-            
-            if (products.length === 0) {
-                console.log('No products found in localStorage');
-                console.log('Available localStorage keys:', Object.keys(localStorage));
-                return;
-            }
-            
-            // Show first 5 products (not just featured)
-            const productsToShow = products.slice(0, 5);
-            console.log('Products to show:', productsToShow);
-            
-            // Create product cards HTML with working placeholder images
-            const productCardsHTML = productsToShow.map(product => {
-                // Use working placeholder images instead of broken external URLs
-                const imageUrl = `https://via.placeholder.com/300x200/8b5cf6/ffffff?text=${encodeURIComponent(product.name)}`;
-                return `
-                    <article class="product-card">
-                        <div class="product-card__media">
-                            <img src="${imageUrl}" 
-                                 alt="${product.name}">
-                        </div>
-                        <h3 class="product-card__title">${product.name}</h3>
-                        <p class="product-card__price">₹${product.price.toLocaleString()}</p>
-                        <button class="btn" onclick="window.open('https://wa.me/917000532010?text=' + encodeURIComponent('Hi! I am interested in ${product.name} (${product.brand}). Can you provide more information?'), '_blank')">
-                            📱 Contact via WhatsApp
-                        </button>
-                    </article>
-                `;
-            }).join('');
-            
-            // Create products section
-            const productsSection = `
-                <div class="products-section">
-                    <h2>🛍️ All Products (First 5)</h2>
-                    
-                    <div class="products-grid">
-                        ${productCardsHTML}
-                    </div>
-                    
-                    <div style="text-align: center; margin-top: 30px;">
-                        <p style="color: #666; font-size: 1.1em;">Showing first 5 products from your inventory.</p>
-                    </div>
-                </div>
-            `;
-            
-            // Add it to the Gucci Spotlight section
-            const featuredContainer = document.getElementById('featuredProducts');
-            if (featuredContainer) {
-                featuredContainer.innerHTML = productsSection;
-                console.log('All products section added to Gucci Spotlight area!');
-            } else {
-                console.log('Featured container not found!');
-            }
-            
-            console.log('All products displayed!');
-        };
-
-        // Debug localStorage function
-        window.debugStorage = function() {
-            console.log('=== LOCALSTORAGE DEBUG ===');
-            console.log('All localStorage keys:', Object.keys(localStorage));
-            console.log('adminPanelData:', localStorage.getItem('adminPanelData'));
-            
-            try {
-                const adminData = JSON.parse(localStorage.getItem('adminPanelData') || '{}');
-                console.log('Parsed admin data:', adminData);
-                console.log('Products count:', adminData.products ? adminData.products.length : 'No products');
-                if (adminData.products) {
-                    console.log('First product:', adminData.products[0]);
-                }
-            } catch (error) {
-                console.error('Error parsing admin data:', error);
-            }
-        };
-
-        // Create offline product display (no external images)
-        window.showOfflineProducts = function() {
-            console.log('Creating offline products display...');
-            
-            // Load real products from localStorage
-            let products = [];
-            try {
-                const adminData = JSON.parse(localStorage.getItem('adminPanelData') || '{}');
-                products = adminData.products || [];
-                console.log('Loaded real products:', products.length);
-            } catch (error) {
-                console.error('Error loading products:', error);
-            }
-            
-            if (products.length === 0) {
-                console.log('No products found - products must be added through admin panel');
-                products = [];
-            }
-            
-            // Show first 5 products
-            const productsToShow = products.slice(0, 5);
-            console.log('Products to show:', productsToShow);
-            
-            // Create product cards HTML with SVG placeholders (no external images)
-            const productCardsHTML = productsToShow.map((product, index) => {
-                const colors = ['#DEA193', '#059669', '#dc2626', '#ea580c', '#BA867B'];
-                const color = colors[index % colors.length];
-                
-                return `
-                    <article class="product-card">
-                        <div class="product-card__media" style="background: linear-gradient(135deg, ${color}20, ${color}40); display: flex; align-items: center; justify-content: center;">
-                            <div style="text-align: center; color: ${color};">
-                                <div style="font-size: 3rem; margin-bottom: 10px;">🕶️</div>
-                                <div style="font-weight: bold; font-size: 1.1rem;">${product.brand}</div>
-                            </div>
-                        </div>
-                        <h3 class="product-card__title">${product.name}</h3>
-                        <p class="product-card__price">₹${product.price.toLocaleString()}</p>
-                        <button class="btn" onclick="window.open('https://wa.me/917000532010?text=' + encodeURIComponent('Hi! I am interested in ${product.name} (${product.brand}). Can you provide more information?'), '_blank')">
-                            📱 Contact via WhatsApp
-                        </button>
-                    </article>
-                `;
-            }).join('');
-            
-            // Create products section
-            const productsSection = `
-                <div class="products-section">
-                    <h2>🛍️ Featured Products</h2>
-                    
-                    <div class="products-grid">
-                        ${productCardsHTML}
-                    </div>
-                    
-                    <div style="text-align: center; margin-top: 30px;">
-                        <p style="color: #666; font-size: 1.1em;">All products are available for purchase. Contact us via WhatsApp for more information!</p>
-                    </div>
-                </div>
-            `;
-            
-            // Add it to the Gucci Spotlight section
-            const featuredContainer = document.getElementById('featuredProducts');
-            if (featuredContainer) {
-                featuredContainer.innerHTML = productsSection;
-                console.log('Offline products section added to Gucci Spotlight area!');
-            } else {
-                console.log('Featured container not found!');
-            }
-            
-            console.log('Offline products displayed successfully!');
-        };
-
-        console.log('Global functions created: refreshProducts(), forceInitProducts(), testProduct(), showAllProducts(), showOfflineProducts()');
-        
-        // Add debug functions directly to window for immediate access
-        window.debugProducts = function() {
-            console.log('=== PRODUCT DEBUG INFO ===');
-            console.log('ProductDisplay exists:', !!window.productDisplay);
-            console.log('Products in system:', window.productDisplay?.products?.length || 0);
-            console.log('Featured products:', window.productDisplay?.getFeaturedProducts()?.length || 0);
-            
-            // Check admin data
-            try {
-                const adminData = JSON.parse(localStorage.getItem('adminPanelData') || '{}');
-                console.log('Admin data products:', adminData.products?.length || 0);
-                console.log('Admin featured products:', adminData.products?.filter(p => p.featured)?.length || 0);
-                console.log('Admin products:', adminData.products);
-            } catch (error) {
-                console.error('Error reading admin data:', error);
-            }
-            
-            // Check featured container
-            const featuredContainer = document.getElementById('featuredProducts');
-            console.log('Featured container exists:', !!featuredContainer);
-            console.log('Featured container content length:', featuredContainer?.innerHTML?.length || 0);
-            
-            return 'Debug complete - check console for details';
-        };
-
-        window.forceSyncProducts = function() {
-            console.log('Force syncing products...');
-            
-            try {
-                // Load from admin panel
-                const adminData = JSON.parse(localStorage.getItem('adminPanelData') || '{}');
-                const products = adminData.products || [];
-                
-                if (products.length === 0) {
-                    console.log('No products in admin panel!');
-                    return 'No products found in admin panel';
-                }
-                
-                // Fix image URLs to prevent 404 errors
-                const fixedProducts = products.map(product => ({
-                    ...product,
-                    image: '' // Remove external image URLs to use placeholders
-                }));
-                
-                // Update admin data with fixed products
-                adminData.products = fixedProducts;
-                localStorage.setItem('adminPanelData', JSON.stringify(adminData));
-                
-                // Update productDisplay
-                if (window.productDisplay) {
-                    window.productDisplay.products = fixedProducts;
-                    window.productDisplay.saveProducts();
-                    window.productDisplay.displayProductsOnPageLoad();
-                    
-                    console.log('Products synced and image URLs fixed!');
-                    return `Synced ${fixedProducts.length} products (${fixedProducts.filter(p => p.featured).length} featured) - Images fixed!`;
-                } else {
-                    console.log('ProductDisplay not available');
-                    return 'ProductDisplay system not loaded';
-                }
-            } catch (error) {
-                console.error('Error syncing products:', error);
-                return 'Error syncing products: ' + error.message;
-            }
-        };
-        
-        // Function to fix all image issues
-        window.fixAllImages = function() {
-            console.log('Fixing all image URLs...');
-            
-            try {
-                const adminData = JSON.parse(localStorage.getItem('adminPanelData') || '{}');
-                const products = adminData.products || [];
-                
-                if (products.length === 0) {
-                    return 'No products found to fix';
-                }
-                
-                // Fix all products to use placeholder images
-                const fixedProducts = products.map(product => ({
-                    ...product,
-                    image: '' // Remove all external image URLs
-                }));
-                
-                // Update admin data
-                adminData.products = fixedProducts;
-                localStorage.setItem('adminPanelData', JSON.stringify(adminData));
-                
-                // Refresh display
-                if (window.productDisplay) {
-                    window.productDisplay.products = fixedProducts;
-                    window.productDisplay.displayProductsOnPageLoad();
-                }
-                
-                console.log('All image URLs fixed!');
-                return `Fixed ${fixedProducts.length} products - no more image errors!`;
-            } catch (error) {
-                console.error('Error fixing images:', error);
-                return 'Error fixing images: ' + error.message;
-            }
-        };
-        
-        // Function to force show specific product
-        window.showAjProduct = function() {
-            console.log('Force showing aj product...');
-            
-            try {
-                const adminData = JSON.parse(localStorage.getItem('adminPanelData') || '{}');
-                const products = adminData.products || [];
-                
-                console.log('All products:', products.map(p => ({ name: p.name, featured: p.featured, brand: p.brand })));
-                
-                // Look for exact match first, then partial match
-                let ajProduct = products.find(p => p.name === 'aj');
-                if (!ajProduct) {
-                    ajProduct = products.find(p => p.name.toLowerCase().includes('aj'));
-                }
-                
-                if (!ajProduct) {
-                    console.log('aj product not found in admin panel');
-                    console.log('Available products:', products.map(p => p.name));
-                    return 'aj product not found';
-                }
-                
-                console.log('Found aj product:', ajProduct);
-                
-                // Force display in featured container
-                const featuredContainer = document.getElementById('featuredProducts');
-                if (featuredContainer) {
-                    featuredContainer.innerHTML = `
-                        <article class="product-card">
-                            <div class="product-card__media">
-                                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xMDAgODBDMTEwLjQ2MSA4MCAxMjAgODkuNTM5IDEyMCAxMDBDMTIwIDExMC40NjEgMTEwLjQ2MSAxMjAgMTAwIDEyMEM4OS41MzkxIDEyMCA4MCAxMTAuNDYxIDgwIDEwMEM4MCA4OS41MzkgODkuNTM5MSA4MCAxMDAgODBaIiBmaWxsPSIjOUNBM0FGIi8+CjxwYXRoIGQ9Ik0xMDAgMTQwQzEwNS41MjMgMTQwIDExMCAxMzUuNTIzIDExMCAxMzBDMTEwIDEyNC40NzcgMTA1LjUyMyAxMjAgMTAwIDEyMEM5NC40NzcyIDEyMCA5MCAxMjQuNDc3IDkwIDEzMEM5MCAxMzUuNTIzIDk0LjQ3NzIgMTQwIDEwMCAxNDBaIiBmaWxsPSIjOUNBM0FGIi8+Cjwvc3ZnPgo=" 
-                                     alt="${ajProduct.name}" 
-                                     style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px;">
-                            </div>
-                            <h3 class="product-card__title">${ajProduct.name}</h3>
-                            <p class="product-card__price">₹ ${ajProduct.price.toLocaleString()}</p>
-                            <button class="btn" onclick="window.productDisplay ? window.productDisplay.viewProduct('${ajProduct.id}') : alert('Product system not loaded')">View Details</button>
-                        </article>
-                    `;
-                    
-                    console.log('aj product displayed successfully!');
-                    return `aj product displayed: ${ajProduct.name}`;
-                } else {
-                    console.log('Featured container not found');
-                    return 'Featured container not found';
-                }
-            } catch (error) {
-                console.error('Error showing aj product:', error);
-                return 'Error: ' + error.message;
-            }
-        };
-        
-        // Function to make aj product featured
-        window.makeAjFeatured = function() {
-            console.log('Making aj product featured...');
-            
-            try {
-                const adminData = JSON.parse(localStorage.getItem('adminPanelData') || '{}');
-                const products = adminData.products || [];
-                
-                console.log('All products in admin:', products.map(p => ({ name: p.name, featured: p.featured })));
-                
-                // Find the aj product
-                let ajProduct = products.find(p => p.name === 'aj');
-                if (!ajProduct) {
-                    ajProduct = products.find(p => p.name.toLowerCase().includes('aj'));
-                }
-                
-                if (!ajProduct) {
-                    console.log('aj product not found in admin data');
-                    console.log('Available products:', products.map(p => p.name));
-                    return 'aj product not found in admin data';
-                }
-                
-                // Make it featured
-                ajProduct.featured = true;
-                
-                // Save back to localStorage
-                localStorage.setItem('adminPanelData', JSON.stringify(adminData));
-                
-                console.log('aj product is now featured!');
-                return `aj product "${ajProduct.name}" is now featured!`;
-            } catch (error) {
-                console.error('Error making aj featured:', error);
-                return 'Error: ' + error.message;
-            }
-        };
-        
-        // Function to clear all cached products and force reload from database
-        window.clearCachedProducts = async function() {
-            console.log('🧹 Clearing cached products...');
-            
-            try {
-                // Step 1: Clear localStorage
-                const adminData = JSON.parse(localStorage.getItem('adminPanelData') || '{}');
-                console.log('Products in localStorage before clear:', adminData.products?.length || 0);
-                
-                // Clear products from localStorage
-                adminData.products = [];
-                localStorage.setItem('adminPanelData', JSON.stringify(adminData));
-                console.log('✅ localStorage products cleared');
-                
-                // Step 2: Clear API cache
-                if (window.apiClient && window.apiClient.clearCache) {
-                    window.apiClient.clearCache();
-                    console.log('✅ API cache cleared');
-                }
-                
-                // Step 3: Force reload from backend
-                if (window.productDisplay) {
-                    console.log('🔄 Force reloading products from backend...');
-                    await window.productDisplay.loadProducts();
-                    window.productDisplay.displayProductsOnPageLoad();
-                    console.log('✅ Products reloaded from backend:', window.productDisplay.products.length);
-                    
-                    return `✅ Cache cleared! Loaded ${window.productDisplay.products.length} products from database.`;
-                } else {
-                    console.log('⚠️ ProductDisplay not available, reloading page...');
-                    location.reload();
-                    return '✅ Cache cleared! Page reloading...';
-                }
-            } catch (error) {
-                console.error('❌ Error clearing cache:', error);
-                return `❌ Error: ${error.message}`;
-            }
-        };
-        
-        // Function to check admin data
-        window.checkAdminData = function() {
-            console.log('Checking admin data...');
-            
-            try {
-                const adminData = JSON.parse(localStorage.getItem('adminPanelData') || '{}');
-                console.log('Admin data keys:', Object.keys(adminData));
-                console.log('Products count:', adminData.products?.length || 0);
-                console.log('All products:', adminData.products?.map(p => ({ 
-                    name: p.name, 
-                    featured: p.featured, 
-                    brand: p.brand,
-                    price: p.price 
-                })) || []);
-                
-                return `Admin data checked: ${adminData.products?.length || 0} products found`;
-            } catch (error) {
-                console.error('Error checking admin data:', error);
-                return 'Error: ' + error.message;
-            }
-        };
-        
-        // Function to add aj product if missing
-        window.addAjProduct = function() {
-            console.log('Adding aj product...');
-            
-            try {
-                const adminData = JSON.parse(localStorage.getItem('adminPanelData') || '{}');
-                const products = adminData.products || [];
-                
-                // Check if aj product already exists
-                const existingAj = products.find(p => p.name === 'aj' || p.name.toLowerCase().includes('aj'));
-                if (existingAj) {
-                    console.log('aj product already exists:', existingAj);
-                    return `aj product already exists: ${existingAj.name}`;
-                }
-                
-                // Create new aj product
-                const newAjProduct = {
-                    id: Date.now(),
-                    name: 'aj',
-                    brand: 'Michael Kors',
-                    price: 6784,
-                    category: 'sunglasses',
-                    featured: true,
-                    image: '',
-                    description: 'Premium sunglasses by Michael Kors'
-                };
-                
-                // Add to products array
-                products.push(newAjProduct);
-                adminData.products = products;
-                
-                // Save to localStorage
-                localStorage.setItem('adminPanelData', JSON.stringify(adminData));
-                
-                console.log('aj product added successfully!');
-                return `aj product added: ${newAjProduct.name} (${newAjProduct.brand}) - ₹${newAjProduct.price}`;
-            } catch (error) {
-                console.error('Error adding aj product:', error);
-                return 'Error: ' + error.message;
-            }
-        };
-        
-        // Function to show all products (not just featured)
-        window.showAllProducts = function() {
-            console.log('Showing all products...');
-            
-            try {
-                // Check/create container
-                checkFeaturedContainer();
-                
-                const adminData = JSON.parse(localStorage.getItem('adminPanelData') || '{}');
-                const products = adminData.products || [];
-                
-                console.log('All products found:', products.length);
-                console.log('All products:', products.map(p => p.name));
-                
-                const featuredContainer = document.getElementById('featuredProducts');
-                if (featuredContainer && products.length > 0) {
-                    featuredContainer.innerHTML = products.map(product => `
-                        <article class="product-card">
-                            <div class="product-card__media">
-                                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xMDAgODBDMTEwLjQ2MSA4MCAxMjAgODkuNTM5IDEyMCAxMDBDMTIwIDExMC40NjEgMTEwLjQ2MSAxMjAgMTAwIDEyMEM4OS41MzkxIDEyMCA4MCAxMTAuNDYxIDgwIDEwMEM4MCA4OS41MzkgODkuNTM5MSA4MCAxMDAgODBaIiBmaWxsPSIjOUNBM0FGIi8+CjxwYXRoIGQ9Ik0xMDAgMTQwQzEwNS41MjMgMTQwIDExMCAxMzUuNTIzIDExMCAxMzBDMTEwIDEyNC40NzcgMTA1LjUyMyAxMjAgMTAwIDEyMEM5NC40NzcyIDEyMCA5MCAxMjQuNDc3IDkwIDEzMEM5MCAxMzUuNTIzIDk0LjQ3NzIgMTQwIDEwMCAxNDBaIiBmaWxsPSIjOUNBM0FGIi8+Cjwvc3ZnPgo=" 
-                                     alt="${product.name}" 
-                                     style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px;">
-                            </div>
-                            <h3 class="product-card__title">${product.name} ${product.featured ? '⭐' : ''}</h3>
-                            <p class="product-card__price">₹ ${product.price.toLocaleString()}</p>
-                            <button class="btn" onclick="window.productDisplay ? window.productDisplay.viewProduct('${product.id}') : alert('Product system not loaded')">View Details</button>
-                        </article>
-                    `).join('');
-                    
-                    console.log(`Displayed ${products.length} products`);
-                    return `Displayed ${products.length} products: ${products.map(p => p.name).join(', ')}`;
-                } else {
-                    console.log('Featured container not found or no products');
-                    return 'Featured container not found or no products';
-                }
-            } catch (error) {
-                console.error('Error showing all products:', error);
-                return 'Error: ' + error.message;
-            }
-        };
-        
-        // Function to check and create featured container if missing
-        window.checkFeaturedContainer = function() {
-            console.log('Checking featured container...');
-            
-            let featuredContainer = document.getElementById('featuredProducts');
-            if (!featuredContainer) {
-                console.log('Featured container not found, looking for alternatives...');
-                
-                // Try to find the Gucci Spotlight section
-                const gucciSection = document.querySelector('h2:contains("Gucci Spotlight")') || 
-                                   document.querySelector('h2[class*="section__title"]');
-                
-                if (gucciSection) {
-                    console.log('Found Gucci Spotlight section, creating container...');
-                    const container = document.createElement('div');
-                    container.id = 'featuredProducts';
-                    container.className = 'grid-4';
-                    gucciSection.parentElement.appendChild(container);
-                    featuredContainer = container;
-                    console.log('Featured container created!');
-                } else {
-                    console.log('Could not find suitable section to create container');
-                    return 'Could not create featured container';
-                }
-            } else {
-                console.log('Featured container found:', featuredContainer);
-            }
-            
-            return `Featured container: ${featuredContainer ? 'Found/Created' : 'Not found'}`;
-        };
-        
-        // Function to force display all featured products
-        window.showAllFeaturedProducts = function() {
-            console.log('Showing all featured products...');
-            
-            try {
-                // Check/create container
-                checkFeaturedContainer();
-                
-                const adminData = JSON.parse(localStorage.getItem('adminPanelData') || '{}');
-                const products = adminData.products || [];
-                const featuredProducts = products.filter(p => p.featured);
-                
-                console.log('Featured products found:', featuredProducts.length);
-                console.log('Featured products:', featuredProducts.map(p => p.name));
-                
-                const featuredContainer = document.getElementById('featuredProducts');
-                if (featuredContainer && featuredProducts.length > 0) {
-                    featuredContainer.innerHTML = featuredProducts.map(product => `
-                        <article class="product-card">
-                            <div class="product-card__media">
-                                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xMDAgODBDMTEwLjQ2MSA4MCAxMjAgODkuNTM5IDEyMCAxMDBDMTIwIDExMC40NjEgMTEwLjQ2MSAxMjAgMTAwIDEyMEM4OS41MzkxIDEyMCA4MCAxMTAuNDYxIDgwIDEwMEM4MCA4OS41MzkgODkuNTM5MSA4MCAxMDAgODBaIiBmaWxsPSIjOUNBM0FGIi8+CjxwYXRoIGQ9Ik0xMDAgMTQwQzEwNS41MjMgMTQwIDExMCAxMzUuNTIzIDExMCAxMzBDMTEwIDEyNC40NzcgMTA1LjUyMyAxMjAgMTAwIDEyMEM5NC40NzcyIDEyMCA5MCAxMjQuNDc3IDkwIDEzMEM5MCAxMzUuNTIzIDk0LjQ3NzIgMTQwIDEwMCAxNDBaIiBmaWxsPSIjOUNBM0FGIi8+Cjwvc3ZnPgo=" 
-                                     alt="${product.name}" 
-                                     style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px;">
-                            </div>
-                            <h3 class="product-card__title">${product.name}</h3>
-                            <p class="product-card__price">₹ ${product.price.toLocaleString()}</p>
-                            <button class="btn" onclick="window.productDisplay ? window.productDisplay.viewProduct('${product.id}') : alert('Product system not loaded')">View Details</button>
-                        </article>
-                    `).join('');
-                    
-                    console.log(`Displayed ${featuredProducts.length} featured products`);
-                    return `Displayed ${featuredProducts.length} featured products: ${featuredProducts.map(p => p.name).join(', ')}`;
-                } else {
-                    console.log('Featured container not found or no featured products');
-                    return 'Featured container not found or no featured products';
-                }
-            } catch (error) {
-                console.error('Error showing featured products:', error);
-                return 'Error: ' + error.message;
-            }
-        };
-        
-        // Function to sync products with the main product system
-        window.syncProductsWithSystem = function() {
-            console.log('Syncing products with main system...');
-            
-            try {
-                // Check if productDisplay exists
-                if (!window.productDisplay) {
-                    console.log('ProductDisplay not found, creating...');
-                    // Try to initialize it
-                    if (typeof ProductDisplay !== 'undefined') {
-                        window.productDisplay = new ProductDisplay();
-                    } else {
-                        console.log('ProductDisplay class not available');
-                        return 'ProductDisplay class not available';
-                    }
-                }
-                
-                // Force reload products
-                window.productDisplay.loadProducts();
-                
-                console.log('Products synced:', window.productDisplay.products.length);
-                console.log('Featured products:', window.productDisplay.products.filter(p => p.featured).length);
-                
-                // Check if aj product is in the system
-                const ajProduct = window.productDisplay.products.find(p => p.name === 'aj');
-                if (ajProduct) {
-                    console.log('aj product found in system:', ajProduct);
-                    return `Products synced! aj product found with ID: ${ajProduct.id}`;
-                } else {
-                    console.log('aj product not found in system');
-                    return 'Products synced, but aj product not found in system';
-                }
-            } catch (error) {
-                console.error('Error syncing products:', error);
-                return 'Error: ' + error.message;
-            }
-        };
-        
-        // Function to test product viewing
-        window.testAjProductView = function() {
-            console.log('Testing aj product view...');
-            
-            try {
-                if (!window.productDisplay) {
-                    return 'ProductDisplay not available';
-                }
-                
-                const ajProduct = window.productDisplay.products.find(p => p.name === 'aj');
-                if (!ajProduct) {
-                    return 'aj product not found in ProductDisplay';
-                }
-                
-                console.log('Found aj product:', ajProduct);
-                console.log('Product ID:', ajProduct.id, 'Type:', typeof ajProduct.id);
-                console.log('All products:', window.productDisplay.products.map(p => ({ name: p.name, id: p.id, type: typeof p.id })));
-                
-                // Try to view the product
-                window.productDisplay.viewProduct(ajProduct.id);
-                
-                return `aj product view test completed for ID: ${ajProduct.id}`;
-            } catch (error) {
-                console.error('Error testing aj product view:', error);
-                return 'Error: ' + error.message;
-            }
-        };
-        
-        // Function to force reload products and test aj product
-        window.forceReloadAndTestAj = function() {
-            console.log('Force reloading products and testing aj...');
-            
-            try {
-                // Force reload products
-                if (window.productDisplay) {
-                    window.productDisplay.loadProducts();
-                    console.log('Products reloaded:', window.productDisplay.products.length);
-                }
-                
-                // Check admin data directly
-                const adminData = JSON.parse(localStorage.getItem('adminPanelData') || '{}');
-                const adminProducts = adminData.products || [];
-                const ajInAdmin = adminProducts.find(p => p.name === 'aj');
-                
-                console.log('Admin products:', adminProducts.length);
-                console.log('aj in admin:', ajInAdmin);
-                
-                if (ajInAdmin) {
-                    console.log('aj product found in admin:', ajInAdmin);
-                    
-                    // Try to find it in ProductDisplay
-                    const ajInSystem = window.productDisplay?.products.find(p => p.name === 'aj');
-                    console.log('aj in ProductDisplay:', ajInSystem);
-                    
-                    if (ajInSystem) {
-                        console.log('Testing viewProduct with ID:', ajInSystem.id);
-                        window.productDisplay.viewProduct(ajInSystem.id);
-                        return `aj product found and tested with ID: ${ajInSystem.id}`;
-                    } else {
-                        return 'aj product in admin but not in ProductDisplay system';
-                    }
-                } else {
-                    return 'aj product not found in admin data';
-                }
-            } catch (error) {
-                console.error('Error in force reload:', error);
-                return 'Error: ' + error.message;
-            }
-        };
-        
-        console.log('Debug functions added: debugProducts(), forceSyncProducts(), fixAllImages(), showAjProduct(), makeAjFeatured(), addAjProduct(), checkAdminData(), showAllProducts(), checkFeaturedContainer(), showAllFeaturedProducts(), syncProductsWithSystem(), testAjProductView(), forceReloadAndTestAj()');
-        
-        // Test if the function is working
-        console.log('Testing showOfflineProducts function...');
-        console.log('Function exists:', typeof window.showOfflineProducts);
-        
-        
-        
-        // Ultra simple test function
-        window.testSimple = function() {
-            console.log('=== ULTRA SIMPLE TEST ===');
-            const div = document.createElement('div');
-            div.innerHTML = '<h1 style="color: red; background: yellow; padding: 20px;">TEST PRODUCTS WORKING!</h1>';
-            div.style.cssText = 'position: fixed; top: 50px; left: 50px; z-index: 9999; border: 5px solid red;';
-            document.body.appendChild(div);
-            console.log('Test div added!');
-            return 'Test completed!';
-        };
-        
-    </script>
-    
-    <!-- Load JavaScript files (single include set) -->
+    <!-- Load JavaScript files -->
     <script src="js/api-client.js" defer></script>
     <script src="js/idb.js" defer></script>
     <script src="js/main.js" defer></script>
@@ -1546,47 +519,6 @@
     <script src="js/products.js" defer></script>
     <script src="js/website-content.js" defer></script>
     <script src="js/analytics.js" defer></script>
-    
-    <!-- Initialize systems when DOM is ready -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded, initializing systems...');
-            
-            // Initialize ProductDisplay if not already present
-            if (!window.productDisplay) {
-                console.log('Initializing ProductDisplay...');
-                window.productDisplay = new ProductDisplay();
-            }
-            
-            // Initialize WebsiteContentManager if not already present
-            if (!window.websiteContentManager) {
-                console.log('Initializing WebsiteContentManager...');
-                window.websiteContentManager = new WebsiteContentManager();
-            }
-            
-            // Test admin integration
-            window.testAdminIntegration = function() {
-                console.log('Testing admin integration...');
-                console.log('API Client available:', !!window.apiClient);
-                console.log('ProductDisplay available:', !!window.productDisplay);
-                console.log('WebsiteContentManager available:', !!window.websiteContentManager);
-                
-                if (window.apiClient) {
-                    console.log('Testing API connection...');
-                    window.apiClient.getProducts().then(response => {
-                        console.log('API test successful:', response);
-                    }).catch(error => {
-                        console.error('API test failed:', error);
-                    });
-                }
-                
-                return 'Admin integration test complete - check console for details';
-            };
-            
-            console.log('All systems initialized successfully!');
-        });
-    </script>
+    <script src="js/init.js" defer></script>
 </body>
 </html>
-
-
