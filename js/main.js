@@ -2070,39 +2070,39 @@ class PhotoSlider {
         
         const heroImages = [
             {
-                url: 'uploads/brand-posters/boss.jpg',
+                url: 'assets/boss.jpg',
                 alt: 'BOSS Eyewear'
             },
             {
-                url: 'uploads/brand-posters/montblanc.jpg',
+                url: 'assets/montblanc.jpg',
                 alt: 'Montblanc Eyewear'
             },
             {
-                url: 'uploads/brand-posters/carrera.jpg',
+                url: 'assets/carrera.jpg',
                 alt: 'Carrera Eyewear'
             },
             {
-                url: 'uploads/brand-posters/philipp-plein.jpg',
+                url: 'assets/philipp-plein.jpg',
                 alt: 'Philipp Plein Eyewear'
             },
             {
-                url: 'uploads/brand-posters/michael-kors.jpg',
+                url: 'assets/michael-kors.jpg',
                 alt: 'Michael Kors Eyewear'
             },
             {
-                url: 'uploads/brand-posters/marc-jacobs.jpg',
+                url: 'assets/marc-jacobs.jpg',
                 alt: 'Marc Jacobs Eyewear'
             },
             {
-                url: 'uploads/brand-posters/dolce-gabbana.jpg',
+                url: 'assets/dolce-gabbana.jpg',
                 alt: 'Dolce & Gabbana Eyewear'
             },
             {
-                url: 'uploads/brand-posters/tom-ford.jpg',
+                url: 'assets/tom-ford.jpg',
                 alt: 'Tom Ford Eyewear'
             },
             {
-                url: 'uploads/brand-posters/burberry.jpg',
+                url: 'assets/burberry.jpg',
                 alt: 'Burberry Eyewear'
             }
         ];
