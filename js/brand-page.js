@@ -25,16 +25,10 @@ class BrandPage {
     }
 
     updatePageContent() {
-        // Update page title
         document.getElementById('pageTitle').textContent = `${this.brand} Products - MONICA OPTO HUB`;
-        
-        // Update brand title
         document.getElementById('brandTitle').textContent = `${this.brand} Collection`;
-        
-        // Update current brand in breadcrumb
         document.getElementById('currentBrand').textContent = this.brand;
         
-        // Update brand description
         const descriptions = {
             'Titan': 'Discover Titan\'s innovative eyewear collection featuring cutting-edge technology and contemporary designs.',
             'Ray-Ban': 'Explore Ray-Ban\'s iconic sunglasses collection, from classic aviators to modern styles.',
@@ -55,7 +49,6 @@ class BrandPage {
     }
 
     async loadProducts() {
-        // Show loading indicator
         this.showLoading();
         
         try {
@@ -72,12 +65,9 @@ class BrandPage {
                 this.displayProducts();
             }
             
-            // Then try API in background to sync (with shorter timeout for faster loading)
             if (window.apiClient && localProducts.length === 0) {
-                // Only wait for API if we don't have localStorage data
                 try {
                     console.log('Fetching from API (no localStorage data)...');
-                    // Use shorter timeout for brand page (3 seconds instead of 10)
                     const apiPromise = window.apiClient.getProducts({ brand: this.brand });
                     const timeoutPromise = new Promise((_, reject) => 
                         setTimeout(() => reject(new Error('API timeout')), 3000)
@@ -89,13 +79,11 @@ class BrandPage {
                     this.displayProducts();
                 } catch (apiError) {
                     console.warn('API request failed or timed out:', apiError.message);
-                    // Show error if no products at all
                     if (this.products.length === 0) {
-                        this.displayProducts(); // Will show "no products" message
+                        this.displayProducts();
                     }
                 }
             } else if (window.apiClient && localProducts.length > 0) {
-                // We have localStorage data, sync with API in background (non-blocking)
                 window.apiClient.getProducts({ brand: this.brand })
                     .then(response => {
                         const apiProducts = response.products || [];
@@ -107,23 +95,19 @@ class BrandPage {
                     })
                     .catch(err => {
                         console.log('Background API sync failed (non-critical):', err.message);
-                        // Keep using localStorage data
                     });
             } else {
-                // No API client, use localStorage
                 if (this.products.length === 0) {
                     this.products = localProducts;
                     this.displayProducts();
                 }
             }
             
-            // If still no products, show message
             if (this.products.length === 0) {
                 this.displayProducts();
             }
         } catch (error) {
             console.error('Error loading products:', error);
-            // Try localStorage as final fallback
             const adminData = JSON.parse(localStorage.getItem('adminPanelData') || '{}');
             const allProducts = adminData.products || [];
             this.products = allProducts.filter(product => product.brand === this.brand);
@@ -154,15 +138,10 @@ class BrandPage {
             noProductsMessage.style.display = 'none';
         }
         
-        // Add spin animation if not exists
         if (!document.getElementById('loading-spin-style')) {
             const style = document.createElement('style');
             style.id = 'loading-spin-style';
-            style.textContent = `
-                @keyframes spin {
-                    to { transform: rotate(360deg); }
-                }
-            `;
+            style.textContent = `@keyframes spin { to { transform: rotate(360deg); } }`;
             document.head.appendChild(style);
         }
     }
@@ -179,21 +158,21 @@ class BrandPage {
         
         container.style.display = 'grid';
         noProductsMessage.style.display = 'none';
-        
         container.innerHTML = this.products.map(product => this.renderProductCard(product)).join('');
     }
 
     renderProductCard(product) {
-        // Get the primary image or first available image
         let imageUrl = this.getPlaceholderImage();
         
         if (product.images && product.images.length > 0) {
-            // Use the primary image or first image
             const primaryImage = product.images.find(img => img.is_primary) || product.images[0];
             imageUrl = primaryImage.image_url;
         } else if (product.image_url) {
             imageUrl = product.image_url;
         }
+
+        // ✅ FIX: Use _id (MongoDB) or id (localStorage)
+        const productId = product._id || product.id;
         
         return `
             <article class="product-card">
@@ -210,14 +189,14 @@ class BrandPage {
                     <span class="product-category">${product.category}</span>
                     <span class="product-gender">${product.gender}</span>
                 </div>
-                <button class="btn btn--ghost view-details-btn" data-product-id="${product.id}">View Details</button>
+                <button class="btn btn--ghost view-details-btn" data-product-id="${productId}">View Details</button>
                 <button class="btn btn--primary add-to-cart-btn" 
                         data-product-name="${product.name}" 
                         data-product-brand="${product.brand}"
                         data-product-price="${product.price}"
                         data-product-category="${product.category}"
                         data-product-model="${product.model || ''}"
-                        data-product-id="${product.id}">🛒 Add to Cart</button>
+                        data-product-id="${productId}">🛒 Add to Cart</button>
             </article>
         `;
     }
@@ -227,7 +206,6 @@ class BrandPage {
     }
 
     setupEventListeners() {
-        // Handle view details buttons
         document.addEventListener('click', (e) => {
             if (e.target.classList.contains('view-details-btn')) {
                 e.preventDefault();
@@ -236,7 +214,6 @@ class BrandPage {
             }
         });
 
-        // Handle Add to Cart buttons
         document.addEventListener('click', (e) => {
             if (e.target.classList.contains('add-to-cart-btn')) {
                 e.preventDefault();
@@ -252,13 +229,14 @@ class BrandPage {
     }
 
     viewProduct(productId) {
-        const product = this.products.find(p => p.id === productId);
+        // ✅ FIX: Check both _id (MongoDB) and id (localStorage)
+        const product = this.products.find(p => (p._id || p.id) === productId);
         if (!product) {
+            console.error('Product not found with ID:', productId);
             alert('Product not found');
             return;
         }
 
-        // Create modal
         const modal = document.createElement('div');
         modal.style.cssText = `
             position: fixed;
@@ -289,37 +267,34 @@ class BrandPage {
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
                     <div>
                         <div style="position: relative;">
-                            <button class="gallery-prev" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);background:#0008;color:#fff;border:none;border-radius:6px;padding:6px 10px;cursor:pointer">‹</button>
+                            ${images.length > 1 ? `<button class="gallery-prev" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);background:#0008;color:#fff;border:none;border-radius:6px;padding:6px 10px;cursor:pointer">‹</button>` : ''}
                             <img class="gallery-main" src="${images[0]}" alt="${product.name}" style="width: 100%; height: 250px; object-fit: cover; border-radius: 8px; border: 2px solid #f1f5f9;">
-                            <button class="gallery-next" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:#0008;color:#fff;border:none;border-radius:6px;padding:6px 10px;cursor:pointer">›</button>
+                            ${images.length > 1 ? `<button class="gallery-next" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:#0008;color:#fff;border:none;border-radius:6px;padding:6px 10px;cursor:pointer">›</button>` : ''}
                         </div>
+                        ${images.length > 1 ? `
                         <div class="gallery-thumbs" style="display:flex;gap:8px;margin-top:10px;overflow-x:auto;">
                             ${images.map((src, idx) => `
                                 <img data-index="${idx}" src="${src}" style="width:60px;height:60px;object-fit:cover;border-radius:6px;border:2px solid ${idx===0?'#DEA193':'#e5e7eb'};cursor:pointer;" />
                             `).join('')}
-                        </div>
+                        </div>` : ''}
                     </div>
                     <div>
                         <div style="margin-bottom: 15px;">
                             <strong style="color: #475569;">Brand:</strong> 
                             <span style="color: #0f172a; font-weight: 500;">${product.brand}</span>
                         </div>
-                        
                         <div style="margin-bottom: 15px;">
                             <strong style="color: #475569;">Category:</strong> 
                             <span style="color: #0f172a; font-weight: 500;">${product.category}</span>
                         </div>
-                        
                         <div style="margin-bottom: 15px;">
                             <strong style="color: #475569;">Gender:</strong> 
                             <span style="color: #0f172a; font-weight: 500;">${product.gender}</span>
                         </div>
-                        
                         <div style="margin-bottom: 15px;">
                             <strong style="color: #475569;">Model:</strong> 
                             <span style="color: #0f172a; font-weight: 500;">${product.model || 'N/A'}</span>
                         </div>
-                        
                         <div style="margin-bottom: 20px; padding: 15px; background: linear-gradient(135deg, #DEA193, #BA867B); border-radius: 12px; text-align: center; box-shadow: 0 4px 15px rgba(222, 161, 147, 0.3);">
                             <strong style="color: white; font-size: 1.1rem;">Price</strong><br>
                             <span style="color: white; font-size: 1.5em; font-weight: bold;">₹ ${product.price.toLocaleString()}</span>
@@ -347,46 +322,41 @@ class BrandPage {
         
         document.body.appendChild(modal);
         
-        // Add event listeners
         const closeButtons = modal.querySelectorAll('.close-modal-btn');
         const addToCartButton = modal.querySelector('.add-to-cart-modal-btn');
         const mainImg = modal.querySelector('.gallery-main');
-        const prevBtn = modal.querySelector('.gallery-prev');
-        const nextBtn = modal.querySelector('.gallery-next');
+        const prevBtn = images.length > 1 ? modal.querySelector('.gallery-prev') : null;
+        const nextBtn = images.length > 1 ? modal.querySelector('.gallery-next') : null;
         const thumbs = Array.from(modal.querySelectorAll('.gallery-thumbs img'));
         
         closeButtons.forEach(btn => {
-            btn.addEventListener('click', () => {
-                modal.remove();
-            });
+            btn.addEventListener('click', () => modal.remove());
         });
         
         if (addToCartButton) {
             addToCartButton.addEventListener('click', () => {
-                this.openAddToCartModal(product.name, product.brand, product.price, product.category, product.model, product.id);
+                // ✅ FIX: Use _id or id when passing to cart
+                this.openAddToCartModal(product.name, product.brand, product.price, product.category, product.model, product._id || product.id);
                 modal.remove();
             });
         }
 
         function showImage(index) {
             if (index < 0) index = images.length - 1;
-            if (index >= images.length) index = images.length - 1;
+            if (index >= images.length) index = 0;
             currentIndex = index;
             mainImg.src = images[currentIndex];
             thumbs.forEach((t, i) => t.style.borderColor = i === currentIndex ? '#DEA193' : '#e5e7eb');
         }
+
         if (prevBtn) prevBtn.addEventListener('click', () => showImage(currentIndex - 1));
         if (nextBtn) nextBtn.addEventListener('click', () => showImage(currentIndex + 1));
         thumbs.forEach(t => t.addEventListener('click', (e) => showImage(parseInt(e.currentTarget.getAttribute('data-index')))));
         
-        // Close modal when clicking outside
         modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.remove();
-            }
+            if (e.target === modal) modal.remove();
         });
         
-        // Close modal with Escape key
         const handleEscape = (e) => {
             if (e.key === 'Escape') {
                 modal.remove();
@@ -434,7 +404,6 @@ style.textContent = `
         margin: 10px 0;
         font-size: 0.9rem;
     }
-    
     .product-category, .product-gender {
         background: #f1f5f9;
         padding: 4px 8px;
@@ -442,17 +411,14 @@ style.textContent = `
         color: #475569;
         font-size: 0.8rem;
     }
-    
     .product-category {
         background: #dbeafe;
         color: #1e40af;
     }
-    
     .product-gender {
         background: #f0fdf4;
         color: #166534;
     }
-    
     @keyframes fadeIn {
         from { opacity: 0; }
         to { opacity: 1; }
