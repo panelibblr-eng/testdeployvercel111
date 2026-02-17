@@ -245,8 +245,6 @@ class ProductDisplay {
                     images: product.images && Array.isArray(product.images) ? product.images : (product.image_url ? [{ image_url: product.image_url }] : [])
                 }));
                 
-                // Removed verbose processing logs
-                
                 // Debug: Log products with multiple images
                 const productsWithMultipleImages = this.products.filter(p => p.images && p.images.length > 1);
                 if (productsWithMultipleImages.length > 0) {
@@ -367,6 +365,9 @@ class ProductDisplay {
         if (sliderImages.length > 1) {
             console.log(`Product "${product.name}" has ${sliderImages.length} images:`, sliderImages);
         }
+
+        // ✅ FIX: Use _id (MongoDB) or id (localStorage) 
+        const productId = product._id || product.id;
         
         return `
             <article class="product-card">
@@ -382,14 +383,14 @@ class ProductDisplay {
                 </div>
                 <h3 class="product-card__title">${product.name}</h3>
                 <p class="product-card__price">₹ ${product.price.toLocaleString()}</p>
-                <button class="btn btn--ghost view-details-btn" data-product-id="${product.id}">View Details</button>
+                <button class="btn btn--ghost view-details-btn" data-product-id="${productId}">View Details</button>
                 <button class="btn btn--primary add-to-cart-btn" 
                         data-product-name="${product.name}" 
                         data-product-brand="${product.brand}"
                         data-product-price="${product.price}"
                         data-product-category="${product.category}"
                         data-product-model="${product.model || ''}"
-                        data-product-id="${product.id}" style="width: 100%; margin-top: 10px;">🛒 Add to Cart</button>
+                        data-product-id="${productId}" style="width: 100%; margin-top: 10px;">🛒 Add to Cart</button>
             </article>
         `;
     }
@@ -432,7 +433,6 @@ class ProductDisplay {
         console.log(`Displaying ${productsToShow.length} products in ${containerId} (category: ${category}, gender: ${gender || 'all'})`);
 
         // Render products
-        // Optimize large DOM updates using DocumentFragment
         const html = productsToShow.map(product => this.renderProductCard(product)).join('');
         container.innerHTML = html;
 
@@ -486,13 +486,11 @@ class ProductDisplay {
 
         const allFeatured = this.getFeaturedProducts();
         console.log('Total featured products found:', allFeatured.length);
-        console.log('Featured products:', allFeatured.map(p => ({ id: p.id, name: p.name, featured: p.featured })));
+        console.log('Featured products:', allFeatured.map(p => ({ id: p._id || p.id, name: p.name, featured: p.featured })));
         
         const featuredProducts = limit 
             ? allFeatured.slice(0, limit)
             : allFeatured;
-        
-        // Removed verbose display logging
         
         if (featuredProducts.length === 0) {
             container.innerHTML = `
@@ -505,10 +503,8 @@ class ProductDisplay {
         }
 
         container.innerHTML = featuredProducts.map(product => this.renderProductCard(product)).join('');
-        // Removed verbose rendering logging
         
         // Ensure container has proper width to show all products
-        const totalWidth = featuredProducts.length * (container.offsetWidth / 4); // 4 products visible at a time
         container.style.width = '100%';
         container.style.overflowX = 'auto';
         
@@ -597,9 +593,7 @@ class ProductDisplay {
         container.style.overflowX = 'auto';
         container.style.overflowY = 'hidden';
         
-        // Use requestAnimationFrame to avoid forced reflows and reduce setTimeout handler time
         requestAnimationFrame(() => {
-            // Re-check if elements still exist (they might have been removed from DOM)
             const currentPrevBtn = document.getElementById('trendingPrev');
             const currentNextBtn = document.getElementById('trendingNext');
             const currentContainer = document.getElementById('trendingProducts');
@@ -609,43 +603,33 @@ class ProductDisplay {
                 return;
             }
             
-            // Verify buttons have parent nodes before trying to replace
             if (!currentPrevBtn.parentNode || !currentNextBtn.parentNode) {
                 console.warn('⚠️ Trending slider buttons have no parent node, skipping replacement');
                 return;
             }
             
-            // Batch DOM reads to avoid forced reflows
             const scrollWidth = currentContainer.scrollWidth;
             const clientWidth = currentContainer.clientWidth;
             const isScrollable = scrollWidth > clientWidth + 10;
             
             if (!this._hasLoggedSliderDimensions) {
-                console.log('Trending slider dimensions:', {
-                    scrollWidth,
-                    clientWidth,
-                    isScrollable
-                });
+                console.log('Trending slider dimensions:', { scrollWidth, clientWidth, isScrollable });
                 this._hasLoggedSliderDimensions = true;
             }
             
-            const scrollAmount = clientWidth * 0.8; // Scroll 80% of container width
+            const scrollAmount = clientWidth * 0.8;
             
-            // Remove existing listeners to prevent duplicates
             const prevClone = currentPrevBtn.cloneNode(true);
             const nextClone = currentNextBtn.cloneNode(true);
             currentPrevBtn.parentNode.replaceChild(prevClone, currentPrevBtn);
             currentNextBtn.parentNode.replaceChild(nextClone, currentNextBtn);
             
-            // Re-query after replacement
             const newPrevBtn = document.getElementById('trendingPrev');
             const newNextBtn = document.getElementById('trendingNext');
             const newContainer = document.getElementById('trendingProducts');
             
             if (newPrevBtn && newNextBtn && newContainer) {
-                // Use already calculated isScrollable to avoid forced reflow
                 if (!isScrollable) {
-                    // Batch style updates to reduce reflows
                     requestAnimationFrame(() => {
                         newPrevBtn.style.opacity = '0.5';
                         newPrevBtn.style.pointerEvents = 'none';
@@ -655,79 +639,55 @@ class ProductDisplay {
                         newNextBtn.style.cursor = 'not-allowed';
                     });
                 } else {
-                    // Only add click handlers if scrollable
                     newPrevBtn.addEventListener('click', (e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        console.log('⬅️ Trending slider prev clicked');
-                        newContainer.scrollBy({
-                            left: -scrollAmount,
-                            behavior: 'smooth'
-                        });
+                        newContainer.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
                     });
                     
                     newNextBtn.addEventListener('click', (e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        console.log('➡️ Trending slider next clicked');
-                        newContainer.scrollBy({
-                            left: scrollAmount,
-                            behavior: 'smooth'
-                        });
+                        newContainer.scrollBy({ left: scrollAmount, behavior: 'smooth' });
                     });
                 }
                 
-                // Show/hide buttons based on scroll position (always update, even if not scrollable)
-                // Throttle scroll handler to reduce forced reflows
                 let scrollTimeout;
                 const updateButtonVisibility = () => {
-                    if (!isScrollable) return; // Don't update if not scrollable
-                    
-                    // Cancel previous timeout to debounce
-                    if (scrollTimeout) {
-                        cancelAnimationFrame(scrollTimeout);
-                    }
-                    
-                    // Use requestAnimationFrame to batch style updates
+                    if (!isScrollable) return;
+                    if (scrollTimeout) cancelAnimationFrame(scrollTimeout);
                     scrollTimeout = requestAnimationFrame(() => {
-                        // Batch DOM reads
                         const scrollLeft = newContainer.scrollLeft;
                         const scrollWidth = newContainer.scrollWidth;
                         const clientWidth = newContainer.clientWidth;
-                        
-                        const isAtStart = scrollLeft <= 5; // Small threshold
+                        const isAtStart = scrollLeft <= 5;
                         const isAtEnd = scrollLeft >= scrollWidth - clientWidth - 5;
-                        
-                        // Batch style writes
                         newPrevBtn.style.opacity = isAtStart ? '0.5' : '1';
                         newPrevBtn.style.pointerEvents = isAtStart ? 'none' : 'auto';
                         newPrevBtn.style.cursor = isAtStart ? 'not-allowed' : 'pointer';
-                        
                         newNextBtn.style.opacity = isAtEnd ? '0.5' : '1';
                         newNextBtn.style.pointerEvents = isAtEnd ? 'none' : 'auto';
                         newNextBtn.style.cursor = isAtEnd ? 'not-allowed' : 'pointer';
                     });
                 };
                 
-                // Use passive listener for better performance
                 newContainer.addEventListener('scroll', updateButtonVisibility, { passive: true });
-                // Initial check with requestAnimationFrame
                 requestAnimationFrame(updateButtonVisibility);
-                
                 console.log('✅ Trending slider controls initialized successfully');
             } else {
                 console.error('❌ Failed to initialize trending slider - elements not found after cloning');
             }
-        }); // Use requestAnimationFrame instead of setTimeout
+        });
     }
 
-    // View product details
+    // ✅ FIX: View product details - supports MongoDB _id and localStorage id
     viewProduct(productId) {
         console.log('=== VIEW PRODUCT CALLED ===');
         console.log('Product ID:', productId);
         console.log('Available products:', this.products.length);
         
-        const product = this.products.find(p => p.id === productId);
+        // ✅ FIXED LINE: Check both _id (MongoDB) and id (localStorage)
+        const product = this.products.find(p => (p._id || p.id) === productId);
         if (!product) {
             console.error('Product not found with ID:', productId);
             alert('Product not found');
@@ -782,23 +742,18 @@ class ProductDisplay {
         // Build images array for gallery - check multiple sources
         let images = [];
         
-        // Priority 1: Use images array from product_images table
         if (product.images && Array.isArray(product.images) && product.images.length > 0) {
             images = product.images.map(img => {
-                // Handle both object format { image_url: "..." } and string format
                 return typeof img === 'string' ? img : (img.image_url || img);
-            }).filter(img => img && img.trim() !== ''); // Filter out any null/undefined/empty values
-            
+            }).filter(img => img && img.trim() !== '');
             console.log(`Using ${images.length} images from product.images array`);
         }
         
-        // Priority 2: If no images from array, check if image_url exists
         if (images.length === 0 && product.image_url && product.image_url.trim() !== '') {
             images = [product.image_url];
             console.log('Using single image_url:', product.image_url);
         }
         
-        // Priority 3: Fallback to placeholder
         if (images.length === 0) {
             images = [this.getPlaceholderImage()];
             console.log('No images found, using placeholder');
@@ -892,7 +847,7 @@ class ProductDisplay {
         function showImage(index) {
             if (images.length === 0) return;
             if (index < 0) index = images.length - 1;
-            if (index >= images.length) index = 0; // Wrap around to first image
+            if (index >= images.length) index = 0;
             currentIndex = index;
             if (mainImg) {
                 mainImg.src = images[currentIndex];
@@ -910,14 +865,10 @@ class ProductDisplay {
         if (whatsappButton) {
             whatsappButton.addEventListener('click', () => {
                 const message = `Hi! I am interested in ${product.name} from ${product.brand}. Can you provide more information?`;
-                
                 console.log('Modal WhatsApp message:', message);
-                
-                // Use the global WhatsApp function if available
                 if (typeof window.openWhatsApp === 'function') {
                     window.openWhatsApp(message);
                 } else {
-                    // Fallback to direct WhatsApp URL
                     const cleanMessage = message.trim().replace(/\s+/g, ' ');
                     const encodedMessage = encodeURIComponent(cleanMessage);
                     const whatsappUrl = `https://wa.me/917000532010?text=${encodedMessage}`;
@@ -946,67 +897,26 @@ class ProductDisplay {
         console.log('✅ Product modal created and displayed');
     }
 
-    // Setup event listeners
-    setupEventListeners() {
-        // Listen for storage changes to update products when admin panel adds new ones
-        window.addEventListener('storage', (e) => {
-            if (e.key === 'adminPanelData') {
-                console.log('Storage event received, updating products smoothly...');
-                this.loadProducts();
-                this.refreshAllDisplays();
-            }
-        });
-
-        // Custom event for same-page updates - use smooth update instead of full refresh
-        window.addEventListener('adminDataUpdated', (e) => {
-            console.log('Admin data updated event received, updating products smoothly...');
-            if (e.detail && e.detail.products) {
-                // Only update if products actually changed
-                const newProducts = e.detail.products;
-                if (JSON.stringify(this.products) !== JSON.stringify(newProducts)) {
-                    console.log('Products changed, updating smoothly...');
-                    this.products = newProducts;
-                    this.saveProducts();
-                    this.refreshAllDisplays();
-                } else {
-                    console.log('Products unchanged, skipping update');
-                }
-            } else {
-                // Fallback to loading from localStorage
-                this.loadProducts();
-                this.refreshAllDisplays();
-            }
-        });
-    }
-
     // Display products when page loads
     displayProductsOnPageLoad() {
-        // Prevent multiple simultaneous calls
         if (this._displayingProducts) {
             console.log('⚠️ displayProductsOnPageLoad already in progress, skipping...');
             return;
         }
         this._displayingProducts = true;
         
-        // Only log on first display
         if (!this._hasDisplayedOnce) {
             console.log('Displaying products on page load...');
             console.log('Available products:', this.products.length);
         }
         
-        // Split work across multiple frames to avoid long-running tasks (>50ms)
-        // This prevents setTimeout handler violations
-        
-        // Frame 1: Load products (if needed) - non-blocking
         if (!this._hasLoadedOnce) {
             this.loadProducts();
         }
         
-        // Frame 2: Display featured products
         requestAnimationFrame(() => {
             this.displayFeaturedProducts('featuredProducts');
             
-            // Frame 3: Display category products
             requestAnimationFrame(() => {
                 if (document.getElementById('sunglassesGrid')) {
                     this.displayProducts('sunglassesGrid', 'sunglasses');
@@ -1015,7 +925,6 @@ class ProductDisplay {
                     this.displayProducts('opticalFramesGrid', 'optical-frames');
                 }
                 
-                // Frame 4: Display women's category products
                 requestAnimationFrame(() => {
                     if (document.getElementById('womenSunglassesGrid')) {
                         this.displayProducts('womenSunglassesGrid', 'sunglasses', null, 'women');
@@ -1024,7 +933,6 @@ class ProductDisplay {
                         this.displayProducts('womenOpticalFramesGrid', 'optical-frames', null, 'women');
                     }
                     
-                    // Frame 5: Display trending products
                     requestAnimationFrame(() => {
                         const trendingProducts = this.products.filter(p => {
                             return p.trending === true || p.trending === 1 || p.trending === '1' || p.trending === 'true';
@@ -1038,11 +946,9 @@ class ProductDisplay {
                             trendingProductsContainer.classList.add('product-slider');
                             trendingProductsContainer.innerHTML = productsToShow.map(product => this.renderProductCard(product)).join('');
                             
-                            // Frame 6: Initialize slider after DOM update
                             requestAnimationFrame(() => {
                                 this.initTrendingSlider();
                                 
-                                // Final: Log and reset
                                 requestAnimationFrame(() => {
                                     if (!this._hasDisplayedOnce) {
                                         console.log('Products displayed:', this.products.length);
@@ -1055,7 +961,6 @@ class ProductDisplay {
                                 });
                             });
                         } else {
-                            // No trending container
                             requestAnimationFrame(() => {
                                 if (!this._hasDisplayedOnce) {
                                     console.log('Products displayed:', this.products.length);
@@ -1072,25 +977,20 @@ class ProductDisplay {
 
     // Refresh all product displays on the page
     refreshAllDisplays() {
-        // Prevent multiple simultaneous refreshes
         if (this._refreshing) {
             console.log('⚠️ refreshAllDisplays already in progress, skipping...');
             return;
         }
         this._refreshing = true;
         
-        // Refresh featured products
         this.displayFeaturedProducts('featuredProducts');
         
-        // Refresh category-specific displays only if containers exist
         if (document.getElementById('sunglassesGrid')) {
             this.displayProducts('sunglassesGrid', 'sunglasses');
         }
         if (document.getElementById('opticalFramesGrid')) {
             this.displayProducts('opticalFramesGrid', 'optical-frames');
         }
-        
-        // Refresh women's category-specific displays
         if (document.getElementById('womenSunglassesGrid')) {
             this.displayProducts('womenSunglassesGrid', 'sunglasses', null, 'women');
         }
@@ -1098,28 +998,20 @@ class ProductDisplay {
             this.displayProducts('womenOpticalFramesGrid', 'optical-frames', null, 'women');
         }
         
-        // Refresh trending products (show products marked as trending, or fallback to latest 20)
         const trendingProducts = this.products.filter(p => {
-            // Handle both boolean true and number 1 from database
             return p.trending === true || p.trending === 1 || p.trending === '1' || p.trending === 'true';
         });
-        // Show all trending products (or up to 20 for performance), not just 4
         const productsToShow = trendingProducts.length > 0 
-            ? trendingProducts.slice(0, 20) // Show up to 20 trending products (scrollable)
-            : this.products.slice(-20).reverse(); // Fallback to latest 20 products
+            ? trendingProducts.slice(0, 20)
+            : this.products.slice(-20).reverse();
         
-        // ONLY display in trendingProducts container (not featuredProducts)
         const trendingProductsContainer = document.getElementById('trendingProducts');
         if (trendingProductsContainer) {
-            // Ensure container has the product-slider class for proper styling
             trendingProductsContainer.classList.add('product-slider');
-            
             trendingProductsContainer.innerHTML = productsToShow.map(product => this.renderProductCard(product)).join('');
             console.log(`Refreshed: Displayed ${productsToShow.length} trending products in trendingProducts container`);
             
-            // Re-initialize trending slider navigation after refresh (reset flag first)
             this._trendingSliderInitialized = false;
-            // Use requestAnimationFrame instead of setTimeout for better performance
             requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
                     this.initTrendingSlider();
@@ -1131,7 +1023,6 @@ class ProductDisplay {
             console.log(`Refreshed: Found ${trendingProducts.length} total trending products`);
         }
         
-        // Reset refresh flag after display completes
         requestAnimationFrame(() => {
             requestAnimationFrame(() => {
                 this._refreshing = false;
@@ -1150,49 +1041,40 @@ class ProductDisplay {
         this.products.push(product);
         this.saveProducts();
         this.refreshAllDisplays();
-        
-        // Dispatch custom event
         window.dispatchEvent(new CustomEvent('adminDataUpdated'));
     }
 
-    // Update a product (called from admin panel)
+    // ✅ FIX: Update a product - supports MongoDB _id and localStorage id
     updateProduct(productId, productData) {
-        const index = this.products.findIndex(p => p.id === productId);
+        const index = this.products.findIndex(p => (p._id || p.id) === productId);
         if (index !== -1) {
             this.products[index] = { ...this.products[index], ...productData };
             this.saveProducts();
             this.refreshAllDisplays();
-            
-            // Dispatch custom event
             window.dispatchEvent(new CustomEvent('adminDataUpdated'));
         }
     }
 
-    // Delete a product (called from admin panel)
+    // ✅ FIX: Delete a product - supports MongoDB _id and localStorage id
     deleteProduct(productId) {
         console.log(`🗑️ Removing product ${productId} from frontend display...`);
         
-        // Remove from products array
         const beforeCount = this.products.length;
-        this.products = this.products.filter(p => p.id !== productId);
+        this.products = this.products.filter(p => (p._id || p.id) !== productId);
         const afterCount = this.products.length;
         
         if (beforeCount > afterCount) {
             console.log(`✅ Product ${productId} removed from products array (${beforeCount} → ${afterCount})`);
         }
         
-        // Save updated products list to localStorage (remove deleted product)
         this.saveProducts();
         
-        // Clear API cache to force fresh data
         if (window.apiClient) {
             window.apiClient.clearCache();
         }
         
-        // Immediately refresh all displays to remove deleted product
         this.refreshAllDisplays();
         
-        // Force reload from backend after DOM update to ensure deletion is complete
         requestAnimationFrame(() => {
             requestAnimationFrame(() => {
                 this.loadProducts().then(() => {
@@ -1200,13 +1082,11 @@ class ProductDisplay {
                     console.log('✅ Products reloaded from backend after deletion');
                 }).catch(err => {
                     console.error('Error reloading products:', err);
-                    // Even if reload fails, refresh display with current products
                     this.displayProductsOnPageLoad();
                 });
             });
         });
         
-        // Dispatch custom event to notify other components
         window.dispatchEvent(new CustomEvent('adminDataUpdated', { 
             detail: { action: 'delete', productId: productId } 
         }));
@@ -1223,7 +1103,6 @@ document.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
         
-        // Get product info from data attributes
         const productName = e.target.getAttribute('data-product-name') || 'this product';
         const productBrand = e.target.getAttribute('data-product-brand') || 'Unknown Brand';
         const productPrice = parseFloat(e.target.getAttribute('data-product-price')) || 0;
@@ -1233,7 +1112,6 @@ document.addEventListener('click', (e) => {
         
         console.log('Global handler - Product info:', { productName, productBrand, productPrice, productCategory, productModel, productId });
         
-        // Use the global Add to Cart function
         if (typeof window.openAddToCartModal === 'function') {
             window.openAddToCartModal(productName, productBrand, productPrice, productCategory, productModel, productId);
         } else {
@@ -1250,7 +1128,6 @@ document.addEventListener('click', (e) => {
         e.stopPropagation();
         const productId = e.target.getAttribute('data-product-id');
         console.log('Global View Details button clicked!');
-        console.log('Button element:', e.target);
         console.log('Product ID:', productId);
         
         if (productId && window.productDisplay) {
@@ -1258,30 +1135,11 @@ document.addEventListener('click', (e) => {
             window.productDisplay.viewProduct(productId);
         } else if (!productId) {
             console.error('No product ID found on button');
-            console.log('Button attributes:', e.target.attributes);
         } else {
             console.error('ProductDisplay not available');
         }
     }
 });
-
-// DISABLED: Auto-refresh to prevent console spam and unnecessary API calls
-// Products are refreshed when admin panel updates them via events
-// If you need auto-refresh, uncomment and adjust the interval
-/*
-setInterval(() => {
-    if (window.productDisplay && window.productDisplay.products) {
-        try {
-            const isAdminPanelActive = window.location.pathname.includes('admin.html');
-            if (!isAdminPanelActive) {
-                window.productDisplay.loadProducts();
-            }
-        } catch (error) {
-            console.error('Auto-refresh error:', error);
-        }
-    }
-}, 300000); // 5 minutes if needed
-*/
 
 // Manual refresh function for debugging
 window.refreshProducts = function() {
@@ -1297,17 +1155,14 @@ window.debugProducts = function() {
     console.log('Products in system:', window.productDisplay?.products?.length || 0);
     console.log('Featured products:', window.productDisplay?.getFeaturedProducts()?.length || 0);
     
-    // Check admin data
     try {
         const adminData = JSON.parse(localStorage.getItem('adminPanelData') || '{}');
         console.log('Admin data products:', adminData.products?.length || 0);
-        console.log('Admin featured products:', adminData.products?.filter(p => p.featured)?.length || 0);
         console.log('Admin products:', adminData.products);
     } catch (error) {
         console.error('Error reading admin data:', error);
     }
     
-    // Check featured container
     const featuredContainer = document.getElementById('featuredProducts');
     console.log('Featured container exists:', !!featuredContainer);
     console.log('Featured container content length:', featuredContainer?.innerHTML?.length || 0);
@@ -1320,7 +1175,6 @@ window.forceSyncProducts = function() {
     console.log('Force syncing products...');
     
     try {
-        // Load from admin panel
         const adminData = JSON.parse(localStorage.getItem('adminPanelData') || '{}');
         const products = adminData.products || [];
         
@@ -1329,16 +1183,13 @@ window.forceSyncProducts = function() {
             return 'No products found in admin panel';
         }
         
-        // Update productDisplay
         if (window.productDisplay) {
             window.productDisplay.products = products;
             window.productDisplay.saveProducts();
             window.productDisplay.displayProductsOnPageLoad();
-            
             console.log('Products synced successfully!');
             return `Synced ${products.length} products (${products.filter(p => p.featured).length} featured)`;
         } else {
-            console.log('ProductDisplay not available');
             return 'ProductDisplay system not loaded';
         }
     } catch (error) {
@@ -1347,25 +1198,13 @@ window.forceSyncProducts = function() {
     }
 };
 
-// Force initialize products (use this if products aren't showing)
+// Force initialize products
 window.forceInitProducts = function() {
     console.log('Force initializing products...');
     window.productDisplay.initializeSampleProducts();
     window.productDisplay.displayProductsOnPageLoad();
     console.log('Products force initialized:', window.productDisplay.products.length);
 };
-
-// Make functions available immediately
-console.log('Product system loaded. Available functions:');
-console.log('- window.refreshProducts()');
-console.log('- window.forceInitProducts()');
-console.log('- window.forceReloadProducts()');
-console.log('- window.checkProductStatus()');
-console.log('- window.testViewProduct(productId)');
-console.log('- window.testViewFirstProduct()');
-console.log('- window.testViewButton()');
-console.log('- window.testWhatsAppButtons()');
-console.log('- window.productDisplay.products');
 
 // Global function to test viewProduct
 window.testViewProduct = function(productId) {
@@ -1382,7 +1221,7 @@ window.testViewFirstProduct = function() {
     if (window.productDisplay && window.productDisplay.products.length > 0) {
         const firstProduct = window.productDisplay.products[0];
         console.log('Testing with first product:', firstProduct);
-        window.productDisplay.viewProduct(firstProduct.id);
+        window.productDisplay.viewProduct(firstProduct._id || firstProduct.id);
     } else {
         console.error('No products available for testing');
     }
@@ -1397,7 +1236,6 @@ window.forceReloadProducts = async function() {
         console.log('Products reloaded:', window.productDisplay.products.length);
         return `Products reloaded: ${window.productDisplay.products.length} products found`;
     } else {
-        console.error('ProductDisplay not available');
         return 'ProductDisplay not available';
     }
 };
@@ -1420,11 +1258,9 @@ window.forceLoadFromBackend = async function() {
                 console.log('✅ Products loaded from backend API:', window.productDisplay.products.length);
                 return `Successfully loaded ${window.productDisplay.products.length} products from backend`;
             } else {
-                console.log('❌ ProductDisplay not available');
                 return 'ProductDisplay not available';
             }
         } else {
-            console.log('❌ Backend API error:', response.status, response.statusText);
             return `Backend API error: ${response.status} ${response.statusText}`;
         }
     } catch (error) {
@@ -1439,80 +1275,46 @@ window.checkProductStatus = function() {
     console.log('ProductDisplay available:', !!window.productDisplay);
     console.log('API Client available:', !!window.apiClient);
     console.log('Products loaded:', window.productDisplay ? window.productDisplay.products.length : 'N/A');
-    console.log('Products data:', window.productDisplay ? window.productDisplay.products : 'N/A');
     
     if (window.productDisplay && window.productDisplay.products.length > 0) {
         console.log('First product:', window.productDisplay.products[0]);
         return `✅ Products loaded: ${window.productDisplay.products.length} products available`;
     } else {
-        console.log('❌ No products available');
         return '❌ No products available - try window.forceReloadProducts()';
     }
 };
 
 // Global function to test WhatsApp buttons
 window.testWhatsAppButtons = function() {
-    console.log('=== TESTING WHATSAPP BUTTONS ===');
-    
     const whatsappButtons = document.querySelectorAll('.whatsapp-btn');
     console.log('WhatsApp buttons found:', whatsappButtons.length);
     
-    whatsappButtons.forEach((button, index) => {
-        console.log(`Button ${index + 1}:`, {
-            element: button,
-            classes: button.classList.toString(),
-            'data-product-name': button.getAttribute('data-product-name'),
-            'data-product-brand': button.getAttribute('data-product-brand'),
-            onclick: button.getAttribute('onclick')
-        });
-    });
-    
     if (whatsappButtons.length > 0) {
-        console.log('Testing first WhatsApp button...');
         whatsappButtons[0].click();
         return `✅ Found ${whatsappButtons.length} WhatsApp buttons`;
     } else {
-        console.log('❌ No WhatsApp buttons found');
         return '❌ No WhatsApp buttons found on page';
     }
 };
 
 // Global function to test view button functionality
 window.testViewButton = function() {
-    console.log('=== TESTING VIEW BUTTON FUNCTIONALITY ===');
+    if (!window.productDisplay) return '❌ ProductDisplay not available';
+    if (window.productDisplay.products.length === 0) return '❌ No products loaded - try window.forceReloadProducts()';
     
-    // Check if ProductDisplay is available
-    if (!window.productDisplay) {
-        console.error('❌ ProductDisplay not available');
-        return '❌ ProductDisplay not available';
-    }
-    
-    // Check if products are loaded
-    if (window.productDisplay.products.length === 0) {
-        console.error('❌ No products loaded');
-        return '❌ No products loaded - try window.forceReloadProducts()';
-    }
-    
-    // Check if view buttons exist on the page
     const viewButtons = document.querySelectorAll('.view-details-btn');
     console.log('View buttons found on page:', viewButtons.length);
     
-    if (viewButtons.length === 0) {
-        console.error('❌ No view buttons found on page');
-        return '❌ No view buttons found on page - products may not be displayed';
-    }
+    if (viewButtons.length === 0) return '❌ No view buttons found on page';
     
-    // Test clicking the first button
     const firstButton = viewButtons[0];
     const productId = firstButton.getAttribute('data-product-id');
     console.log('First button product ID:', productId);
     
     if (productId) {
-        console.log('✅ Testing view button click...');
         firstButton.click();
         return `✅ View button test completed - check console for results`;
     } else {
-        console.error('❌ First button has no product ID');
         return '❌ First button has no product ID';
     }
 };
@@ -1521,10 +1323,8 @@ window.testViewButton = function() {
 window.cardSlideNext = function(element) {
     const media = element.closest('.card-slider');
     if (!media) return;
-    
     const slides = Array.from(media.querySelectorAll('.card-slide'));
     if (slides.length < 2) return;
-    
     let idx = parseInt(media.getAttribute('data-idx') || '0');
     idx = (idx + 1) % slides.length;
     media.setAttribute('data-idx', String(idx));
@@ -1534,13 +1334,22 @@ window.cardSlideNext = function(element) {
 window.cardSlidePrev = function(element) {
     const media = element.closest('.card-slider');
     if (!media) return;
-    
     const slides = Array.from(media.querySelectorAll('.card-slide'));
     if (slides.length < 2) return;
-    
     let idx = parseInt(media.getAttribute('data-idx') || '0');
     idx = idx - 1;
     if (idx < 0) idx = slides.length - 1;
     media.setAttribute('data-idx', String(idx));
     slides.forEach((img, i) => img.style.display = i === idx ? 'block' : 'none');
 };
+
+console.log('Product system loaded. Available functions:');
+console.log('- window.refreshProducts()');
+console.log('- window.forceInitProducts()');
+console.log('- window.forceReloadProducts()');
+console.log('- window.checkProductStatus()');
+console.log('- window.testViewProduct(productId)');
+console.log('- window.testViewFirstProduct()');
+console.log('- window.testViewButton()');
+console.log('- window.testWhatsAppButtons()');
+console.log('- window.productDisplay.products');
