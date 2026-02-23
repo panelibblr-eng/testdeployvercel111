@@ -15,8 +15,8 @@ const analyticsRoutes = require('./routes/analytics');
 const { initDatabase } = require('./database/init');
 
 const app = express();
+app.set('trust proxy', 1);
 const PORT = process.env.PORT || 3001;
-
 // Detect environment
 const isProduction = process.env.NODE_ENV === 'production';
 const isDevelopment = !isProduction;
