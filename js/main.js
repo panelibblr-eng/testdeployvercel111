@@ -2097,11 +2097,7 @@ class PhotoSlider {
                 url: 'assets/dolce-gabbana.jpg',
                 alt: 'Dolce & Gabbana Eyewear'
             },
-            {
-                url: 'assets/tom-ford.jpg',
-                alt: 'Tom Ford Eyewear'
-            },
-            {
+                       {
                 url: 'assets/burberry.jpg',
                 alt: 'Burberry Eyewear'
             }
