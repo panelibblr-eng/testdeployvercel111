@@ -5,21 +5,17 @@ const Product = require('../database/models/Product');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const cloudinary = require('cloudinary').v2;
 
-// Configure multer for image uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadPath = path.join(__dirname, '../uploads/products');
-    if (!fs.existsSync(uploadPath)) {
-      fs.mkdirSync(uploadPath, { recursive: true });
-    }
-    cb(null, uploadPath);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, 'product-' + uniqueSuffix + path.extname(file.originalname));
-  }
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
 });
+
+// Configure multer to use memory storage (not disk)
+const storage = multer.memoryStorage();
 
 const upload = multer({
   storage: storage,
@@ -40,19 +36,50 @@ const upload = multer({
   }
 });
 
+// Helper function to upload buffer to Cloudinary
+async function uploadToCloudinary(buffer, filename) {
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder: 'monica-opto-hub/products',
+        public_id: filename,
+        resource_type: 'image'
+      },
+      (error, result) => {
+        if (error) reject(error);
+        else resolve(result);
+      }
+    );
+    uploadStream.end(buffer);
+  });
+}
+
+// Helper function to delete image from Cloudinary
+async function deleteFromCloudinary(imageUrl) {
+  try {
+    if (imageUrl && imageUrl.includes('cloudinary.com')) {
+      // Extract public_id from URL
+      const urlParts = imageUrl.split('/');
+      const publicIdWithExt = urlParts.slice(-2).join('/');
+      const publicId = publicIdWithExt.replace(/\.[^/.]+$/, '');
+      await cloudinary.uploader.destroy('monica-opto-hub/products/' + publicId.split('/').pop());
+    }
+  } catch (err) {
+    console.error('Error deleting from Cloudinary:', err);
+  }
+}
+
 // GET /api/products - Get all products with optional filtering
 router.get('/', async (req, res) => {
   try {
     try {
       await ensureDatabaseConnection();
     } catch (dbError) {
-      // Database not available - return empty array so frontend can use localStorage
       console.log('⚠️ Database not available, returning empty products array');
       return res.json({ success: true, products: [], count: 0, message: 'Database not available. Frontend will use localStorage.' });
     }
     const { category, gender, featured, search, brand, limit, offset } = req.query;
     
-    // Build MongoDB query
     const query = {};
     
     if (category && category !== 'all') {
@@ -79,7 +106,6 @@ router.get('/', async (req, res) => {
       ];
     }
     
-    // Build query options
     const options = {
       sort: { created_at: -1 }
     };
@@ -93,7 +119,6 @@ router.get('/', async (req, res) => {
     
     const products = await Product.find(query, null, options);
     
-    // Sort images by image_order
     const productsWithImages = products.map(product => {
       const productObj = product.toObject();
       productObj.images = (productObj.images || []).sort((a, b) => a.image_order - b.image_order);
@@ -113,7 +138,6 @@ router.get('/brands', async (req, res) => {
     try {
       await ensureDatabaseConnection();
     } catch (dbError) {
-      // Database not available - return empty array
       console.log('⚠️ Database not available, returning empty brands array');
       return res.json({ success: true, brands: [] });
     }
@@ -131,7 +155,6 @@ router.get('/stats/summary', async (req, res) => {
     try {
       await ensureDatabaseConnection();
     } catch (dbError) {
-      // Database not available - return empty stats
       console.log('⚠️ Database not available, returning empty stats');
       return res.json({ success: true, total: 0, featured: 0, byCategory: {}, byGender: {} });
     }
@@ -190,7 +213,6 @@ router.get('/:id', async (req, res) => {
     try {
       await ensureDatabaseConnection();
     } catch (dbError) {
-      // Database not available - return 404
       console.log('⚠️ Database not available');
       return res.status(404).json({ success: false, error: 'Product not found. Database not available.' });
     }
@@ -232,22 +254,31 @@ router.post('/', upload.array('images', 10), async (req, res) => {
       trending
     } = req.body;
     
-    // Validate required fields
     if (!name || !brand || !price || !category || !gender) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
     
     const id = 'prod_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
     
-    // Set primary image URL (first uploaded image or empty)
-    const primaryImageUrl = req.files && req.files.length > 0 ? `/uploads/products/${req.files[0].filename}` : '';
+    // Upload images to Cloudinary
+    let images = [];
+    let primaryImageUrl = '';
     
-    // Prepare images array
-    const images = req.files ? req.files.map((file, index) => ({
-      image_url: `/uploads/products/${file.filename}`,
-      image_order: index,
-      is_primary: index === 0
-    })) : [];
+    if (req.files && req.files.length > 0) {
+      for (let i = 0; i < req.files.length; i++) {
+        const file = req.files[i];
+        const filename = 'product-' + Date.now() + '-' + Math.round(Math.random() * 1E9);
+        const result = await uploadToCloudinary(file.buffer, filename);
+        
+        if (i === 0) primaryImageUrl = result.secure_url;
+        
+        images.push({
+          image_url: result.secure_url,
+          image_order: i,
+          is_primary: i === 0
+        });
+      }
+    }
     
     const product = new Product({
       _id: id,
@@ -315,7 +346,6 @@ router.post('/bulk', async (req, res) => {
           updated_at: new Date()
         };
         
-        // Add images if provided
         if (product.image_url) {
           productData.images.push({
             image_url: product.image_url,
@@ -357,122 +387,6 @@ router.post('/bulk', async (req, res) => {
   }
 });
 
-// POST /api/products/inventory - Bulk import inventory items from CSV
-router.post('/inventory', async (req, res) => {
-  try {
-    const { inventoryItems } = req.body;
-    
-    if (!inventoryItems || !Array.isArray(inventoryItems)) {
-      return res.status(400).json({ error: 'Invalid inventory items data' });
-    }
-    
-    await ensureDatabaseConnection();
-    
-    const results = {
-      success: 0,
-      failed: 0,
-      errors: []
-    };
-    
-    // Helper function to map product type to category
-    function mapProductTypeToCategory(productType) {
-      const type = productType.toLowerCase();
-      if (type.includes('sunglass')) return 'sunglasses';
-      if (type.includes('frame')) return 'optical-frames';
-      if (type.includes('contact') || type.includes('lens')) return 'contact-lenses';
-      return 'sunglasses'; // default
-    }
-    
-    // Helper function to extract brand from description
-    function extractBrandFromDescription(description) {
-      const commonBrands = ['Boss', 'Ray-Ban', 'Gucci', 'Tom Ford', 'Prada', 'Cartier', 'Versace', 'Dolce & Gabbana', 'Oakley', 'Acuvue', 'Johnson & Johnson'];
-      for (const brand of commonBrands) {
-        if (description.toLowerCase().includes(brand.toLowerCase())) {
-          return brand;
-        }
-      }
-      return null;
-    }
-    
-    // Process inventory items in batches
-    const batchSize = 10;
-    for (let i = 0; i < inventoryItems.length; i += batchSize) {
-      const batch = inventoryItems.slice(i, i + batchSize);
-      
-      for (const item of batch) {
-        const {
-          siNo,
-          product,
-          productCode,
-          description,
-          branchName,
-          quantity,
-          piecesPerBox,
-          totalPieces,
-          averageUnitPrice,
-          averageTaxPercent,
-          totalPurchase
-        } = item;
-        
-        // Validate required fields
-        if (!product || !productCode || !description || !averageUnitPrice) {
-          results.failed++;
-          results.errors.push(`Item ${i + 1}: Missing required fields`);
-          continue;
-        }
-        
-        try {
-          const category = mapProductTypeToCategory(product);
-          const brand = extractBrandFromDescription(description) || 'Unknown';
-          const id = 'prod_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-          
-          const inventoryData = {
-            siNo,
-            quantity,
-            piecesPerBox,
-            totalPieces,
-            averageTaxPercent,
-            totalPurchase,
-            branchName
-          };
-          
-          const updatedDescription = `${description}\n\nInventory Data: ${JSON.stringify(inventoryData)}`;
-          
-          const productData = {
-            _id: id,
-            name: description || `${product} ${productCode}`,
-            brand,
-            price: parseFloat(averageUnitPrice),
-            category,
-            gender: 'unisex',
-            model: productCode,
-            description: updatedDescription,
-            image_url: '',
-            featured: false,
-            images: [],
-            created_at: new Date(),
-            updated_at: new Date()
-          };
-          
-          await Product.create(productData);
-          results.success++;
-        } catch (err) {
-          results.failed++;
-          results.errors.push(`Item ${i + 1}: ${err.message}`);
-        }
-      }
-    }
-    
-    res.json({
-      message: `Inventory import completed. ${results.success} products created, ${results.failed} failed.`,
-      results
-    });
-  } catch (error) {
-    console.error('Error in inventory import:', error);
-    res.status(500).json({ error: 'Failed to import inventory' });
-  }
-});
-
 // PUT /api/products/:id - Update product
 router.put('/:id', upload.array('images', 10), async (req, res) => {
   try {
@@ -490,52 +404,38 @@ router.put('/:id', upload.array('images', 10), async (req, res) => {
       trending
     } = req.body;
     
-    // Check if product exists
     const existingProduct = await Product.findById(id);
     
     if (!existingProduct) {
       return res.status(404).json({ error: 'Product not found' });
     }
     
-    // Handle image update
     let imageUrl = existingProduct.image_url;
     let images = existingProduct.images || [];
     
     if (req.files && req.files.length > 0) {
-      // Delete old image files
-      if (images.length > 0) {
-        images.forEach(image => {
-          const oldImagePath = path.join(__dirname, '../', image.image_url);
-          try {
-            if (fs.existsSync(oldImagePath)) {
-              fs.unlinkSync(oldImagePath);
-              console.log(`Deleted old image file: ${oldImagePath}`);
-            }
-          } catch (fileErr) {
-            console.error('Error deleting old image file:', fileErr);
-          }
-        });
+      // Delete old images from Cloudinary
+      for (const image of images) {
+        await deleteFromCloudinary(image.image_url);
       }
       
-      // Set new primary image
-      imageUrl = `/uploads/products/${req.files[0].filename}`;
-      
-      // Create new images array
-      images = req.files.map((file, index) => ({
-        image_url: `/uploads/products/${file.filename}`,
-        image_order: index,
-        is_primary: index === 0
-      }));
-    } else if (existingProduct.image_url && existingProduct.image_url.trim() !== '' && images.length === 0) {
-      // Migrate image_url to images array if needed
-      images = [{
-        image_url: existingProduct.image_url,
-        image_order: 0,
-        is_primary: true
-      }];
+      // Upload new images to Cloudinary
+      images = [];
+      for (let i = 0; i < req.files.length; i++) {
+        const file = req.files[i];
+        const filename = 'product-' + Date.now() + '-' + Math.round(Math.random() * 1E9);
+        const result = await uploadToCloudinary(file.buffer, filename);
+        
+        if (i === 0) imageUrl = result.secure_url;
+        
+        images.push({
+          image_url: result.secure_url,
+          image_order: i,
+          is_primary: i === 0
+        });
+      }
     }
     
-    // Update product
     const updateData = {
       name: name || existingProduct.name,
       brand: brand || existingProduct.brand,
@@ -577,48 +477,21 @@ router.delete('/:id', async (req, res) => {
       return res.status(404).json({ error: 'Product not found' });
     }
     
-    // Delete image files
-    let filesDeleted = 0;
+    // Delete images from Cloudinary
     const images = product.images || [];
-    
-    if (images.length > 0) {
-      images.forEach(image => {
-        const imagePath = path.join(__dirname, '../', image.image_url);
-        try {
-          if (fs.existsSync(imagePath)) {
-            fs.unlinkSync(imagePath);
-            filesDeleted++;
-            console.log(`✅ Deleted image file: ${image.image_url}`);
-          }
-        } catch (fileErr) {
-          console.error(`Error deleting image file ${image.image_url}:`, fileErr);
-        }
-      });
+    for (const image of images) {
+      await deleteFromCloudinary(image.image_url);
     }
-    
-    // Delete primary image if exists
     if (product.image_url) {
-      const imagePath = path.join(__dirname, '../', product.image_url);
-      try {
-        if (fs.existsSync(imagePath)) {
-          fs.unlinkSync(imagePath);
-          filesDeleted++;
-          console.log(`✅ Deleted primary image file: ${product.image_url}`);
-        }
-      } catch (fileErr) {
-        console.error(`Error deleting primary image file:`, fileErr);
-      }
+      await deleteFromCloudinary(product.image_url);
     }
     
-    // Delete product from database
     await Product.findByIdAndDelete(id);
     
-    console.log(`✅ Product ${id} permanently deleted (${images.length} image records, ${filesDeleted} image files)`);
+    console.log(`✅ Product ${id} permanently deleted`);
     res.json({
       message: 'Product permanently deleted',
-      id: id,
-      imagesDeleted: images.length,
-      filesDeleted: filesDeleted
+      id: id
     });
   } catch (error) {
     console.error('Error deleting product:', error);
