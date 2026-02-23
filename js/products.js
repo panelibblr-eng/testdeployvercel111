@@ -66,16 +66,19 @@ class ProductDisplay {
             });
         };
         
-        this._storageHandler = (e) => {
-            if (e.key === 'adminPanelData') {
-                // Only log if not already refreshing
-                if (!this._refreshing) {
-                    console.log('Storage change detected for adminPanelData');
-                }
-                this.loadProducts();
+this._storageHandler = (e) => {
+    if (e.key === 'adminPanelData') {
+        if (!this._refreshing) {
+            console.log('Storage change detected for adminPanelData');
+        }
+        clearTimeout(this._storageDebounceTimer);
+        this._storageDebounceTimer = setTimeout(() => {
+            this.loadProducts().then(() => {
                 this.displayProductsOnPageLoad();
-            }
-        };
+            });
+        }, 500);
+    }
+};
         
         // Add event listeners
         window.addEventListener('adminDataUpdated', this._adminDataUpdatedHandler);
