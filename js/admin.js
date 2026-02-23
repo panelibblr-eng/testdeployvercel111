@@ -1271,8 +1271,9 @@ class AdminPanel {
                     ${product.featured ? '<span class="featured-badge">Featured</span>' : '-'}
                 </div>
                 <div class="table-cell product-actions">
-                    <button class="btn btn--small" onclick="adminPanel.editProduct('${product.id}')">Edit</button>
-                    <button class="btn btn--small btn--danger" onclick="adminPanel.deleteProduct('${product.id}')">Delete</button>
+                    <button class="btn btn--small" onclick="adminPanel.editProduct('${product.id || product._id}')">Edit</button>
+                    
+                    <button class="btn btn--small btn--danger" onclick="adminPanel.deleteProduct('${product.id || product._id}')">Delete</button>
                 </div>
             </div>
                 `;
