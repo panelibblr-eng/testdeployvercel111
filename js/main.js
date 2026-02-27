@@ -565,22 +565,7 @@ Please confirm this order and provide the above details. Thank you! 🙏`;
                                 <option value="4">4</option>
                                 <option value="5">5</option>
                             </select>
-                        </div>
-                        <div>
-                            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #7a534a;">Size/Fit</label>
-                            <select id="sizeFit" name="sizeFit" 
-                                    style="width: 100%; padding: 12px 16px; border: 2px solid rgba(222, 161, 147, 0.3); border-radius: 8px; font-size: 1rem; outline: none; transition: border-color 0.3s; background: rgba(255, 255, 255, 0.8);"
-                                    onfocus="this.style.borderColor='#DEA193'; this.style.boxShadow='0 0 0 3px rgba(222, 161, 147, 0.1)'"
-                                    onblur="this.style.borderColor='rgba(222, 161, 147, 0.3)'; this.style.boxShadow='none'">
-                                <option value="">Select Size/Fit</option>
-                                <option value="Small">Small</option>
-                                <option value="Medium">Medium</option>
-                                <option value="Large">Large</option>
-                                <option value="Extra Large">Extra Large</option>
-                                <option value="Custom">Custom</option>
-                            </select>
-                        </div>
-                    </div>
+                        
                     
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                         <div>
