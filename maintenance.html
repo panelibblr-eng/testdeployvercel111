@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website Temporarily Unavailable – Monica Opto Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --blush: #DEA193;
+            --blush-dark: #BA867B;
+            --blush-light: #F3DDD8;
+            --cream: #FCF8F7;
+            --brown: #7a534a;
+            --text: #1f2937;
+            --muted: #94a3b8;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--cream);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Decorative background blobs */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -20%;
+            right: -15%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(222,161,147,0.18) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        body::after {
+            content: '';
+            position: fixed;
+            bottom: -20%;
+            left: -15%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(186,134,123,0.15) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .card {
+            background: #fff;
+            border: 1px solid rgba(222,161,147,0.25);
+            border-radius: 24px;
+            max-width: 620px;
+            width: 100%;
+            padding: 3rem 3.5rem;
+            box-shadow: 0 8px 60px rgba(186,134,123,0.12);
+            text-align: center;
+            animation: fadeUp 0.7s cubic-bezier(0.22,1,0.36,1) both;
+            position: relative;
+            z-index: 1;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(32px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .logo-area {
+            margin-bottom: 2rem;
+        }
+
+        .logo-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.35rem;
+            color: var(--brown);
+            letter-spacing: 0.08em;
+            font-weight: 600;
+        }
+
+        .divider {
+            width: 48px;
+            height: 2px;
+            background: linear-gradient(90deg, var(--blush), var(--blush-dark));
+            margin: 1rem auto;
+            border-radius: 2px;
+        }
+
+        .icon-wrap {
+            width: 72px;
+            height: 72px;
+            background: linear-gradient(135deg, var(--blush-light), #f0d4ce);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.75rem;
+            font-size: 2rem;
+            animation: pulse 2.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(222,161,147,0.35); }
+            50%       { box-shadow: 0 0 0 14px rgba(222,161,147,0); }
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.75rem;
+            color: var(--brown);
+            font-weight: 600;
+            margin-bottom: 0.6rem;
+            line-height: 1.3;
+        }
+
+        .subtitle {
+            font-size: 0.95rem;
+            color: var(--muted);
+            font-weight: 300;
+            margin-bottom: 2rem;
+            letter-spacing: 0.02em;
+        }
+
+        .message-box {
+            background: linear-gradient(135deg, var(--blush-light), #f0d4ce);
+            border-left: 4px solid var(--blush);
+            border-radius: 12px;
+            padding: 1.5rem 1.75rem;
+            text-align: left;
+            margin-bottom: 2rem;
+        }
+
+        .message-box p {
+            font-size: 0.92rem;
+            color: var(--text);
+            line-height: 1.75;
+            font-weight: 400;
+        }
+
+        .message-box p + p {
+            margin-top: 0.75rem;
+        }
+
+        .message-box strong {
+            color: var(--brown);
+            font-weight: 500;
+        }
+
+        .contact-row {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 0.5rem;
+        }
+
+        .contact-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.65rem 1.4rem;
+            border-radius: 50px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.25s ease;
+            cursor: pointer;
+            border: none;
+        }
+
+        .contact-btn--whatsapp {
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            color: #fff;
+            box-shadow: 0 4px 14px rgba(37,211,102,0.25);
+        }
+        .contact-btn--whatsapp:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37,211,102,0.35);
+        }
+
+        .contact-btn--email {
+            background: linear-gradient(135deg, var(--blush), var(--blush-dark));
+            color: #fff;
+            box-shadow: 0 4px 14px rgba(222,161,147,0.3);
+        }
+        .contact-btn--email:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(222,161,147,0.4);
+        }
+
+        .footer-note {
+            margin-top: 2rem;
+            font-size: 0.8rem;
+            color: var(--muted);
+            font-weight: 300;
+        }
+
+        @media (max-width: 480px) {
+            .card { padding: 2rem 1.5rem; }
+            h1 { font-size: 1.45rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+
+    <div class="logo-area">
+        <div class="logo-text">MONICA OPTO HUB</div>
+        <div class="divider"></div>
+    </div>
+
+    <div class="icon-wrap">⚠️</div>
+
+    <h1>Website Temporarily Down</h1>
+    <p class="subtitle">We'll be back shortly</p>
+
+    <div class="message-box">
+        <p>This website is currently unavailable due to an <strong>environment key configuration error</strong> on the Render server.</p>
+        <p>Some required <strong>environment variables</strong> are missing or incorrectly configured, which is preventing the application from starting properly.</p>
+        <p>The issue will be resolved once the correct keys are added and the server is redeployed. <strong>We apologize for the inconvenience.</strong></p>
+    </div>
+
+    <p style="font-size:0.9rem; color:var(--brown); margin-bottom:1rem; font-weight:500;">Need help? Reach us directly:</p>
+
+    <div class="contact-row">
+        <a class="contact-btn contact-btn--whatsapp"
+           href="https://wa.me/917000532010?text=Hi!%20The%20website%20is%20down.%20Can%20you%20help%3F"
+           target="_blank" rel="noopener">
+            📱 WhatsApp Us
+        </a>
+        <a class="contact-btn contact-btn--email"
+           href="mailto:Optohubmonica@gmail.com">
+            ✉️ Email Us
+        </a>
+    </div>
+
+    <p class="footer-note">© Monica Opto Hub — Please try again later.</p>
+
+</div>
+
+</body>
+</html>
