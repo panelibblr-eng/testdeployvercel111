@@ -9,8 +9,9 @@ body[unresolved] {opacity: 0; display: block; overflow: hidden; position: relati
     <meta name="description" content="Admin panel for managing products and analytics">
     <link rel="preconnect" href="https://fonts.googleapis.com/">
     <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
-    <link href="./Admin Panel - Monica Opto Hub_files/css2" rel="stylesheet">
-    <link rel="stylesheet" href="./Admin Panel - Monica Opto Hub_files/admin.css">
+    <!-- FIXED - underscores, matching your actual folder name -->
+<link href="./Admin_Panel_Monica_OptoHub_files/css2" rel="stylesheet">
+<link rel="stylesheet" href="./Admin_Panel_Monica_OptoHub_files/admin.css">
 </head>
 <body class="theme-blush">
     <!-- Login Screen -->
