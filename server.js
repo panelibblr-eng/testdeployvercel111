@@ -147,8 +147,7 @@ app.get('*', (req, res, next) => {
   
   // For routes without file extensions (SPA routes), serve index.html
   // But first check if index.html exists
-  const indexPath = path.join(__dirname, 'maintenance.html');
-  if (fs.existsSync(indexPath)) {
+const indexPath = path.join(__dirname, 'index.html');  if (fs.existsSync(indexPath)) {
     return res.sendFile(indexPath);
   }
   
