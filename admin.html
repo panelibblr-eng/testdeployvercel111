@@ -14,24 +14,56 @@
     <!-- Login Screen -->
     <div id="loginScreen" class="login-screen">
         <div class="login-container">
-            <div class="login-card">
-                <h1 class="login-title">Admin Login</h1>
-                <p class="login-subtitle">Monica Opto Hub Admin Panel</p>
-                <form id="loginForm" class="login-form">
-                    <div class="form-group">
-                        <label for="username">Username</label>
-                        <input type="text" id="username" name="username" autocomplete="username" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="password">Password</label>
-                        <input type="password" id="password" name="password" autocomplete="current-password" required>
-                    </div>
-                    <button type="submit" class="btn btn--primary btn--full">Login</button>
-                </form>
-                <div id="loginError" class="error-message" style="display: none;"></div>
-            </div>
-        </div>
+          <div class="login-card" style="display:grid;grid-template-columns:1fr 1fr;border-radius:20px;overflow:hidden;max-width:780px;min-height:480px;box-shadow:0 20px 60px rgba(42,26,22,0.15);">
+  <!-- Left dark panel -->
+  <div style="background:#2a1a16;padding:2.5rem 2rem;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden;">
+    <div style="position:absolute;top:-80px;right:-80px;width:250px;height:250px;border-radius:50%;background:rgba(222,161,147,0.1);pointer-events:none;"></div>
+    <div style="position:relative;z-index:1;">
+      <div style="width:40px;height:40px;border:1px solid rgba(222,161,147,0.4);border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:1.25rem;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#DEA193" stroke-width="1.5"><circle cx="12" cy="12" r="4"/><path d="M2 12C2 12 5 6 12 6s10 6 10 6-3 6-10 6S2 12 2 12z" stroke-linejoin="round"/></svg>
+      </div>
+      <p style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:300;color:#f5ede9;letter-spacing:0.06em;margin:0 0 0.3rem;">Monica<br>Opto Hub</p>
+      <p style="font-size:10px;color:rgba(222,161,147,0.7);letter-spacing:0.14em;text-transform:uppercase;font-weight:300;">Admin Control Centre</p>
     </div>
+    <div style="position:relative;z-index:1;">
+      <div style="border-top:0.5px solid rgba(222,161,147,0.2);padding-top:0.85rem;margin-bottom:0.85rem;">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:300;color:#DEA193;line-height:1;margin-bottom:0.2rem;">35+</div>
+        <div style="font-size:10px;color:rgba(245,237,233,0.4);letter-spacing:0.12em;text-transform:uppercase;font-weight:300;">Years of Heritage</div>
+      </div>
+      <div style="border-top:0.5px solid rgba(222,161,147,0.2);padding-top:0.85rem;margin-bottom:0.85rem;">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:300;color:#DEA193;line-height:1;margin-bottom:0.2rem;">6</div>
+        <div style="font-size:10px;color:rgba(245,237,233,0.4);letter-spacing:0.12em;text-transform:uppercase;font-weight:300;">Store Locations</div>
+      </div>
+    </div>
+    <div style="position:relative;z-index:1;">
+      <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(222,161,147,0.1);border:0.5px solid rgba(222,161,147,0.25);border-radius:20px;padding:5px 12px;">
+        <div style="width:5px;height:5px;border-radius:50%;background:#4ade80;box-shadow:0 0 6px rgba(74,222,128,0.6);"></div>
+        <span style="font-size:10px;color:rgba(222,161,147,0.8);letter-spacing:0.08em;">SSL Secured</span>
+      </div>
+      <p style="font-size:10px;color:rgba(222,161,147,0.35);margin-top:1rem;letter-spacing:0.04em;">Deployed by dhruvvvvv</p>
+    </div>
+  </div>
+
+  <!-- Right login panel -->
+  <div style="background:#fff;padding:2.5rem 2rem;display:flex;flex-direction:column;justify-content:center;">
+    <p style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:400;color:#2a1a16;margin:0 0 0.3rem;letter-spacing:0.01em;">Welcome back</p>
+    <p style="font-size:12px;color:#94a3b8;font-weight:300;margin-bottom:1.75rem;">Sign in to your admin dashboard</p>
+
+    <form id="loginForm" class="login-form">
+      <div class="form-group" style="margin-bottom:1.1rem;">
+        <label for="username" style="font-size:10px;font-weight:500;letter-spacing:0.14em;text-transform:uppercase;color:#7a534a;display:block;margin-bottom:0.45rem;">Username</label>
+        <input type="text" id="username" name="username" autocomplete="username" required placeholder="Enter username" style="width:100%;padding:0.72rem 1rem;border:0.5px solid rgba(186,134,123,0.3);border-radius:10px;font-size:13.5px;color:#2a1a16;background:#fdfaf9;outline:none;box-sizing:border-box;">
+      </div>
+      <div class="form-group" style="margin-bottom:1.25rem;">
+        <label for="password" style="font-size:10px;font-weight:500;letter-spacing:0.14em;text-transform:uppercase;color:#7a534a;display:block;margin-bottom:0.45rem;">Password</label>
+        <input type="password" id="password" name="password" autocomplete="current-password" required placeholder="Enter password" style="width:100%;padding:0.72rem 1rem;border:0.5px solid rgba(186,134,123,0.3);border-radius:10px;font-size:13.5px;color:#2a1a16;background:#fdfaf9;outline:none;box-sizing:border-box;">
+      </div>
+      <button type="submit" class="btn btn--primary btn--full" style="background:#2a1a16;border:none;border-radius:10px;font-size:12px;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;color:#f5ede9;padding:0.82rem;width:100%;cursor:pointer;">Sign In to Dashboard</button>
+    </form>
+    <div id="loginError" class="error-message" style="display:none;margin-top:1rem;background:#fff5f5;border:0.5px solid rgba(180,60,50,0.2);border-radius:8px;padding:0.6rem 0.9rem;font-size:12px;color:#a33020;text-align:center;"></div>
+    <p style="font-size:10px;color:#c4a09a;text-align:center;margin-top:1.5rem;letter-spacing:0.04em;font-weight:300;">© 2026 Monica Opto Hub · Authorised Access Only</p>
+  </div>
+</div>
 
     <!-- Admin Dashboard -->
     <div id="adminDashboard" class="admin-dashboard" style="display: none;">
