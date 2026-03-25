@@ -1,77 +1,42 @@
-<!DOCTYPE html>
-<!-- saved from url=(0051)https://testdeployvercel111.onrender.com/admin.html -->
-<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><style>body {transition: opacity ease-in 0.2s; } 
-body[unresolved] {opacity: 0; display: block; overflow: hidden; position: relative; } 
-</style>
-    
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>Admin Panel - Monica Opto Hub</title>
     <meta name="description" content="Admin panel for managing products and analytics">
-    <link rel="preconnect" href="https://fonts.googleapis.com/">
-    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
-   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/admin.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/admin.css">
 </head>
 <body class="theme-blush">
     <!-- Login Screen -->
-<div id="loginScreen" class="login-screen" style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#FCF8F7;overflow-y:auto;">
-        <div class="login-container" style="display:flex;align-items:center;justify-content:center;padding:2rem;">
-          <div class="login-card" style="display:grid;grid-template-columns:1fr 1fr;border-radius:20px;overflow:hidden;max-width:780px;min-height:480px;box-shadow:0 20px 60px rgba(42,26,22,0.15);">
-  <!-- Left dark panel -->
-  <div style="background:#2a1a16;padding:2.5rem 2rem;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden;">
-    <div style="position:absolute;top:-80px;right:-80px;width:250px;height:250px;border-radius:50%;background:rgba(222,161,147,0.1);pointer-events:none;"></div>
-    <div style="position:relative;z-index:1;">
-      <div style="width:40px;height:40px;border:1px solid rgba(222,161,147,0.4);border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:1.25rem;">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#DEA193" stroke-width="1.5"><circle cx="12" cy="12" r="4"></circle><path d="M2 12C2 12 5 6 12 6s10 6 10 6-3 6-10 6S2 12 2 12z" stroke-linejoin="round"></path></svg>
-      </div>
-      <p style="font-family:&#39;Cormorant Garamond&#39;,serif;font-size:1.4rem;font-weight:300;color:#f5ede9;letter-spacing:0.06em;margin:0 0 0.3rem;">Monica<br>Opto Hub</p>
-      <p style="font-size:10px;color:rgba(222,161,147,0.7);letter-spacing:0.14em;text-transform:uppercase;font-weight:300;">Admin Control Centre</p>
-    </div>
-    <div style="position:relative;z-index:1;">
-      <div style="border-top:0.5px solid rgba(222,161,147,0.2);padding-top:0.85rem;margin-bottom:0.85rem;">
-        <div style="font-family:&#39;Cormorant Garamond&#39;,serif;font-size:1.5rem;font-weight:300;color:#DEA193;line-height:1;margin-bottom:0.2rem;">35+</div>
-        <div style="font-size:10px;color:rgba(245,237,233,0.4);letter-spacing:0.12em;text-transform:uppercase;font-weight:300;">Years of Heritage</div>
-      </div>
-      <div style="border-top:0.5px solid rgba(222,161,147,0.2);padding-top:0.85rem;margin-bottom:0.85rem;">
-        <div style="font-family:&#39;Cormorant Garamond&#39;,serif;font-size:1.5rem;font-weight:300;color:#DEA193;line-height:1;margin-bottom:0.2rem;">6</div>
-        <div style="font-size:10px;color:rgba(245,237,233,0.4);letter-spacing:0.12em;text-transform:uppercase;font-weight:300;">Store Locations</div>
-      </div>
-    </div>
-    <div style="position:relative;z-index:1;">
-      <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(222,161,147,0.1);border:0.5px solid rgba(222,161,147,0.25);border-radius:20px;padding:5px 12px;">
-        <div style="width:5px;height:5px;border-radius:50%;background:#4ade80;box-shadow:0 0 6px rgba(74,222,128,0.6);"></div>
-        <span style="font-size:10px;color:rgba(222,161,147,0.8);letter-spacing:0.08em;">SSL Secured</span>
-      </div>
-      <p style="font-size:10px;color:rgba(222,161,147,0.35);margin-top:1rem;letter-spacing:0.04em;"> dhruvvvvv</p>
-    </div>
-  </div>
-
-  <!-- Right login panel -->
-  <div style="background:#fff;padding:2.5rem 2rem;display:flex;flex-direction:column;justify-content:center;">
-    <p style="font-family:&#39;Cormorant Garamond&#39;,serif;font-size:1.6rem;font-weight:400;color:#2a1a16;margin:0 0 0.3rem;letter-spacing:0.01em;">Welcome back</p>
-    <p style="font-size:12px;color:#94a3b8;font-weight:300;margin-bottom:1.75rem;">Sign in to your admin dashboard</p>
-
-    <form id="loginForm" class="login-form">
-      <div class="form-group" style="margin-bottom:1.1rem;">
-        <label for="username" style="font-size:10px;font-weight:500;letter-spacing:0.14em;text-transform:uppercase;color:#7a534a;display:block;margin-bottom:0.45rem;">Username</label>
-        <input type="text" id="username" name="username" autocomplete="username" required="" placeholder="Enter username" style="width:100%;padding:0.72rem 1rem;border:0.5px solid rgba(186,134,123,0.3);border-radius:10px;font-size:13.5px;color:#2a1a16;background:#fdfaf9;outline:none;box-sizing:border-box;">
-      </div>
-      <div class="form-group" style="margin-bottom:1.25rem;">
-        <label for="password" style="font-size:10px;font-weight:500;letter-spacing:0.14em;text-transform:uppercase;color:#7a534a;display:block;margin-bottom:0.45rem;">Password</label>
-        <input type="password" id="password" name="password" autocomplete="current-password" required="" placeholder="Enter password" style="width:100%;padding:0.72rem 1rem;border:0.5px solid rgba(186,134,123,0.3);border-radius:10px;font-size:13.5px;color:#2a1a16;background:#fdfaf9;outline:none;box-sizing:border-box;">
-      </div>
-      <button type="submit" class="btn btn--primary btn--full" style="background:#2a1a16;border:none;border-radius:10px;font-size:12px;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;color:#f5ede9;padding:0.82rem;width:100%;cursor:pointer;">Sign In to Dashboard</button>
-    </form>
-    <div id="loginError" class="error-message" style="display:none;margin-top:1rem;background:#fff5f5;border:0.5px solid rgba(180,60,50,0.2);border-radius:8px;padding:0.6rem 0.9rem;font-size:12px;color:#a33020;text-align:center;"></div>
-    <p style="font-size:10px;color:#c4a09a;text-align:center;margin-top:1.5rem;letter-spacing:0.04em;font-weight:300;">© 2026 Monica Opto Hub · Authorised Access Only</p>
- </div>
+    <div id="loginScreen" class="login-screen">
+        <div class="login-container">
+            <div class="login-card">
+                <h1 class="login-title">Admin Login</h1>
+                <p class="login-subtitle">Monica Opto Hub Admin Panel</p>
+                <form id="loginForm" class="login-form">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" name="username" autocomplete="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" autocomplete="current-password" required>
+                    </div>
+                    <button type="submit" class="btn btn--primary btn--full">Login</button>
+                </form>
+                <div id="loginError" class="error-message" style="display: none;"></div>
+            </div>
         </div>
     </div>
 
     <!-- Admin Dashboard -->
     <div id="adminDashboard" class="admin-dashboard" style="display: none;">
         <!-- Header -->
-        <header class="admin-header" style="position: relative;">
+        <header class="admin-header">
             <div class="admin-header-content">
                 <div class="admin-logo">
                     <button id="mobileMenuToggle" class="mobile-menu-toggle" aria-label="Toggle menu">
@@ -86,7 +51,7 @@ body[unresolved] {opacity: 0; display: block; overflow: hidden; position: relati
                     <button id="logoutBtn" class="btn btn--ghost">Logout</button>
                 </div>
             </div>
-        <div id="connectionStatus" class="connection-status unknown" style="position: absolute; top: 10px; right: 20px; padding: 5px 10px; border-radius: 15px; font-size: 12px; font-weight: bold; background: rgba(255, 255, 255, 0.9); border: 1px solid rgb(221, 221, 221);">⚪ Checking...</div></header>
+        </header>
 
         <!-- Mobile Navigation Overlay -->
         <div id="mobileNavOverlay" class="mobile-nav-overlay"></div>
@@ -94,27 +59,27 @@ body[unresolved] {opacity: 0; display: block; overflow: hidden; position: relati
         <!-- Navigation -->
         <nav class="admin-nav" id="adminNav">
             <ul class="admin-nav-list">
-                <li><a href="https://testdeployvercel111.onrender.com/admin.html#dashboard" class="nav-link active" data-section="dashboard">
+                <li><a href="#dashboard" class="nav-link active" data-section="dashboard">
                     <span class="nav-icon">📊</span>
                     <span class="nav-text">Dashboard</span>
                 </a></li>
-                <li><a href="https://testdeployvercel111.onrender.com/admin.html#products" class="nav-link" data-section="products">
+                <li><a href="#products" class="nav-link" data-section="products">
                     <span class="nav-icon">📦</span>
                     <span class="nav-text">Products</span>
                 </a></li>
-                <li><a href="https://testdeployvercel111.onrender.com/admin.html#content" class="nav-link" data-section="content">
+                <li><a href="#content" class="nav-link" data-section="content">
                     <span class="nav-icon">✏️</span>
                     <span class="nav-text">Content</span>
                 </a></li>
-                <li><a href="https://testdeployvercel111.onrender.com/admin.html#appointments" class="nav-link" data-section="appointments">
+                <li><a href="#appointments" class="nav-link" data-section="appointments">
                     <span class="nav-icon">📅</span>
                     <span class="nav-text">Appointments</span>
                 </a></li>
-                <li><a href="https://testdeployvercel111.onrender.com/admin.html#analytics" class="nav-link" data-section="analytics">
+                <li><a href="#analytics" class="nav-link" data-section="analytics">
                     <span class="nav-icon">📈</span>
                     <span class="nav-text">Analytics</span>
                 </a></li>
-                <li><a href="https://testdeployvercel111.onrender.com/admin.html#settings" class="nav-link" data-section="settings">
+                <li><a href="#settings" class="nav-link" data-section="settings">
                     <span class="nav-icon">⚙️</span>
                     <span class="nav-text">Settings</span>
                 </a></li>
@@ -134,7 +99,7 @@ body[unresolved] {opacity: 0; display: block; overflow: hidden; position: relati
                     <div class="stat-card">
                         <div class="stat-icon">👥</div>
                         <div class="stat-content">
-                            <h3 id="totalVisitors">1</h3>
+                            <h3 id="totalVisitors">0</h3>
                             <p>Total Visitors</p>
                         </div>
                     </div>
@@ -148,7 +113,7 @@ body[unresolved] {opacity: 0; display: block; overflow: hidden; position: relati
                     <div class="stat-card">
                         <div class="stat-icon">📈</div>
                         <div class="stat-content">
-                            <h3 id="todayVisitors">1</h3>
+                            <h3 id="todayVisitors">0</h3>
                             <p>Today's Visitors</p>
                         </div>
                     </div>
@@ -165,20 +130,14 @@ body[unresolved] {opacity: 0; display: block; overflow: hidden; position: relati
                     <div class="dashboard-card">
                         <h3>Recent Activity</h3>
                         <div id="recentActivity" class="activity-list">
-            <div class="activity-item">
-                <div class="activity-icon">👤</div>
-                <div class="activity-content">
-                    <p class="activity-text">New visitor from Unknown</p>
-                    <p class="activity-time">Just now</p>
-                </div>
-            </div>
-        </div>
+                            <p class="no-data">No recent activity</p>
+                        </div>
                     </div>
                     <div class="dashboard-card">
                         <h3>Quick Actions</h3>
                         <div class="quick-actions">
-                            <button class="btn btn--primary" onclick="showSection(&#39;products&#39;)">Add New Product</button>
-                            <button class="btn btn--ghost" onclick="showSection(&#39;analytics&#39;)">View Analytics</button>
+                            <button class="btn btn--primary" onclick="showSection('products')">Add New Product</button>
+                            <button class="btn btn--ghost" onclick="showSection('analytics')">View Analytics</button>
                             <button class="btn btn--ghost" onclick="exportData()">Export Data</button>
                         </div>
                     </div>
@@ -201,7 +160,7 @@ body[unresolved] {opacity: 0; display: block; overflow: hidden; position: relati
                         <button class="category-tab" data-category="contact-lenses">Contact Lenses</button>
                     </div>
                     <div class="category-stats">
-                        <span id="categoryStats">0 total products • 0 featured</span>
+                        <span id="categoryStats">Loading...</span>
                     </div>
                 </div>
 
@@ -213,11 +172,11 @@ body[unresolved] {opacity: 0; display: block; overflow: hidden; position: relati
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="productName">Product Name</label>
-                                    <input type="text" id="productName" name="productName" required="">
+                                    <input type="text" id="productName" name="productName" required>
                                 </div>
                                 <div class="form-group">
                                     <label for="productBrand">Brand</label>
-                                    <select id="productBrand" name="productBrand" required="">
+                                    <select id="productBrand" name="productBrand" required>
                                         <option value="">Select Brand</option>
                                         <option value="Titan">Titan</option>
                                         <option value="Fastrack">Fastrack</option>
@@ -232,7 +191,7 @@ body[unresolved] {opacity: 0; display: block; overflow: hidden; position: relati
                                         <option value="Hugo">Hugo</option>
                                         <option value="Marc Jacobs">Marc Jacobs</option>
                                         <option value="Versace">Versace</option>
-                                        <option value="Dolce &amp; Gabbana">Dolce &amp; Gabbana</option>
+                                        <option value="Dolce & Gabbana">Dolce & Gabbana</option>
                                         <option value="Burberry">Burberry</option>
                                         <option value="Off-White">Off-White</option>
                                         <option value="Tom Ford">Tom Ford</option>
@@ -251,11 +210,11 @@ body[unresolved] {opacity: 0; display: block; overflow: hidden; position: relati
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="productPrice">Price (₹)</label>
-                                    <input type="number" id="productPrice" name="productPrice" min="0" step="0.01" required="">
+                                    <input type="number" id="productPrice" name="productPrice" min="0" step="0.01" required>
                                 </div>
                                 <div class="form-group">
                                     <label for="productCategory">Category</label>
-                                    <select id="productCategory" name="productCategory" required="">
+                                    <select id="productCategory" name="productCategory" required>
                                         <option value="">Select Category</option>
                                         <option value="sunglasses">Sunglasses</option>
                                         <option value="optical-frames">Optical Frames</option>
@@ -275,7 +234,7 @@ body[unresolved] {opacity: 0; display: block; overflow: hidden; position: relati
                             </div>
                             <div class="form-group">
                                 <label for="productImages">Product Images</label>
-                                <input type="file" id="productImages" name="images" multiple="" accept="image/*" class="file-input">
+                                <input type="file" id="productImages" name="images" multiple accept="image/*" class="file-input">
                                 <div class="file-input-info">
                                     <small>Select multiple images (JPG, PNG, GIF, WebP). First image will be the primary image.</small>
                                 </div>
@@ -340,7 +299,9 @@ body[unresolved] {opacity: 0; display: block; overflow: hidden; position: relati
                             <div class="table-cell">Featured</div>
                             <div class="table-cell">Actions</div>
                         </div>
-                        <div id="productsList" class="products-list-content"><div class="no-data">No products found. Add your first product!</div></div>
+                        <div id="productsList" class="products-list-content">
+                            <div class="no-data">No products found. Add your first product!</div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -396,7 +357,7 @@ body[unresolved] {opacity: 0; display: block; overflow: hidden; position: relati
                 <!-- Appointments List -->
                 <div class="appointments-list">
                     <div class="list-header">
-                        <h3>Appointments &amp; Contact Inquiries</h3>
+                        <h3>Appointments & Contact Inquiries</h3>
                         <div class="list-controls">
                             <input type="text" id="searchAppointments" placeholder="Search appointments..." class="search-input" aria-label="Search appointments">
                             <select id="appointmentType" class="filter-select" aria-label="Filter appointments by type">
@@ -416,7 +377,9 @@ body[unresolved] {opacity: 0; display: block; overflow: hidden; position: relati
                             <div class="table-cell">Status</div>
                             <div class="table-cell">Actions</div>
                         </div>
-                        <div id="appointmentsList" class="appointments-list-content"><div class="no-data">No appointments found matching your criteria.</div></div>
+                        <div id="appointmentsList" class="appointments-list-content">
+                            <div class="no-data">No appointments found. Appointments will appear here when customers book through your website.</div>
+                        </div>
                     </div>
                 </div>
 
@@ -447,7 +410,7 @@ body[unresolved] {opacity: 0; display: block; overflow: hidden; position: relati
                     <div class="analytics-controls">
                         <select id="analyticsPeriod" class="filter-select" aria-label="Select analytics time period">
                             <option value="7">Last 7 days</option>
-                            <option value="30" selected="">Last 30 days</option>
+                            <option value="30" selected>Last 30 days</option>
                             <option value="90">Last 90 days</option>
                             <option value="365">Last year</option>
                         </select>
@@ -518,7 +481,7 @@ body[unresolved] {opacity: 0; display: block; overflow: hidden; position: relati
                             <div class="form-group">
                                 <label for="heroTitle">Main Title</label>
                                 <input type="text" id="heroTitle" name="heroTitle" value="David Walker 
-                                &lt;br&gt;EyeWear">
+                                <br>EyeWear">
                             </div>
                             <div class="form-group">
                                 <label for="heroDescription">Description</label>
@@ -528,9 +491,11 @@ body[unresolved] {opacity: 0; display: block; overflow: hidden; position: relati
                             <!-- Hero Slider Images Management -->
                             <div class="form-group">
                                 <label>Hero Slider Images</label>
-                                <div id="heroImagesContainer" class="hero-images-container"><p class="no-images">No images uploaded yet</p></div>
+                                <div id="heroImagesContainer" class="hero-images-container">
+                                    <!-- Images will be populated here -->
+                                </div>
                                 <div class="image-upload-section">
-                                    <input type="file" id="heroImageUpload" accept="image/*" multiple="" style="display: none;" aria-label="Upload hero section images">
+                                    <input type="file" id="heroImageUpload" accept="image/*" multiple style="display: none;" aria-label="Upload hero section images">
                                     <button type="button" id="uploadHeroImagesBtn" class="btn btn--secondary">
                                         <span class="btn-icon">📁</span>
                                         Upload Images
@@ -571,7 +536,7 @@ body[unresolved] {opacity: 0; display: block; overflow: hidden; position: relati
                 </div>
                             <div class="form-group">
                                 <label>
-                                    <input type="checkbox" id="announcementVisible" checked="">
+                                    <input type="checkbox" id="announcementVisible" checked>
                                     Show announcement on website
                                 </label>
                             </div>
@@ -584,40 +549,12 @@ body[unresolved] {opacity: 0; display: block; overflow: hidden; position: relati
                         <div class="brand-management">
                             <h4>Featured Brands</h4>
                             <div id="brandList" class="brand-list">
-            <div class="brand-item">
-                <span class="brand-name">Ray-Ban</span>
-                <button class="btn btn--small btn--danger" onclick="adminPanel.removeBrand(&#39;Ray-Ban&#39;)">Remove</button>
-            </div>
-        
-            <div class="brand-item">
-                <span class="brand-name">Gucci</span>
-                <button class="btn btn--small btn--danger" onclick="adminPanel.removeBrand(&#39;Gucci&#39;)">Remove</button>
-            </div>
-        
-            <div class="brand-item">
-                <span class="brand-name">Tom Ford</span>
-                <button class="btn btn--small btn--danger" onclick="adminPanel.removeBrand(&#39;Tom Ford&#39;)">Remove</button>
-            </div>
-        
-            <div class="brand-item">
-                <span class="brand-name">Prada</span>
-                <button class="btn btn--small btn--danger" onclick="adminPanel.removeBrand(&#39;Prada&#39;)">Remove</button>
-            </div>
-        
-            <div class="brand-item">
-                <span class="brand-name">Cartier</span>
-                <button class="btn btn--small btn--danger" onclick="adminPanel.removeBrand(&#39;Cartier&#39;)">Remove</button>
-            </div>
-        
-            <div class="brand-item">
-                <span class="brand-name">Johnson &amp; Johnson</span>
-                <button class="btn btn--small btn--danger" onclick="adminPanel.removeBrand(&#39;Johnson &amp; Johnson&#39;)">Remove</button>
-            </div>
-        </div>
+                                <!-- Brands will be populated here -->
+                            </div>
                             <form id="addBrandForm" class="add-brand-form">
                                 <div class="form-group">
                                     <label for="newBrandName">Brand Name</label>
-                                    <input type="text" id="newBrandName" placeholder="Brand Name" required="">
+                                    <input type="text" id="newBrandName" placeholder="Brand Name" required>
                                     <button type="submit" class="btn btn--primary">Add Brand</button>
                                 </div>
                             </form>
@@ -625,7 +562,7 @@ body[unresolved] {opacity: 0; display: block; overflow: hidden; position: relati
                     </div>
 
                     <div class="content-card">
-                        <h3>Social Media &amp; Contact</h3>
+                        <h3>Social Media & Contact</h3>
                         <form id="socialMediaForm">
                             <div class="form-group">
                                 <label for="whatsappNumber">WhatsApp Number</label>
@@ -709,7 +646,7 @@ body[unresolved] {opacity: 0; display: block; overflow: hidden; position: relati
         <div class="modal-content">
             <div class="modal-header">
                 <h3>Bulk Import Products</h3>
-                <button class="modal-close" onclick="hideBulkImportModal()">×</button>
+                <button class="modal-close" onclick="hideBulkImportModal()">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="import-instructions">
@@ -770,7 +707,7 @@ body[unresolved] {opacity: 0; display: block; overflow: hidden; position: relati
         <div class="modal-content">
             <div class="modal-header">
                 <h3>Inventory Report Import</h3>
-                <button class="modal-close" onclick="hideInventoryImportModal()">×</button>
+                <button class="modal-close" onclick="hideInventoryImportModal()">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="import-instructions">
@@ -836,8 +773,8 @@ body[unresolved] {opacity: 0; display: block; overflow: hidden; position: relati
         </div>
     </div>
 
-   <script src="/js/api-client.js"></script>
-<script src="/js/idb.js"></script>
-<script src="/js/admin.js"></script>
-
-
+    <script src="js/api-client.js"></script>
+    <script src="js/idb.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>
