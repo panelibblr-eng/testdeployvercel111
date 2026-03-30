@@ -666,7 +666,7 @@ Please confirm this order and provide the above details. Thank you! 🙏`;
                     
                     <!-- Action Buttons -->
                     <div style="display: flex; gap: 15px; margin-top: 25px;">
-                        <button type="submit" class="submit-cart-btn" style="background: linear-gradient(135deg, #DEA193, #BA867B); color: white; border: none; padding: 15px 30px; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 1rem; box-shadow: 0 4px 15px rgba(222, 161, 147, 0.3); flex: 1; transition: all 0.3s ease;">
+                        <button type="button" class="submit-cart-btn" style="background: linear-gradient(135deg, #DEA193, #BA867B); color: white; border: none; padding: 15px 30px; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 1rem; box-shadow: 0 4px 15px rgba(222, 161, 147, 0.3); flex: 1; transition: all 0.3s ease;">
                             🛒 Add to Cart & Order
                         </button>
                         <button type="button" class="close-cart-modal-btn" style="background: linear-gradient(135deg, #DEA193, #BA867B); color: white; border: none; padding: 15px 30px; border-radius: 12px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 15px rgba(222, 161, 147, 0.3); transition: all 0.3s ease;">
