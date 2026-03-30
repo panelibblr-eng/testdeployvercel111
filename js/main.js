@@ -763,28 +763,26 @@ Please confirm this order and provide the above details. Thank you! 🙏`;
 
     // Handle Add to Cart form submission
     function handleAddToCartSubmission(productName, productBrand, productPrice, productCategory, productModel, productId) {
-        const form = document.getElementById('addToCartForm');
-        const formData = new FormData(form);
-        
-        const orderData = {
-            productId: productId,
-            productName: productName,
-            productBrand: productBrand,
-            productPrice: productPrice,
-            productCategory: productCategory,
-            productModel: productModel,
-            customerName: formData.get('customerName'),
-            customerPhone: formData.get('customerPhone'),
-            customerEmail: formData.get('customerEmail'),
-            quantity: parseInt(formData.get('quantity')),
-            sizeFit: formData.get('sizeFit'),
-            lensType: formData.get('lensType'),
-            frameColor: formData.get('frameColor'),
-            deliveryAddress: formData.get('deliveryAddress'),
-            paymentMethod: formData.get('paymentMethod'),
-            preferredDeliveryDate: formData.get('preferredDeliveryDate'),
-            additionalRequirements: formData.get('additionalRequirements'),
-            orderDate: new Date().toISOString(),
+        const form = modal.querySelector('#addToCartForm');
+
+const orderData = {
+    productId: productId,
+    productName: productName,
+    productBrand: productBrand,
+    productPrice: productPrice,
+    productCategory: productCategory,
+    productModel: productModel,
+    customerName: modal.querySelector('#customerName').value.trim(),
+    customerPhone: modal.querySelector('#customerPhone').value.trim(),
+    customerEmail: modal.querySelector('#customerEmail').value.trim(),
+    quantity: parseInt(modal.querySelector('#quantity').value) || 1,
+    sizeFit: '',
+    lensType: modal.querySelector('#lensType') ? modal.querySelector('#lensType').value : '',
+    frameColor: '',
+    deliveryAddress: modal.querySelector('#deliveryAddress').value.trim(),
+    paymentMethod: modal.querySelector('#paymentMethod').value,
+    preferredDeliveryDate: modal.querySelector('#preferredDeliveryDate') ? modal.querySelector('#preferredDeliveryDate').value : '',
+    additionalRequirements: modal.querySelector('#additionalRequirements') ? modal.querySelector('#additionalRequirements').value.trim() : '',            orderDate: new Date().toISOString(),
             orderId: 'ORD-' + Date.now(),
             status: 'pending'
         };
