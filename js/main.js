@@ -763,8 +763,16 @@ Please confirm this order and provide the above details. Thank you! 🙏`;
 
     // Handle Add to Cart form submission
     function handleAddToCartSubmission(productName, productBrand, productPrice, productCategory, productModel, productId) {
-        const form = modal.querySelector('#addToCartForm');
-
+        const form = document.getElementById('addToCartForm');
+        const customerName = document.getElementById('customerName')?.value.trim() || '';
+        const customerPhone = document.getElementById('customerPhone')?.value.trim() || '';
+        const customerEmail = document.getElementById('customerEmail')?.value.trim() || '';
+        const quantity = parseInt(document.getElementById('quantity')?.value) || 1;
+        const deliveryAddress = document.getElementById('deliveryAddress')?.value.trim() || '';
+        const paymentMethod = document.getElementById('paymentMethod')?.value || '';
+        const lensType = document.getElementById('lensType')?.value || '';
+        const preferredDeliveryDate = document.getElementById('preferredDeliveryDate')?.value || '';
+        const additionalRequirements = document.getElementById('additionalRequirements')?.value.trim() || '';
 const orderData = {
     productId: productId,
     productName: productName,
