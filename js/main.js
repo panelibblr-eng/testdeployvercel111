@@ -719,6 +719,22 @@ Please confirm this order and provide the above details. Thank you! 🙏`;
         modal.querySelector('.submit-cart-btn').addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
+            
+            // Validate required fields first
+            const name = document.getElementById('customerName').value.trim();
+            const phone = document.getElementById('customerPhone').value.trim();
+            const email = document.getElementById('customerEmail').value.trim();
+            const quantity = document.getElementById('quantity').value;
+            const address = document.getElementById('deliveryAddress').value.trim();
+            const payment = document.getElementById('paymentMethod').value;
+            
+            if (!name) { alert('Please enter your full name'); return; }
+            if (!phone) { alert('Please enter your phone number'); return; }
+            if (!email) { alert('Please enter your email address'); return; }
+            if (!quantity) { alert('Please select a quantity'); return; }
+            if (!address) { alert('Please enter your delivery address'); return; }
+            if (!payment) { alert('Please select a payment method'); return; }
+            
             handleAddToCartSubmission(productName, productBrand, productPrice, productCategory, productModel, productId);
             modal.remove();
         });
