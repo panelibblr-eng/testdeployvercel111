@@ -721,12 +721,12 @@ Please confirm this order and provide the above details. Thank you! 🙏`;
             e.stopPropagation();
             
             // Validate required fields first
-            const name = document.getElementById('customerName').value.trim();
-            const phone = document.getElementById('customerPhone').value.trim();
-            const email = document.getElementById('customerEmail').value.trim();
-            const quantity = document.getElementById('quantity').value;
-            const address = document.getElementById('deliveryAddress').value.trim();
-            const payment = document.getElementById('paymentMethod').value;
+            const name = modal.querySelector('#customerName').value.trim();
+            const phone = modal.querySelector('#customerPhone').value.trim();
+            const email = modal.querySelector('#customerEmail').value.trim();
+            const quantity = modal.querySelector('#quantity').value;
+            const address = modal.querySelector('#deliveryAddress').value.trim();
+            const payment = modal.querySelector('#paymentMethod').value;
             
             if (!name) { alert('Please enter your full name'); return; }
             if (!phone) { alert('Please enter your phone number'); return; }
