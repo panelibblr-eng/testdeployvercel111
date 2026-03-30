@@ -2061,8 +2061,10 @@ class PhotoSlider {
     container.style.position = 'relative';
     container.style.overflow = 'hidden';
     container.style.borderRadius = '16px';
+container.style.height = '400px';
+container.style.minHeight = '400px';
     
-    container.innerHTML = `
+   container.innerHTML = `
         <video 
             autoplay 
             muted 
@@ -2070,11 +2072,10 @@ class PhotoSlider {
             playsinline
             style="
                 width: 100%;
-                height: 100%;
+                height: 400px;
                 object-fit: cover;
                 border-radius: 16px;
                 display: block;
-                min-height: 400px;
             ">
             <source src="assets/hero-video.mp4" type="video/mp4">
         </video>
