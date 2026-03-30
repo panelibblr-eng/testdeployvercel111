@@ -1633,13 +1633,10 @@ class AnnouncementManager {
         this.isAnimating = false;
         this.autoRotateInterval = null;
         this.announcements = [
-            ' Buy 1 get 1 on David Walker Eyewear',
-            ' New Collection: Premium Designer Frames Now Available!',
-            ' Book Your Eye Test Today - Expert Optometrists Available',
-            ' Limited Time: 20% Off All Sunglasses Collection',
-            ' Free Eye Consultation with Every Purchase',
-            ' Same Day Delivery Available'
-        ];
+    '🕶️ David Walker — Buy 1 Get 1 on David Walker Eyewear!',
+    '✨ Enjoy Upto 20% OFF on Global Brands — Limited Time Only!',
+    '📱 For Prescription Lenses connect with us on WhatsApp: +91-7000532010'
+];
         this.init();
     }
     
