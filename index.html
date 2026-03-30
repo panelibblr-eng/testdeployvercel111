@@ -223,45 +223,55 @@
             </div>
         </section>
 
-        <!-- Shop by Category Section -->
+       <!-- Shop by Category Section -->
         <section class="section section--strip">
             <div class="container">
                 <div class="section__head">
                     <h2 class="section__title">Shop by Category</h2>
                     <p class="section__subtitle">Discover our complete collection of eyewear</p>
                 </div>
-                <div class="category-tiles" style="gap: 2rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
-                    <a href="all-products.html?category=sunglasses" class="category-card" style="text-decoration: none; background: linear-gradient(to bottom, #ffffff 0%, #fefefe 100%); border: 1px solid rgba(222, 161, 147, 0.15); border-radius: 16px; padding: 3rem 2rem; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); position: relative; overflow: hidden;" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 12px 40px rgba(222, 161, 147, 0.15)'; this.style.borderColor='rgba(222, 161, 147, 0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0, 0, 0, 0.04)'; this.style.borderColor='rgba(222, 161, 147, 0.15)';">
-                        <div style="text-align: center;">
-                            <div style="margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid rgba(222, 161, 147, 0.1);">
-                                <span style="font-size: 3rem; font-weight: 300; letter-spacing: 2px; color: #7a534a; display: inline-block;">SUNGLASSES</span>
+                <div style="position: relative;">
+                    <button onclick="catSliderScroll(-1)" style="position: absolute; left: -20px; top: 50%; transform: translateY(-50%); z-index: 10; background: white; border: 1px solid rgba(222,161,147,0.4); border-radius: 50%; width: 44px; height: 44px; font-size: 1.4rem; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1); color: #7a534a; display: flex; align-items: center; justify-content: center;">‹</button>
+                    <div id="categorySliderTrack" style="display: flex; gap: 2rem; overflow-x: auto; scroll-behavior: smooth; scrollbar-width: none; -ms-overflow-style: none; padding: 1rem 0.5rem;">
+                        <a href="all-products.html?category=sunglasses" class="category-card" style="text-decoration: none; background: linear-gradient(to bottom, #ffffff 0%, #fefefe 100%); border: 1px solid rgba(222, 161, 147, 0.15); border-radius: 16px; padding: 3rem 2rem; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); position: relative; overflow: hidden; min-width: 300px; flex: 0 0 300px;" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 12px 40px rgba(222, 161, 147, 0.15)'; this.style.borderColor='rgba(222, 161, 147, 0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0, 0, 0, 0.04)'; this.style.borderColor='rgba(222, 161, 147, 0.15)';">
+                            <div style="text-align: center;">
+                                <div style="margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid rgba(222, 161, 147, 0.1);">
+                                    <span style="font-size: 3rem; font-weight: 300; letter-spacing: 2px; color: #7a534a; display: inline-block;">SUNGLASSES</span>
+                                </div>
+                                <h3 style="font-weight: 400; color: #1f2937; font-size: 1.1rem; letter-spacing: 0.5px; margin-bottom: 0.5rem; line-height: 1.6;">Exquisite designs from the world's most prestigious houses</h3>
+                                <p style="color: #94a3b8; font-size: 0.875rem; font-weight: 300; letter-spacing: 0.3px; margin-top: 0.5rem;">Explore Collection →</p>
                             </div>
-                            <h3 style="font-weight: 400; color: #1f2937; font-size: 1.1rem; letter-spacing: 0.5px; margin-bottom: 0.5rem; line-height: 1.6;">Exquisite designs from the world's most prestigious houses</h3>
-                            <p style="color: #94a3b8; font-size: 0.875rem; font-weight: 300; letter-spacing: 0.3px; margin-top: 0.5rem;">Explore Collection →</p>
-                        </div>
-                    </a>
-                    <a href="all-products.html?category=optical-frames" class="category-card" style="text-decoration: none; background: linear-gradient(to bottom, #ffffff 0%, #fefefe 100%); border: 1px solid rgba(232, 180, 184, 0.15); border-radius: 16px; padding: 3rem 2rem; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); position: relative; overflow: hidden;" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 12px 40px rgba(232, 180, 184, 0.15)'; this.style.borderColor='rgba(232, 180, 184, 0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0, 0, 0, 0.04)'; this.style.borderColor='rgba(232, 180, 184, 0.15)';">
-                        <div style="text-align: center;">
-                            <div style="margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid rgba(232, 180, 184, 0.1);">
-                                <span style="font-size: 3rem; font-weight: 300; letter-spacing: 2px; color: #7a534a; display: inline-block;">OPTICAL FRAMES</span>
+                        </a>
+                        <a href="all-products.html?category=optical-frames" class="category-card" style="text-decoration: none; background: linear-gradient(to bottom, #ffffff 0%, #fefefe 100%); border: 1px solid rgba(232, 180, 184, 0.15); border-radius: 16px; padding: 3rem 2rem; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); position: relative; overflow: hidden; min-width: 300px; flex: 0 0 300px;" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 12px 40px rgba(232, 180, 184, 0.15)'; this.style.borderColor='rgba(232, 180, 184, 0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0, 0, 0, 0.04)'; this.style.borderColor='rgba(232, 180, 184, 0.15)';">
+                            <div style="text-align: center;">
+                                <div style="margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid rgba(232, 180, 184, 0.1);">
+                                    <span style="font-size: 3rem; font-weight: 300; letter-spacing: 2px; color: #7a534a; display: inline-block;">OPTICAL FRAMES</span>
+                                </div>
+                                <h3 style="font-weight: 400; color: #1f2937; font-size: 1.1rem; letter-spacing: 0.5px; margin-bottom: 0.5rem; line-height: 1.6;">Handcrafted frames with uncompromising attention to detail</h3>
+                                <p style="color: #94a3b8; font-size: 0.875rem; font-weight: 300; letter-spacing: 0.3px; margin-top: 0.5rem;">Explore Collection →</p>
                             </div>
-                            <h3 style="font-weight: 400; color: #1f2937; font-size: 1.1rem; letter-spacing: 0.5px; margin-bottom: 0.5rem; line-height: 1.6;">Handcrafted frames with uncompromising attention to detail</h3>
-                            <p style="color: #94a3b8; font-size: 0.875rem; font-weight: 300; letter-spacing: 0.3px; margin-top: 0.5rem;">Explore Collection →</p>
-                        </div>
-                    </a>
-                    <a href="all-products.html?category=contact-lenses" class="category-card" style="text-decoration: none; background: linear-gradient(to bottom, #ffffff 0%, #fefefe 100%); border: 1px solid rgba(186, 134, 123, 0.15); border-radius: 16px; padding: 3rem 2rem; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); position: relative; overflow: hidden;" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 12px 40px rgba(186, 134, 123, 0.15)'; this.style.borderColor='rgba(186, 134, 123, 0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0, 0, 0, 0.04)'; this.style.borderColor='rgba(186, 134, 123, 0.15)';">
-                        <div style="text-align: center;">
-                            <div style="margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid rgba(186, 134, 123, 0.1);">
-                                <span style="font-size: 3rem; font-weight: 300; letter-spacing: 2px; color: #7a534a; display: inline-block;">CONTACT LENSES</span>
+                        </a>
+                        <a href="all-products.html?category=contact-lenses" class="category-card" style="text-decoration: none; background: linear-gradient(to bottom, #ffffff 0%, #fefefe 100%); border: 1px solid rgba(186, 134, 123, 0.15); border-radius: 16px; padding: 3rem 2rem; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); position: relative; overflow: hidden; min-width: 300px; flex: 0 0 300px;" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 12px 40px rgba(186, 134, 123, 0.15)'; this.style.borderColor='rgba(186, 134, 123, 0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0, 0, 0, 0.04)'; this.style.borderColor='rgba(186, 134, 123, 0.15)';">
+                            <div style="text-align: center;">
+                                <div style="margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid rgba(186, 134, 123, 0.1);">
+                                    <span style="font-size: 3rem; font-weight: 300; letter-spacing: 2px; color: #7a534a; display: inline-block;">CONTACT LENSES</span>
+                                </div>
+                                <h3 style="font-weight: 400; color: #1f2937; font-size: 1.1rem; letter-spacing: 0.5px; margin-bottom: 0.5rem; line-height: 1.6;">Advanced lens technology for discerning vision</h3>
+                                <p style="color: #94a3b8; font-size: 0.875rem; font-weight: 300; letter-spacing: 0.3px; margin-top: 0.5rem;">Explore Collection →</p>
                             </div>
-                            <h3 style="font-weight: 400; color: #1f2937; font-size: 1.1rem; letter-spacing: 0.5px; margin-bottom: 0.5rem; line-height: 1.6;">Advanced lens technology for discerning vision</h3>
-                            <p style="color: #94a3b8; font-size: 0.875rem; font-weight: 300; letter-spacing: 0.3px; margin-top: 0.5rem;">Explore Collection →</p>
-                        </div>
-                    </a>
+                        </a>
+                    </div>
+                    <button onclick="catSliderScroll(1)" style="position: absolute; right: -20px; top: 50%; transform: translateY(-50%); z-index: 10; background: white; border: 1px solid rgba(222,161,147,0.4); border-radius: 50%; width: 44px; height: 44px; font-size: 1.4rem; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1); color: #7a534a; display: flex; align-items: center; justify-content: center;">›</button>
                 </div>
             </div>
         </section>
 
+        <script>
+        function catSliderScroll(dir) {
+            const track = document.getElementById('categorySliderTrack');
+            track.scrollBy({ left: dir * 320, behavior: 'smooth' });
+        }
+        </script>
         <section class="section">
             <div class="container">
                 <div class="section__head">
