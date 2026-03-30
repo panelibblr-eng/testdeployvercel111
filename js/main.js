@@ -2051,46 +2051,42 @@ class PhotoSlider {
     }
 
     loadDefaultBrandPosters() {
-        console.log('Loading 9 brand poster images...');
-        
-        const heroImages = [
-            {
-                url: 'assets/boss.jpg',
-                alt: 'BOSS Eyewear'
-            },
-            {
-                url: 'assets/montblanc.jpg',
-                alt: 'Montblanc Eyewear'
-            },
-            {
-                url: 'assets/carrera.jpg',
-                alt: 'Carrera Eyewear'
-            },
-            {
-                url: 'assets/philipp-plein.jpg',
-                alt: 'Philipp Plein Eyewear'
-            },
-            {
-                url: 'assets/michael-kors.jpg',
-                alt: 'Michael Kors Eyewear'
-            },
-            {
-                url: 'assets/marc-jacobs.jpg',
-                alt: 'Marc Jacobs Eyewear'
-            },
-            {
-                url: 'assets/dolce-gabbana.jpg',
-                alt: 'Dolce & Gabbana Eyewear'
-            },
-                       {
-                url: 'assets/burberry.jpg',
-                alt: 'Burberry Eyewear'
-            }
-        ];
-        
-        this.updateSliderImages(heroImages);
-    }
-
+    console.log('Loading hero video...');
+    
+    if (!this.track) return;
+    
+    this.stopAutoSlide();
+    
+    const container = this.track.parentElement;
+    container.style.position = 'relative';
+    container.style.overflow = 'hidden';
+    container.style.borderRadius = '16px';
+    
+    container.innerHTML = `
+        <video 
+            autoplay 
+            muted 
+            loop 
+            playsinline
+            style="
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                border-radius: 16px;
+                display: block;
+                min-height: 400px;
+            ">
+            <source src="assets/hero-video.mp4" type="video/mp4">
+        </video>
+    `;
+    
+    const prevBtn = document.getElementById('sliderNavPrev');
+    const nextBtn = document.getElementById('sliderNavNext');
+    if (prevBtn) prevBtn.style.display = 'none';
+    if (nextBtn) nextBtn.style.display = 'none';
+    
+    console.log('Hero video loaded!');
+}
     resolveAndUpdateImages(imgs) {
         try {
             console.log('resolveAndUpdateImages called with:', imgs);
