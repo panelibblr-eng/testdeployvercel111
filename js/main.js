@@ -718,28 +718,78 @@ Please confirm this order and provide the above details. Thank you! 🙏`;
         });
 
         modal.querySelector('.submit-cart-btn').addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            // Validate required fields first
-            const name = modal.querySelector('#customerName').value.trim();
-            const phone = modal.querySelector('#customerPhone').value.trim();
-            const email = modal.querySelector('#customerEmail').value.trim();
-            const quantity = modal.querySelector('#quantity').value;
-            const address = modal.querySelector('#deliveryAddress').value.trim();
-            const payment = modal.querySelector('#paymentMethod').value;
-            
-            if (!name) { alert('Please enter your full name'); return; }
-            if (!phone) { alert('Please enter your phone number'); return; }
-            if (!email) { alert('Please enter your email address'); return; }
-            if (!quantity) { alert('Please select a quantity'); return; }
-            if (!address) { alert('Please enter your delivery address'); return; }
-            if (!payment) { alert('Please select a payment method'); return; }
-            
-            handleAddToCartSubmission(productName, productBrand, productPrice, productCategory, productModel, productId);
-            modal.remove();
-        });
-        
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Validate required fields
+    const name = modal.querySelector('#customerName').value.trim();
+    const phone = modal.querySelector('#customerPhone').value.trim();
+    const email = modal.querySelector('#customerEmail').value.trim();
+    const quantity = modal.querySelector('#quantity').value;
+    const address = modal.querySelector('#deliveryAddress').value.trim();
+    const payment = modal.querySelector('#paymentMethod').value;
+    const lensType = modal.querySelector('#lensType').value;
+    const frameColor = modal.querySelector('#frameColor').value;
+    const deliveryDate = modal.querySelector('#preferredDeliveryDate').value;
+    const additionalReqs = modal.querySelector('#additionalRequirements').value.trim();
+    
+    if (!name) { alert('Please enter your full name'); return; }
+    if (!phone) { alert('Please enter your phone number'); return; }
+    if (!email) { alert('Please enter your email address'); return; }
+    if (!quantity) { alert('Please select a quantity'); return; }
+    if (!address) { alert('Please enter your delivery address'); return; }
+    if (!payment) { alert('Please select a payment method'); return; }
+    
+    const totalAmount = (productPrice * parseInt(quantity)) + 200;
+    const orderId = 'ORD-' + Date.now();
+    
+    // ✅ Remove modal BEFORE opening WhatsApp
+    modal.remove();
+    
+    // ✅ Build WhatsApp message
+    const orderMessage = `🛒 *NEW ORDER - MONICA OPTO HUB*
+
+📋 *Order ID:* ${orderId}
+📅 *Order Date:* ${new Date().toLocaleDateString()}
+
+👤 *Customer Details:*
+- Name: ${name}
+- Phone: ${phone}
+- Email: ${email}
+
+🛍️ *Product Details:*
+- Product: ${productName}
+- Brand: ${productBrand}
+- Category: ${productCategory}
+- Model: ${productModel || 'N/A'}
+- Unit Price: ₹${productPrice.toLocaleString()}
+- Quantity: ${quantity}
+- Total Product Cost: ₹${(productPrice * parseInt(quantity)).toLocaleString()}
+
+📐 *Specifications:*
+- Lens Type: ${lensType || 'Not specified'}
+- Frame Color: ${frameColor || 'Not specified'}
+
+🚚 *Delivery Details:*
+- Address: ${address}
+- Preferred Date: ${deliveryDate || 'Not specified'}
+- Delivery Charges: ₹200
+
+💳 *Payment:*
+- Method: ${payment}
+- Total Amount: ₹${totalAmount.toLocaleString()}
+
+📝 *Additional Requirements:*
+${additionalReqs || 'None'}
+
+Please confirm this order and provide delivery timeline. Thank you! 🙏`;
+
+    // ✅ Open WhatsApp in new tab — page never redirects
+    window.open(`https://wa.me/917000532010?text=${encodeURIComponent(orderMessage)}`, '_blank', 'noopener,noreferrer');
+    
+    // ✅ Show success popup
+    showOrderSuccessMessage({ orderId, totalAmount });
+});        
         // Close modal when clicking outside
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
