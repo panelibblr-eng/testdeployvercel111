@@ -565,7 +565,8 @@ Please confirm this order and provide the above details. Thank you! 🙏`;
                                 <option value="4">4</option>
                                 <option value="5">5</option>
                             </select>
-                        
+                        </div>
+                    </div>
                     
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                         <div>
