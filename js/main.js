@@ -716,7 +716,7 @@ Please confirm this order and provide the above details. Thank you! 🙏`;
             modal.remove();
         });
 
-        document.querySelector('.submit-cart-btn').addEventListener('click', function(e) {
+        modal.querySelector('.submit-cart-btn').addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
             handleAddToCartSubmission(productName, productBrand, productPrice, productCategory, productModel, productId);
