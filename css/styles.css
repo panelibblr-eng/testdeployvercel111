@@ -532,3 +532,17 @@ body.theme-blush .store-location__title{color:var(--brand-2);font-weight:700;}
   .newsletter input,.newsletter button{padding:14px 16px;font-size:0.95rem;}
   .whatsapp-button{width:52px;height:52px;bottom:16px;right:16px;}
 }
+/* This removes the border from the link container */
+.logo, a.logo {
+    border: none !important;
+    text-decoration: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* This removes the border from the actual image */
+.logo-img, .logo img {
+    border: 0 !important;
+    border-style: none !important;
+    outline: none !important;
+}
