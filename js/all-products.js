@@ -30,12 +30,10 @@ class AllProductsPage {
                 categorySelect.value = category;
             }
         }
-        
         console.log('URL parameters parsed:', { category });
     }
 
     setupEventListeners() {
-        // Filter controls
         document.getElementById('categoryFilter').addEventListener('change', (e) => {
             this.filters.category = e.target.value;
             this.applyFilters();
@@ -51,12 +49,10 @@ class AllProductsPage {
             this.applyFilters();
         });
 
-        // Load more button
         document.getElementById('loadMoreBtn').addEventListener('click', () => {
             this.loadMoreProducts();
         });
 
-        // Product interaction handlers
         document.addEventListener('click', (e) => {
             if (e.target.classList.contains('view-details-btn')) {
                 e.preventDefault();
@@ -82,76 +78,66 @@ class AllProductsPage {
     async loadProducts() {
         try {
             console.log('Loading all products...');
-            
-            // Try API first
-            if (window.apiClient) {
-                try {
-                    const response = await window.apiClient.getProducts();
-                    this.products = response.products || [];
-                    console.log('Products loaded from API:', this.products.length);
-                    if (this.products.length > 0) {
-                        this.applyFilters();
-                        return;
-                    }
-                } catch (apiError) {
-                    console.warn('API failed, trying localStorage:', apiError);
-                }
-            }
-            
-            // Fallback to localStorage
+
+            // ✅ Load from localStorage FIRST for instant display
             const adminData = JSON.parse(localStorage.getItem('adminPanelData') || '{}');
             this.products = adminData.products || [];
-            console.log('Products loaded from localStorage:', this.products.length);
-            
-            // If still no products, try direct fetch
-            if (this.products.length === 0) {
+
+            if (this.products.length > 0) {
+                console.log('Products loaded from localStorage:', this.products.length);
+                this.applyFilters();
+            }
+
+            // ✅ Then try API with 5 second timeout
+            if (window.apiClient) {
                 try {
-                    const apiUrl = (window.apiClient?.baseURL + '/products') || '/api/products';
-                    const response = await fetch(apiUrl);
-                    if (response.ok) {
-                        const data = await response.json();
-                        this.products = data.products || [];
-                        console.log('Products loaded from direct fetch:', this.products.length);
+                    const timeoutPromise = new Promise((_, reject) =>
+                        setTimeout(() => reject(new Error('timeout')), 5000)
+                    );
+                    const response = await Promise.race([
+                        window.apiClient.getProducts(),
+                        timeoutPromise
+                    ]);
+                    const apiProducts = response.products || [];
+                    if (apiProducts.length > 0) {
+                        this.products = apiProducts;
+                        console.log('Products updated from API:', this.products.length);
+                        this.applyFilters();
                     }
-                } catch (fetchError) {
-                    console.warn('Direct fetch failed:', fetchError);
+                } catch (apiError) {
+                    console.warn('API failed or timed out:', apiError.message);
                 }
             }
-            
-            this.applyFilters();
+
+            // ✅ If still empty show error
+            if (this.products.length === 0) {
+                this.showError('No products found. Please check back later.');
+            }
+
         } catch (error) {
             console.error('Error loading products:', error);
-            this.showError('Failed to load products. Please check if the server is running.');
+            this.showError('Failed to load products. Please refresh the page.');
         }
     }
 
     applyFilters() {
         console.log('Applying filters:', this.filters);
-        
-        // Start with all products
         this.filteredProducts = [...this.products];
 
-        // Apply category filter
         if (this.filters.category !== 'all') {
-            this.filteredProducts = this.filteredProducts.filter(product => 
+            this.filteredProducts = this.filteredProducts.filter(product =>
                 product.category === this.filters.category
             );
         }
 
-        // Apply brand filter
         if (this.filters.brand !== 'all') {
-            this.filteredProducts = this.filteredProducts.filter(product => 
+            this.filteredProducts = this.filteredProducts.filter(product =>
                 product.brand === this.filters.brand
             );
         }
 
-        // Apply sorting
         this.sortProducts();
-
-        // Reset pagination
         this.currentPage = 1;
-
-        // Display products
         this.displayProducts();
     }
 
@@ -181,7 +167,6 @@ class AllProductsPage {
         const noProductsMessage = document.getElementById('noProductsMessage');
         const loadMoreContainer = document.getElementById('loadMoreContainer');
 
-        // Hide loading message
         loadingMessage.style.display = 'none';
 
         if (this.filteredProducts.length === 0) {
@@ -194,22 +179,17 @@ class AllProductsPage {
         container.style.display = 'grid';
         noProductsMessage.style.display = 'none';
 
-        // Calculate products to show
-        const startIndex = 0;
         const endIndex = Math.min(this.currentPage * this.productsPerPage, this.filteredProducts.length);
-        const productsToShow = this.filteredProducts.slice(startIndex, endIndex);
+        const productsToShow = this.filteredProducts.slice(0, endIndex);
 
-        // Render products
         container.innerHTML = productsToShow.map(product => this.renderProductCard(product)).join('');
 
-        // Show/hide load more button
         if (endIndex < this.filteredProducts.length) {
             loadMoreContainer.style.display = 'block';
         } else {
             loadMoreContainer.style.display = 'none';
         }
 
-        // Update results count
         this.updateResultsCount();
     }
 
@@ -219,9 +199,7 @@ class AllProductsPage {
     }
 
     updateResultsCount() {
-        const resultsText = `Showing ${Math.min(this.currentPage * this.productsPerPage, this.filteredProducts.length)} of ${this.filteredProducts.length} products`;
-        
-        // Update or create results count element
+        const resultsText = 'Showing ' + Math.min(this.currentPage * this.productsPerPage, this.filteredProducts.length) + ' of ' + this.filteredProducts.length + ' products';
         let resultsElement = document.getElementById('resultsCount');
         if (!resultsElement) {
             resultsElement = document.createElement('div');
@@ -233,42 +211,44 @@ class AllProductsPage {
     }
 
     renderProductCard(product) {
-        // Get the primary image or first available image
-        let imageUrl = this.getPlaceholderImage();
-        
-        if (product.images && product.images.length > 0) {
-            // Use the primary image or first image
-            const primaryImage = product.images.find(img => img.is_primary) || product.images[0];
-            imageUrl = primaryImage.image_url;
-        } else if (product.image_url) {
-            imageUrl = product.image_url;
+        const productId = product._id || product.id;
+        const placeholder = this.getPlaceholderImage();
+
+        let sliderImages = [];
+        if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+            sliderImages = product.images.map(function(img) {
+                return typeof img === 'string' ? img : (img.image_url || img);
+            }).filter(function(img) { return img && img.trim() !== ''; });
         }
-        
-        return `
-            <article class="product-card">
-                <div class="product-card__media">
-                    <img src="${imageUrl}" 
-                         alt="${product.name}" 
-                         style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px;"
-                         onerror="this.src='${this.getPlaceholderImage()}'">
-                    ${product.images && product.images.length > 1 ? `<div class="image-count-badge">+${product.images.length - 1}</div>` : ''}
-                </div>
-                <h3 class="product-card__title">${product.name}</h3>
-                <p class="product-card__price">₹ ${product.price.toLocaleString()}</p>
-                <div class="product-card__meta">
-                    <span class="product-category">${product.category}</span>
-                    <span class="product-brand">${product.brand}</span>
-                </div>
-                <button class="btn btn--ghost view-details-btn" data-product-id="${product.id}">View Details</button>
-                <button class="btn btn--primary add-to-cart-btn" 
-                        data-product-name="${product.name}" 
-                        data-product-brand="${product.brand}"
-                        data-product-price="${product.price}"
-                        data-product-category="${product.category}"
-                        data-product-model="${product.model || ''}"
-                        data-product-id="${product.id}" style="width: 100%; margin-top: 10px;">🛒 Add to Cart</button>
-            </article>
-        `;
+        if (sliderImages.length === 0 && product.image_url) {
+            sliderImages = [product.image_url];
+        }
+        if (sliderImages.length === 0) {
+            sliderImages = [placeholder];
+        }
+
+        const hasMultiple = sliderImages.length > 1;
+
+        let imagesHtml = '';
+        for (let i = 0; i < sliderImages.length; i++) {
+            imagesHtml += '<img src="' + sliderImages[i] + '" alt="' + product.name + '" style="width:100%;height:200px;object-fit:cover;border-radius:8px;display:' + (i === 0 ? 'block' : 'none') + ';position:absolute;top:0;left:0;" onerror="this.src=\'' + placeholder + '\'" />';
+        }
+
+        return '<article class="product-card">' +
+            '<div class="product-card__media card-slider" data-idx="0" style="position:relative;height:200px;overflow:hidden;border-radius:8px;">' +
+            (hasMultiple ? '<button onclick="apSliderPrev(this)" style="position:absolute;left:6px;top:6px;background:rgba(222,161,147,0.85);color:#fff;border:none;border-radius:8px;padding:5px 10px;cursor:pointer;z-index:3;font-size:1rem;">&#8249;</button>' : '') +
+            imagesHtml +
+            (hasMultiple ? '<button onclick="apSliderNext(this)" style="position:absolute;right:6px;top:6px;background:rgba(222,161,147,0.85);color:#fff;border:none;border-radius:8px;padding:5px 10px;cursor:pointer;z-index:3;font-size:1rem;">&#8250;</button>' : '') +
+            '</div>' +
+            '<h3 class="product-card__title">' + product.name + '</h3>' +
+            '<p class="product-card__price">&#8377; ' + product.price.toLocaleString() + '</p>' +
+            '<div class="product-card__meta">' +
+            '<span class="product-category">' + product.category + '</span>' +
+            '<span class="product-brand">' + product.brand + '</span>' +
+            '</div>' +
+            '<button class="btn btn--ghost view-details-btn" data-product-id="' + productId + '">View Details</button>' +
+            '<button class="btn btn--primary add-to-cart-btn" data-product-name="' + product.name + '" data-product-brand="' + product.brand + '" data-product-price="' + product.price + '" data-product-category="' + product.category + '" data-product-model="' + (product.model || '') + '" data-product-id="' + productId + '" style="width:100%;margin-top:10px;">&#x1F6D2; Add to Cart</button>' +
+            '</article>';
     }
 
     getPlaceholderImage() {
@@ -276,141 +256,120 @@ class AllProductsPage {
     }
 
     viewProduct(productId) {
-const product = this.filteredProducts.find(p => (p._id || p.id) == productId);
+        const product = this.filteredProducts.find(p => (p._id || p.id) == productId);
+        if (!product) {
             alert('Product not found');
             return;
         }
 
-        // Create modal
-        const modal = document.createElement('div');
-        modal.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10000;
-            animation: fadeIn 0.3s ease-in-out;
-        `;
+        let images = [];
+        if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+            images = product.images.map(function(img) {
+                return typeof img === 'string' ? img : (img.image_url || img);
+            }).filter(function(img) { return img && img.trim() !== ''; });
+        }
+        if (images.length === 0 && product.image_url) images = [product.image_url];
+        if (images.length === 0) images = [this.getPlaceholderImage()];
 
-        const imageUrl = product.image_url || product.image || this.getPlaceholderImage();
-        
-        modal.innerHTML = `
-            <div style="background: linear-gradient(135deg, #ffffff, #FCF8F7); padding: 30px; border-radius: 16px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(222, 161, 147, 0.3); border: 1px solid rgba(222, 161, 147, 0.2);">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid rgba(222, 161, 147, 0.3); padding-bottom: 15px;">
-                    <h2 style="margin: 0; color: #7a534a; font-size: 1.8rem; font-weight: 700;">${product.name}</h2>
-                    <button class="close-modal-btn" style="background: rgba(222, 161, 147, 0.1); border: 1px solid rgba(222, 161, 147, 0.3); font-size: 28px; cursor: pointer; color: #7a534a; padding: 5px; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;">&times;</button>
-                </div>
-                
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-                    <div>
-                        <img src="${imageUrl}" alt="${product.name}" style="width: 100%; height: 250px; object-fit: cover; border-radius: 12px; border: 2px solid rgba(222, 161, 147, 0.3);">
-                    </div>
-                    <div>
-                        <div style="margin-bottom: 15px;">
-                            <strong style="color: #7a534a;">Brand:</strong> 
-                            <span style="color: #1f2937; font-weight: 500;">${product.brand}</span>
-                        </div>
-                        
-                        <div style="margin-bottom: 15px;">
-                            <strong style="color: #7a534a;">Category:</strong> 
-                            <span style="color: #1f2937; font-weight: 500;">${product.category}</span>
-                        </div>
-                        
-                        <div style="margin-bottom: 15px;">
-                            <strong style="color: #7a534a;">Model:</strong> 
-                            <span style="color: #1f2937; font-weight: 500;">${product.model || 'N/A'}</span>
-                        </div>
-                        
-                        <div style="margin-bottom: 20px; padding: 15px; background: linear-gradient(135deg, #DEA193, #BA867B); border-radius: 12px; text-align: center; box-shadow: 0 4px 15px rgba(222, 161, 147, 0.3);">
-                            <strong style="color: white; font-size: 1.1rem;">Price</strong><br>
-                            <span style="color: white; font-size: 1.5em; font-weight: bold;">₹ ${product.price.toLocaleString()}</span>
-                        </div>
-                    </div>
-                </div>
-                
-                ${product.description ? `
-                    <div style="margin-bottom: 20px; padding: 15px; background: linear-gradient(135deg, #F3DDD8, #F0D4CE); border-radius: 12px; border-left: 4px solid #DEA193;">
-                        <strong style="color: #7a534a;">Description:</strong><br>
-                        <span style="color: #1f2937; line-height: 1.6;">${product.description}</span>
-                    </div>
-                ` : ''}
-                
-                <div style="display: flex; gap: 15px; margin-top: 25px;">
-                    <button class="whatsapp-modal-btn" style="background: linear-gradient(135deg, #25D366, #128C7E); color: white; border: none; padding: 15px 25px; border-radius: 12px; cursor: pointer; flex: 1; font-weight: bold; font-size: 1rem; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3); transition: all 0.3s ease;">
-                        📱 Contact via WhatsApp
-                    </button>
-                    <button class="close-modal-btn" style="background: linear-gradient(135deg, #DEA193, #BA867B); color: white; border: none; padding: 15px 25px; border-radius: 12px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 15px rgba(222, 161, 147, 0.3); transition: all 0.3s ease;">
-                        Close
-                    </button>
-                </div>
-            </div>
-        `;
-        
+        let currentIndex = 0;
+        const modal = document.createElement('div');
+        modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:10000;';
+
+        const thumbsHtml = images.length > 1 ? images.map(function(src, idx) {
+            return '<img data-index="' + idx + '" src="' + src + '" style="width:60px;height:60px;object-fit:cover;border-radius:8px;border:2px solid ' + (idx === 0 ? '#DEA193' : 'rgba(222,161,147,0.3)') + ';cursor:pointer;" />';
+        }).join('') : '';
+
+        const navHtml = images.length > 1 ?
+            '<button class="gallery-prev" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);background:rgba(222,161,147,0.8);color:#fff;border:none;border-radius:8px;padding:8px 12px;cursor:pointer;z-index:10;">&#8249;</button>' +
+            '<button class="gallery-next" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:rgba(222,161,147,0.8);color:#fff;border:none;border-radius:8px;padding:8px 12px;cursor:pointer;z-index:10;">&#8250;</button>' : '';
+
+        modal.innerHTML =
+            '<div style="background:linear-gradient(135deg,#ffffff,#FCF8F7);padding:30px;border-radius:16px;max-width:600px;width:90%;max-height:80vh;overflow-y:auto;box-shadow:0 20px 60px rgba(222,161,147,0.3);">' +
+            '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;border-bottom:2px solid rgba(222,161,147,0.3);padding-bottom:15px;">' +
+            '<h2 style="margin:0;color:#7a534a;font-size:1.8rem;font-weight:700;">' + product.name + '</h2>' +
+            '<button class="close-modal-btn" style="background:rgba(222,161,147,0.1);border:1px solid rgba(222,161,147,0.3);font-size:28px;cursor:pointer;color:#7a534a;border-radius:50%;width:40px;height:40px;">&times;</button>' +
+            '</div>' +
+            '<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">' +
+            '<div>' +
+            '<div style="position:relative;">' +
+            navHtml +
+            '<img class="gallery-main" src="' + images[0] + '" alt="' + product.name + '" style="width:100%;height:250px;object-fit:cover;border-radius:12px;border:2px solid rgba(222,161,147,0.3);">' +
+            '</div>' +
+            (images.length > 1 ? '<div style="display:flex;gap:8px;margin-top:10px;overflow-x:auto;">' + thumbsHtml + '</div>' : '') +
+            '</div>' +
+            '<div>' +
+            '<div style="margin-bottom:15px;"><strong style="color:#7a534a;">Brand:</strong> ' + product.brand + '</div>' +
+            '<div style="margin-bottom:15px;"><strong style="color:#7a534a;">Category:</strong> ' + product.category + '</div>' +
+            '<div style="margin-bottom:15px;"><strong style="color:#7a534a;">Model:</strong> ' + (product.model || 'N/A') + '</div>' +
+            '<div style="margin-bottom:20px;padding:15px;background:linear-gradient(135deg,#DEA193,#BA867B);border-radius:12px;text-align:center;">' +
+            '<strong style="color:white;">Price</strong><br>' +
+            '<span style="color:white;font-size:1.5em;font-weight:bold;">&#8377; ' + product.price.toLocaleString() + '</span>' +
+            '</div>' +
+            '</div>' +
+            '</div>' +
+            '<div style="display:flex;gap:15px;margin-top:25px;">' +
+            '<button class="whatsapp-modal-btn" style="background:linear-gradient(135deg,#25D366,#128C7E);color:white;border:none;padding:15px 25px;border-radius:12px;cursor:pointer;flex:1;font-weight:bold;">&#128241; Contact via WhatsApp</button>' +
+            '<button class="close-modal-btn" style="background:linear-gradient(135deg,#DEA193,#BA867B);color:white;border:none;padding:15px 25px;border-radius:12px;cursor:pointer;font-weight:bold;">Close</button>' +
+            '</div>' +
+            '</div>';
+
         document.body.appendChild(modal);
-        
-        // Add event listeners
-        const closeButtons = modal.querySelectorAll('.close-modal-btn');
-        const whatsappButton = modal.querySelector('.whatsapp-modal-btn');
-        
-        closeButtons.forEach(btn => {
-            btn.addEventListener('click', () => {
-                modal.remove();
-            });
-        });
-        
-        if (whatsappButton) {
-            whatsappButton.addEventListener('click', () => {
-                this.openWhatsApp(product.name, product.brand);
-                modal.remove();
+
+        const mainImg = modal.querySelector('.gallery-main');
+        const prevBtn = modal.querySelector('.gallery-prev');
+        const nextBtn = modal.querySelector('.gallery-next');
+        const thumbs = Array.from(modal.querySelectorAll('[data-index]'));
+
+        function showImage(index) {
+            if (index < 0) index = images.length - 1;
+            if (index >= images.length) index = 0;
+            currentIndex = index;
+            mainImg.src = images[currentIndex];
+            thumbs.forEach(function(t, i) {
+                t.style.borderColor = i === currentIndex ? '#DEA193' : 'rgba(222,161,147,0.3)';
             });
         }
-        
-        // Close modal when clicking outside
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.remove();
-            }
+
+        if (prevBtn) prevBtn.addEventListener('click', function() { showImage(currentIndex - 1); });
+        if (nextBtn) nextBtn.addEventListener('click', function() { showImage(currentIndex + 1); });
+        thumbs.forEach(function(t) {
+            t.addEventListener('click', function() { showImage(parseInt(t.getAttribute('data-index'))); });
         });
-        
-        // Close modal with Escape key
-        const handleEscape = (e) => {
-            if (e.key === 'Escape') {
-                modal.remove();
-                document.removeEventListener('keydown', handleEscape);
+
+        modal.querySelectorAll('.close-modal-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() { modal.remove(); });
+        });
+
+        modal.querySelector('.whatsapp-modal-btn').addEventListener('click', function() {
+            const message = 'Hi! I am interested in ' + product.name + ' from ' + product.brand + '. Can you provide more information?';
+            if (typeof window.openWhatsApp === 'function') {
+                window.openWhatsApp(message);
+            } else {
+                window.open('https://wa.me/917000532010?text=' + encodeURIComponent(message), '_blank');
             }
-        };
-        document.addEventListener('keydown', handleEscape);
+            modal.remove();
+        });
+
+        modal.addEventListener('click', function(e) { if (e.target === modal) modal.remove(); });
+        document.addEventListener('keydown', function handleEsc(e) {
+            if (e.key === 'Escape') { modal.remove(); document.removeEventListener('keydown', handleEsc); }
+        });
     }
 
     openAddToCartModal(productName, productBrand, productPrice, productCategory, productModel, productId) {
         if (window.openAddToCartModal) {
             window.openAddToCartModal(productName, productBrand, productPrice, productCategory, productModel, productId);
         } else {
-            console.error('Add to Cart modal function not available');
             alert('Add to Cart functionality is not available. Please try the Quick Order option.');
         }
     }
 
     openWhatsApp(productName, productBrand) {
-        const message = `Hi! I am interested in ${productName} from ${productBrand}. Can you provide more information?`;
-        
-        console.log('WhatsApp message:', message);
-        
-        // Use the global WhatsApp function if available
+        const message = 'Hi! I am interested in ' + productName + ' from ' + productBrand + '. Can you provide more information?';
         if (typeof window.openWhatsApp === 'function') {
             window.openWhatsApp(message);
         } else {
-            // Fallback to direct WhatsApp URL
-            const cleanMessage = message.trim().replace(/\s+/g, ' ');
-            const encodedMessage = encodeURIComponent(cleanMessage);
-            const whatsappUrl = `https://wa.me/917000532010?text=${encodedMessage}`;
-            console.log('Fallback WhatsApp URL:', whatsappUrl);
-            window.open(whatsappUrl, '_blank');
+            window.open('https://wa.me/917000532010?text=' + encodeURIComponent(message), '_blank');
         }
     }
 
@@ -418,124 +377,38 @@ const product = this.filteredProducts.find(p => (p._id || p.id) == productId);
         const container = document.getElementById('productsContainer');
         const loadingMessage = document.getElementById('loadingMessage');
         const noProductsMessage = document.getElementById('noProductsMessage');
-        
         loadingMessage.style.display = 'none';
         container.style.display = 'none';
         noProductsMessage.style.display = 'block';
-        noProductsMessage.innerHTML = `
-            <div style="font-size: 4rem; margin-bottom: 20px;">⚠️</div>
-            <h3 style="color: #dc2626; margin-bottom: 15px;">Error</h3>
-            <p style="color: #64748b; margin-bottom: 30px;">${message}</p>
-            <button onclick="location.reload()" class="btn btn--primary">Retry</button>
-        `;
+        noProductsMessage.innerHTML =
+            '<div style="font-size:4rem;margin-bottom:20px;">⚠️</div>' +
+            '<h3 style="color:#dc2626;margin-bottom:15px;">Error</h3>' +
+            '<p style="color:#64748b;margin-bottom:30px;">' + message + '</p>' +
+            '<button onclick="location.reload()" class="btn btn--primary">Retry</button>';
     }
 }
 
-// Clear filters function
 function clearFilters() {
     document.getElementById('categoryFilter').value = 'all';
     document.getElementById('brandFilter').value = 'all';
     document.getElementById('sortBy').value = 'newest';
-    
     if (window.allProductsPage) {
-        window.allProductsPage.filters = {
-            category: 'all',
-            brand: 'all',
-            sortBy: 'newest'
-        };
+        window.allProductsPage.filters = { category: 'all', brand: 'all', sortBy: 'newest' };
         window.allProductsPage.applyFilters();
     }
 }
 
-// Initialize all products page when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
     window.allProductsPage = new AllProductsPage();
 });
 
-// Debug function to check products
 window.debugAllProducts = function() {
     console.log('=== ALL PRODUCTS DEBUG ===');
-    console.log('AllProductsPage instance:', window.allProductsPage);
-    console.log('Products in AllProductsPage:', window.allProductsPage?.products?.length || 0);
-    console.log('Filtered products:', window.allProductsPage?.filteredProducts?.length || 0);
-    
-    // Check API client
-    console.log('API Client available:', !!window.apiClient);
-    
-    // Check localStorage
-    const adminData = JSON.parse(localStorage.getItem('adminPanelData') || '{}');
-    console.log('LocalStorage products:', adminData.products?.length || 0);
-    
-    // Test direct API call
-    const apiUrl = (window.apiClient?.baseURL + '/products') || '/api/products';
-    fetch(apiUrl)
-        .then(response => response.json())
-        .then(data => {
-            console.log('Direct API call result:', data.products?.length || 0);
-            console.log('API products:', data.products);
-        })
-        .catch(error => {
-            console.error('Direct API call failed:', error);
-        });
-    
-    return 'Debug complete - check console for details';
+    console.log('Products:', window.allProductsPage?.products?.length || 0);
+    console.log('Filtered:', window.allProductsPage?.filteredProducts?.length || 0);
+    return 'Debug complete - check console';
 };
 
-// Add CSS for product meta
-const style = document.createElement('style');
-style.textContent = `
-    .product-card__meta {
-        display: flex;
-        gap: 8px;
-        margin: 10px 0;
-        font-size: 0.8rem;
-        flex-wrap: wrap;
-    }
-    
-    .product-category, .product-gender, .product-brand {
-        background: #f1f5f9;
-        padding: 4px 8px;
-        border-radius: 4px;
-        color: #475569;
-        font-size: 0.75rem;
-    }
-    
-    .product-category {
-        background: #dbeafe;
-        color: #1e40af;
-    }
-    
-    .product-gender {
-        background: #f0fdf4;
-        color: #166534;
-    }
-    
-    .product-brand {
-        background: #fef3c7;
-        color: #92400e;
-    }
-    
-    @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-    }
-    
-    #productsContainer {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 20px;
-        margin-bottom: 40px;
-    }
-    
-    @media (max-width: 768px) {
-        #productsContainer {
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 15px;
-        }
-    }
-`;
-document.head.appendChild(style);
-// All Products page card slider functions
 window.apSliderNext = function(btn) {
     const slider = btn.closest('.card-slider');
     if (!slider) return;
@@ -544,7 +417,7 @@ window.apSliderNext = function(btn) {
     let idx = parseInt(slider.getAttribute('data-idx') || '0');
     idx = (idx + 1) % slides.length;
     slider.setAttribute('data-idx', String(idx));
-    slides.forEach((img, i) => img.style.display = i === idx ? 'block' : 'none');
+    slides.forEach(function(img, i) { img.style.display = i === idx ? 'block' : 'none'; });
 };
 
 window.apSliderPrev = function(btn) {
@@ -556,5 +429,9 @@ window.apSliderPrev = function(btn) {
     idx = idx - 1;
     if (idx < 0) idx = slides.length - 1;
     slider.setAttribute('data-idx', String(idx));
-    slides.forEach((img, i) => img.style.display = i === idx ? 'block' : 'none');
+    slides.forEach(function(img, i) { img.style.display = i === idx ? 'block' : 'none'; });
 };
+
+const style = document.createElement('style');
+style.textContent = '.product-card__meta{display:flex;gap:8px;margin:10px 0;font-size:0.8rem;flex-wrap:wrap;}.product-category{background:#dbeafe;color:#1e40af;padding:4px 8px;border-radius:4px;font-size:0.75rem;}.product-brand{background:#fef3c7;color:#92400e;padding:4px 8px;border-radius:4px;font-size:0.75rem;}@keyframes fadeIn{from{opacity:0}to{opacity:1}}#productsContainer{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-bottom:40px;}@media(max-width:768px){#productsContainer{grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:15px;}}';
+document.head.appendChild(style);
