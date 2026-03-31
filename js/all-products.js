@@ -276,8 +276,7 @@ class AllProductsPage {
     }
 
     viewProduct(productId) {
-        const product = this.filteredProducts.find(p => p.id == productId);
-        if (!product) {
+const product = this.filteredProducts.find(p => (p._id || p.id) == productId);
             alert('Product not found');
             return;
         }
