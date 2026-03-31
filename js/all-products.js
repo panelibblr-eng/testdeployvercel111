@@ -535,3 +535,26 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+// All Products page card slider functions
+window.apSliderNext = function(btn) {
+    const slider = btn.closest('.card-slider');
+    if (!slider) return;
+    const slides = Array.from(slider.querySelectorAll('img'));
+    if (slides.length < 2) return;
+    let idx = parseInt(slider.getAttribute('data-idx') || '0');
+    idx = (idx + 1) % slides.length;
+    slider.setAttribute('data-idx', String(idx));
+    slides.forEach((img, i) => img.style.display = i === idx ? 'block' : 'none');
+};
+
+window.apSliderPrev = function(btn) {
+    const slider = btn.closest('.card-slider');
+    if (!slider) return;
+    const slides = Array.from(slider.querySelectorAll('img'));
+    if (slides.length < 2) return;
+    let idx = parseInt(slider.getAttribute('data-idx') || '0');
+    idx = idx - 1;
+    if (idx < 0) idx = slides.length - 1;
+    slider.setAttribute('data-idx', String(idx));
+    slides.forEach((img, i) => img.style.display = i === idx ? 'block' : 'none');
+};
