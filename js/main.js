@@ -2129,42 +2129,39 @@ class PhotoSlider {
     }
 
     loadDefaultBrandPosters() {
-    console.log('Loading hero video...');
+    console.log('Loading hero image slider...');
     
     if (!this.track) return;
     
-    this.stopAutoSlide();
+    const heroImages = [
+        { url: 'assets/hero/hero-1.jpg', alt: 'Eyewear Collection' },
+        { url: 'assets/hero/hero-2.jpg', alt: 'Eyewear Collection' },
+        { url: 'assets/hero/hero-3.jpg', alt: 'Eyewear Collection' },
+        { url: 'assets/hero/hero-4.jpg', alt: 'Eyewear Collection' },
+        { url: 'assets/hero/hero-5.jpg', alt: 'Eyewear Collection' },
+        { url: 'assets/hero/hero-6.jpg', alt: 'Eyewear Collection' },
+        { url: 'assets/hero/hero-7.jpg', alt: 'Eyewear Collection' },
+        { url: 'assets/hero/hero-8.jpg', alt: 'Eyewear Collection' },
+        { url: 'assets/hero/hero-9.jpg', alt: 'Eyewear Collection' },
+        { url: 'assets/hero/hero-10.jpg', alt: 'Eyewear Collection' },
+        { url: 'assets/hero/hero-11.jpg', alt: 'Eyewear Collection' },
+        { url: 'assets/hero/hero-12.jpg', alt: 'Eyewear Collection' },
+        { url: 'assets/hero/hero-13.jpg', alt: 'Eyewear Collection' },
+        { url: 'assets/hero/hero-14.jpg', alt: 'Eyewear Collection' },
+        { url: 'assets/hero/hero-15.jpg', alt: 'Eyewear Collection' },
+        { url: 'assets/hero/hero-16.jpg', alt: 'Eyewear Collection' },
+        { url: 'assets/hero/hero-17.jpg', alt: 'Eyewear Collection' },
+    ];
     
-    const container = this.track.parentElement;
-    container.style.position = 'relative';
-    container.style.overflow = 'hidden';
-    container.style.borderRadius = '16px';
-container.style.height = '400px';
-container.style.minHeight = '400px';
+    this.updateSliderImages(heroImages);
     
-   container.innerHTML = `
-        <video 
-            autoplay 
-            muted 
-            loop 
-            playsinline
-            style="
-                width: 100%;
-                height: 400px;
-                object-fit: cover;
-                border-radius: 16px;
-                display: block;
-            ">
-            <source src="assets/hero-video.mp4" type="video/mp4">
-        </video>
-    `;
-    
+    // Show nav buttons
     const prevBtn = document.getElementById('sliderNavPrev');
     const nextBtn = document.getElementById('sliderNavNext');
-    if (prevBtn) prevBtn.style.display = 'none';
-    if (nextBtn) nextBtn.style.display = 'none';
+    if (prevBtn) prevBtn.style.display = '';
+    if (nextBtn) nextBtn.style.display = '';
     
-    console.log('Hero video loaded!');
+    console.log('Hero image slider loaded with 17 images!');
 }
     resolveAndUpdateImages(imgs) {
         try {
