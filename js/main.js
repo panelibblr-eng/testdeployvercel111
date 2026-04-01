@@ -2268,6 +2268,12 @@ if (nextBtn) nextBtn.style.display = 'none';
             this.counter.style.display = 'none';
         }
         
+        // Hide nav buttons
+        const prevBtn = document.getElementById('sliderNavPrev');
+        const nextBtn = document.getElementById('sliderNavNext');
+        if (prevBtn) prevBtn.style.display = 'none';
+        if (nextBtn) nextBtn.style.display = 'none';
+
         // Update references
         this.slides = this.slider.querySelectorAll('.slide');
         this.totalSlides = this.slides.length;
