@@ -2134,28 +2134,27 @@ class PhotoSlider {
     if (!this.track) return;
     
     const heroImages = [
-        { url: 'assets/hero/hero-1.jpg', alt: 'Eyewear Collection' },
-        { url: 'assets/hero/hero-2.jpg', alt: 'Eyewear Collection' },
-        { url: 'assets/hero/hero-3.jpg', alt: 'Eyewear Collection' },
-        { url: 'assets/hero/hero-4.jpg', alt: 'Eyewear Collection' },
-        { url: 'assets/hero/hero-5.jpg', alt: 'Eyewear Collection' },
-        { url: 'assets/hero/hero-6.jpg', alt: 'Eyewear Collection' },
-        { url: 'assets/hero/hero-7.jpg', alt: 'Eyewear Collection' },
-        { url: 'assets/hero/hero-8.jpg', alt: 'Eyewear Collection' },
-        { url: 'assets/hero/hero-9.jpg', alt: 'Eyewear Collection' },
-        { url: 'assets/hero/hero-10.jpg', alt: 'Eyewear Collection' },
-        { url: 'assets/hero/hero-11.jpg', alt: 'Eyewear Collection' },
-        { url: 'assets/hero/hero-12.jpg', alt: 'Eyewear Collection' },
-        { url: 'assets/hero/hero-13.jpg', alt: 'Eyewear Collection' },
-        { url: 'assets/hero/hero-14.jpg', alt: 'Eyewear Collection' },
-        { url: 'assets/hero/hero-15.jpg', alt: 'Eyewear Collection' },
-        { url: 'assets/hero/hero-16.jpg', alt: 'Eyewear Collection' },
-        { url: 'assets/hero/hero-17.jpg', alt: 'Eyewear Collection' },
+        { url: 'assets/hero-1.jpg', alt: 'Eyewear Collection' },
+        { url: 'assets/hero-2.jpg', alt: 'Eyewear Collection' },
+        { url: 'assets/hero-3.jpg', alt: 'Eyewear Collection' },
+        { url: 'assets/hero-4.jpg', alt: 'Eyewear Collection' },
+        { url: 'assets/hero-5.jpg', alt: 'Eyewear Collection' },
+        { url: 'assets/hero-6.jpg', alt: 'Eyewear Collection' },
+        { url: 'assets/hero-7.jpg', alt: 'Eyewear Collection' },
+        { url: 'assets/hero-8.jpg', alt: 'Eyewear Collection' },
+        { url: 'assets/hero-9.jpg', alt: 'Eyewear Collection' },
+        { url: 'assets/hero-10.jpg', alt: 'Eyewear Collection' },
+        { url: 'assets/hero-11.jpg', alt: 'Eyewear Collection' },
+        { url: 'assets/hero-12.jpg', alt: 'Eyewear Collection' },
+        { url: 'assets/hero-13.jpg', alt: 'Eyewear Collection' },
+        { url: 'assets/hero-14.jpg', alt: 'Eyewear Collection' },
+        { url: 'assets/hero-15.jpg', alt: 'Eyewear Collection' },
+        { url: 'assets/hero-16.jpg', alt: 'Eyewear Collection' },
+        { url: 'assets/hero-17.jpg', alt: 'Eyewear Collection' },
     ];
     
     this.updateSliderImages(heroImages);
     
-    // Show nav buttons
     const prevBtn = document.getElementById('sliderNavPrev');
     const nextBtn = document.getElementById('sliderNavNext');
     if (prevBtn) prevBtn.style.display = '';
