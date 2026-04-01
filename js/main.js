@@ -2156,9 +2156,9 @@ class PhotoSlider {
     this.updateSliderImages(heroImages);
     
     const prevBtn = document.getElementById('sliderNavPrev');
-    const nextBtn = document.getElementById('sliderNavNext');
-    if (prevBtn) prevBtn.style.display = '';
-    if (nextBtn) nextBtn.style.display = '';
+const nextBtn = document.getElementById('sliderNavNext');
+if (prevBtn) prevBtn.style.display = 'none';
+if (nextBtn) nextBtn.style.display = 'none';
     
     console.log('Hero image slider loaded with 17 images!');
 }
