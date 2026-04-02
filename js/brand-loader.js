@@ -52,7 +52,7 @@ class BrandLoader {
                 'Boss', 'Hugo', 'Marc Jacobs', 'Versace', 'Dolce & Gabbana', 
                 'Burberry', 'Off-White', 'Tom Ford', 'Philipp Plein', 
                 'Scott', 'Vogue', 'Michael Kors', 'David Walker', 
-                'Mont Blanc', 'Police', 'Gucci', 'Armani Exchange'
+                ''Mont Blanc', 'Police', 'Gucci', 'Armani Exchange', 'Prada', 'Coach', 'Cartier', 'Johnson & Johnson''
             ].sort();
         }
     }
