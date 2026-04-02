@@ -14,13 +14,13 @@ class BrandLoader {
         try {
             // Define all available brands
             const allAvailableBrands = [
-                'Titan', 'Fastrack', 'Irus', 'Idee', 'French Connection', 
-                'Tommy Hilfiger', 'Calvin Klein', 'Ray-Ban', 'Carrera', 
-                'Boss', 'Hugo', 'Marc Jacobs', 'Versace', 'Dolce & Gabbana', 
-                'Burberry', 'Off-White', 'Tom Ford', 'Philipp Plein', 
-                'Scott', 'Vogue', 'Michael Kors', 'David Walker', 
-                ''Mont Blanc', 'Police', 'Gucci', 'Armani Exchange', 'Prada', 'Coach', 'Cartier', 'Johnson & Johnson''
-            ];
+    'Titan', 'Fastrack', 'Irus', 'Idee', 'French Connection', 
+    'Tommy Hilfiger', 'Calvin Klein', 'Ray-Ban', 'Carrera', 
+    'Boss', 'Hugo', 'Marc Jacobs', 'Versace', 'Dolce & Gabbana', 
+    'Burberry', 'Off-White', 'Tom Ford', 'Philipp Plein', 
+    'Scott', 'Vogue', 'Michael Kors', 'David Walker', 
+    'Mont Blanc', 'Police', 'Gucci', 'Armani Exchange', 'Prada', 'Coach', 'Cartier', 'Johnson & Johnson'
+];
 
             if (window.apiClient) {
                 console.log('Loading brands from API...');
