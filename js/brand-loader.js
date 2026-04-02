@@ -47,13 +47,13 @@ class BrandLoader {
             console.error('Error loading brands:', error);
             // Fallback to all available brands even on error
             this.brands = [
-                'Titan', 'Fastrack', 'Irus', 'Idee', 'French Connection', 
-                'Tommy Hilfiger', 'Calvin Klein', 'Ray-Ban', 'Carrera', 
-                'Boss', 'Hugo', 'Marc Jacobs', 'Versace', 'Dolce & Gabbana', 
-                'Burberry', 'Off-White', 'Tom Ford', 'Philipp Plein', 
-                'Scott', 'Vogue', 'Michael Kors', 'David Walker', 
-                ''Mont Blanc', 'Police', 'Gucci', 'Armani Exchange', 'Prada', 'Coach', 'Cartier', 'Johnson & Johnson''
-            ].sort();
+    'Titan', 'Fastrack', 'Irus', 'Idee', 'French Connection', 
+    'Tommy Hilfiger', 'Calvin Klein', 'Ray-Ban', 'Carrera', 
+    'Boss', 'Hugo', 'Marc Jacobs', 'Versace', 'Dolce & Gabbana', 
+    'Burberry', 'Off-White', 'Tom Ford', 'Philipp Plein', 
+    'Scott', 'Vogue', 'Michael Kors', 'David Walker', 
+    'Mont Blanc', 'Police', 'Gucci', 'Armani Exchange', 'Prada', 'Coach', 'Cartier', 'Johnson & Johnson'
+].sort();
         }
     }
 
